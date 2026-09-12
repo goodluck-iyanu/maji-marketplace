@@ -39,7 +39,6 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
         setItems(JSON.parse(saved))
       } catch (e) {}
     }
-  }, [])
     setIsLoaded(true)
   }, [cartKey])
 
