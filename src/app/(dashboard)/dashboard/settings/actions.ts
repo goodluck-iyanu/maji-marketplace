@@ -54,6 +54,5 @@ export async function saveSettingsAction(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  return { success: true }
 }
 

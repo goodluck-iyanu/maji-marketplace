@@ -19,7 +19,7 @@ export default async function Image({ params }: { params: { storeSlug: string } 
     .single()
 
   const name = store?.name || 'Maji Store'
-  const settings = (Array.isArray(store?.store_settings) ? store?.store_settings[0] : store?.store_settings) || {}
+  const settings: any = (Array.isArray(store?.store_settings) ? store?.store_settings[0] : store?.store_settings) || {}
   const bg = settings.secondary_color || '#ffffff'
   const fg = settings.primary_color || '#000000'
 
