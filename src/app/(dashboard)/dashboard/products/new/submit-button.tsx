@@ -3,6 +3,7 @@
 import { useFormStatus } from 'react-dom'
 import { Save, Loader2 } from 'lucide-react'
 
+export function SubmitButton() {
 export function SubmitButton({ label = 'Save Product' }: { label?: string }) {
   const { pending } = useFormStatus()
 
@@ -17,6 +18,7 @@ export function SubmitButton({ label = 'Save Product' }: { label?: string }) {
       ) : (
         <Save className="h-4 w-4 mr-2" />
       )}
+      {pending ? 'Saving Product...' : 'Save Product'}
       {pending ? 'Saving...' : label}
     </button>
   )
