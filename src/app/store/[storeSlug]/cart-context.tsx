@@ -23,7 +23,6 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-export function CartProvider({ children }: { children: ReactNode }) {
 export function CartProvider({ children, storeSlug }: { children: ReactNode, storeSlug?: string }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -34,7 +33,6 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
 
   // Load from local storage
   useEffect(() => {
-    const saved = localStorage.getItem('maji_cart')
     const saved = localStorage.getItem(cartKey)
     if (saved) {
       try {
@@ -47,8 +45,6 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
 
   // Save to local storage
   useEffect(() => {
-    localStorage.setItem('maji_cart', JSON.stringify(items))
-  }, [items])
     if (isLoaded) {
       localStorage.setItem(cartKey, JSON.stringify(items))
     }
@@ -110,4 +106,5 @@ export function useCart() {
   }
   return context
 }
+
 

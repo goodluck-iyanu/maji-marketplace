@@ -23,7 +23,6 @@ export default async function StoreLayout({
   const secondaryColor = (Array.isArray(store?.store_settings) ? store?.store_settings[0] : store?.store_settings)?.secondary_color || '#ffffff'
 
   return (
-    <CartProvider>
     <CartProvider storeSlug={storeSlug}>
       {children}
       {store && (
@@ -32,5 +31,6 @@ export default async function StoreLayout({
     </CartProvider>
   )
 }
+
 
 
