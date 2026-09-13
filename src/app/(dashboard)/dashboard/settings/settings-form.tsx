@@ -1,11 +1,13 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { SubmitButton } from './submit-button'
 import { saveSettingsAction } from './actions'
 
 export function SettingsForm({ store, settings }: { store: any, settings: any }) {
   const [state, formAction] = useActionState(saveSettingsAction, null)
+  const [primaryColor, setPrimaryColor] = useState(settings.primary_color || '#000000')
+  const [secondaryColor, setSecondaryColor] = useState(settings.secondary_color || '#ffffff')
 
   return (
     <form action={formAction} className="space-y-6">
@@ -157,42 +159,76 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
           <h2 className="text-lg font-medium text-gray-900">Appearance</h2>
+          <button 
+            type="button" 
+            onClick={() => { setPrimaryColor('#000000'); setSecondaryColor('#ffffff'); }}
+            className="text-sm font-medium text-gray-600 hover:text-black border px-3 py-1 rounded bg-white hover:bg-gray-100 transition-colors"
+          >
+            Reset to Default
+          </button>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Primary Color</label>
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label className="block text-sm font-bold text-gray-900 mb-1">Brand Color (Primary)</label>
+            <p className="text-xs text-gray-500 mb-3">Main color used for buttons, badges, and accents.</p>
             <div className="flex items-center gap-3">
               <input 
                 type="color" 
                 name="primary_color"
-                defaultValue={settings.primary_color || '#000000'} 
-                className="h-10 w-10 border-0 p-0 rounded-md" 
+                value={primaryColor}
+                onChange={(e) => setPrimaryColor(e.target.value)}
+                className="h-10 w-16 cursor-pointer border border-gray-300 rounded p-0.5" 
               />
+              <span className="text-sm font-mono font-medium text-gray-600 uppercase">{primaryColor}</span>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Secondary Color</label>
+          
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label className="block text-sm font-bold text-gray-900 mb-1">Text Color (Secondary)</label>
+            <p className="text-xs text-gray-500 mb-3">Color used for the text inside your primary buttons.</p>
             <div className="flex items-center gap-3">
               <input 
                 type="color" 
                 name="secondary_color"
-                defaultValue={settings.secondary_color || '#ffffff'} 
-                className="h-10 w-10 border-0 p-0 rounded-md" 
+                value={secondaryColor}
+                onChange={(e) => setSecondaryColor(e.target.value)}
+                className="h-10 w-16 cursor-pointer border border-gray-300 rounded p-0.5" 
               />
+              <span className="text-sm font-mono font-medium text-gray-600 uppercase">{secondaryColor}</span>
             </div>
           </div>
+          
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Layout Style</label>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Live Preview</label>
+            <div 
+              className="p-6 rounded-lg flex items-center justify-between border shadow-sm transition-colors duration-300" 
+              style={{ backgroundColor: primaryColor, color: secondaryColor, borderColor: primaryColor }}
+            >
+              <div>
+                <h4 className="font-bold text-lg sm:text-xl">Your Custom Store</h4>
+                <p className="opacity-90 text-sm mt-1">This is how your Add to Cart buttons will look.</p>
+              </div>
+              <div 
+                className="px-4 py-2 sm:px-6 sm:py-3 rounded font-bold shadow-sm" 
+                style={{ backgroundColor: secondaryColor, color: primaryColor }}
+              >
+                Add to Cart
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-bold text-gray-900 mb-1 mt-2">Layout Style</label>
             <select 
               name="layout"
               defaultValue={settings.layout || 'classic'} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black bg-white"
             >
-              <option value="classic">Classic</option>
-              <option value="minimal">Minimal</option>
-              <option value="brand">Brand Focused</option>
+              <option value="classic">Classic (Standard Ecommerce)</option>
+              <option value="minimal">Minimal (Clean & Modern)</option>
+              <option value="brand">Brand Focused (Highlights Logo & Bio)</option>
             </select>
           </div>
         </div>
