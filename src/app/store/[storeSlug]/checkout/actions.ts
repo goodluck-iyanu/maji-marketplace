@@ -82,6 +82,7 @@ export async function processCheckout(formData: FormData) {
         totalAmount += (finalPrice * item.qty)
         orderItemsData.push({
           product_id: variant.product_id, // Link to base product
+          variant_id: variant.id,         // Link to variant (Size/Color)
           quantity: item.qty,
           price_at_purchase: finalPrice,
         })
