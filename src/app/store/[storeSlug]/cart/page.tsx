@@ -83,7 +83,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div>
-                    <h3 className="font-semibold text-gray-900 line-clamp-2">{item.name}</h3>
+                    <h3 className="font-semibold text-gray-900 line-clamp-2">{item.name || 'Product Variant'}</h3>
                     <p className="text-gray-900 font-bold mt-1">₦{item.price.toLocaleString()}</p>
                   </div>
                   

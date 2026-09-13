@@ -77,7 +77,7 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 line-clamp-2">{item.name}</h3>
+                    <h3 className="font-medium text-gray-900 line-clamp-2">{item.name || 'Product Variant'}</h3>
                     <p className="text-[var(--store-primary)] font-bold mt-1">₦{item.price.toLocaleString()}</p>
                     
                     <div className="flex items-center justify-between mt-2">

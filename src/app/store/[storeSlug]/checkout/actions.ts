@@ -35,30 +35,59 @@ export async function processCheckout(formData: FormData) {
   if (!store) return { error: 'Store not found' }
   const storeId = store.id
 
-  // 2. Fetch products to get secure prices
+  // 2. Fetch products and variants to get secure prices
   const productIds = cartItems.map(item => item.id)
+  
   const { data: products } = await supabase
     .from('products')
-    .select('id, name, price')
+    .select('id, name, price, discount_percent')
     .in('id', productIds)
     .eq('is_published', true)
 
-  if (!products || products.length === 0) return { error: 'Products not found or unavailable' }
+  const { data: variants } = await supabase
+    .from('product_variants')
+    .select('id, price, product_id, products(is_published, discount_percent)')
+    .in('id', productIds)
+
+  if ((!products || products.length === 0) && (!variants || variants.length === 0)) {
+    return { error: 'Products not found or unavailable' }
+  }
 
   // Calculate total amount securely
   let totalAmount = 0
   const orderItemsData = []
   
   for (const item of cartItems) {
-    const product = products.find(p => p.id === item.id)
+    // Check if it's a base product
+    const product = products?.find(p => p.id === item.id)
     if (product) {
-      totalAmount += (product.price * item.qty)
+      const discount = product.discount_percent || 0
+      const finalPrice = discount > 0 ? product.price * (1 - discount / 100) : product.price
+      totalAmount += (finalPrice * item.qty)
       orderItemsData.push({
         product_id: product.id,
         quantity: item.qty,
-        price_at_purchase: product.price,
+        price_at_purchase: finalPrice,
+      })
+      continue
+    }
+
+    // Check if it's a variant
+    const variant = variants?.find(v => v.id === item.id)
+    if (variant && variant.products?.is_published) {
+      const discount = variant.products.discount_percent || 0
+      const finalPrice = discount > 0 ? variant.price * (1 - discount / 100) : variant.price
+      totalAmount += (finalPrice * item.qty)
+      orderItemsData.push({
+        product_id: variant.product_id, // Link to base product
+        quantity: item.qty,
+        price_at_purchase: finalPrice,
       })
     }
+  }
+
+  if (totalAmount <= 0) {
+    return { error: 'Order total must be greater than 0' }
   }
 
   // 3. Check if seller has a subaccount for split payment
