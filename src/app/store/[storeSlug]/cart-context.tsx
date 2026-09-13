@@ -55,10 +55,11 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
       if (existing) {
         return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + qty } : item)
       }
+      const itemPrice = product.discount_percent ? product.price * (1 - product.discount_percent / 100) : product.price
       return [...prev, {
         id: product.id,
         name: product.name,
-        price: product.price,
+        price: itemPrice,
         image: product.product_images?.[0]?.image_url || '',
         qty
       }]

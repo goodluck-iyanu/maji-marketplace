@@ -34,11 +34,12 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
     }
   }
 
-  // Calculate original price if a discount exists
-  const hasDiscount = product.discount_percent && product.discount_percent > 0
-  const originalPrice = hasDiscount 
-    ? (product.price / (1 - (product.discount_percent / 100))) 
+  // Calculate current and original price based on discount
+  const hasDiscount = Boolean(product.discount_percent && product.discount_percent > 0)
+  const currentPrice = hasDiscount 
+    ? (product.price * (1 - (product.discount_percent / 100))) 
     : product.price
+  const originalPrice = product.price
 
   return (
     <div className="flex flex-col bg-white rounded-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow">
@@ -70,7 +71,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
           
           <div className="mb-3">
             <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
-              ₦{Math.round(product.price).toLocaleString()}
+              ₦{Math.round(currentPrice).toLocaleString()}
             </p>
             {hasDiscount && (
               <p className="text-xs sm:text-sm text-gray-400 line-through mt-1">
