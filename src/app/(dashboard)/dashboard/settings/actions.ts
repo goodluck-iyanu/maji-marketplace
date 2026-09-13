@@ -17,11 +17,15 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
 
   if (!store) return { error: 'Store not found' }
 
-  const name = formData.get('name') as string
-  const about_text = formData.get('about_text') as string
-  const primary_color = formData.get('primary_color') as string
-  const secondary_color = formData.get('secondary_color') as string
-  const layout = formData.get('layout') as string
+  const name = (formData.get('name') as string) || ''
+  const about_text = (formData.get('about_text') as string) || ''
+  const primary_color = (formData.get('primary_color') as string) || '#000000'
+  const secondary_color = (formData.get('secondary_color') as string) || '#ffffff'
+  const layout = (formData.get('layout') as string) || 'classic'
+
+  if (!name.trim()) {
+    return { error: 'Store name is required' }
+  }
 
   console.log('--- SAVING SETTINGS ---')
   console.log('primary_color:', primary_color)

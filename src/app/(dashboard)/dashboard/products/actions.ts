@@ -18,16 +18,26 @@ export async function createProductAction(prevState: any, formData: FormData) {
 
   if (!store) return { error: 'Store not found' }
 
-  const name = formData.get('name') as string
-  const description = formData.get('description') as string
-  const price = parseFloat(formData.get('price') as string)
+  const name = (formData.get('name') as string) || ''
+  const description = (formData.get('description') as string) || ''
+  const priceRaw = formData.get('price')
+  const price = priceRaw ? parseFloat(priceRaw as string) : 0
   const isDigital = formData.get('is_digital') === 'true'
   const isPublished = formData.get('is_published') === 'true'
-  const stock = parseInt(formData.get('stock') as string) || 0
+  const stockRaw = formData.get('stock')
+  const stock = stockRaw ? parseInt(stockRaw as string) : 0
+
+  if (!name.trim()) {
+    return { error: 'Product name is required' }
+  }
+
+  if (isNaN(price) || price < 0) {
+    return { error: 'Please enter a valid price' }
+  }
 
   // 1. Get images
   const imageFiles = formData.getAll('images') as File[]
-  const validImages = imageFiles.filter(f => f.size > 0 && f.name)
+  const validImages = imageFiles.filter(f => f && f.size > 0 && f.name)
   
   if (validImages.length > 0 && validImages.length < 2) {
     return { error: 'Please upload at least 2 images' }
@@ -150,13 +160,14 @@ export async function editProductAction(prevState: any, formData: FormData) {
   if (!user) return { error: 'Not authenticated' }
 
   const productId = formData.get('productId') as string
-  const name = formData.get('name') as string
-  const description = formData.get('description') as string
-  const price = parseFloat(formData.get('price') as string)
+  const name = (formData.get('name') as string) || ''
+  const description = (formData.get('description') as string) || ''
+  const priceRaw = formData.get('price')
+  const price = priceRaw ? parseFloat(priceRaw as string) : 0
   const isDigital = formData.get('is_digital') === 'true'
 
-  if (!productId || !name || !price) {
-    return { error: 'Missing required fields' }
+  if (!productId || !name.trim() || isNaN(price) || price < 0) {
+    return { error: 'Missing or invalid required fields' }
   }
 
   const { error } = await supabase
