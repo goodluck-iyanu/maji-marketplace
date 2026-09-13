@@ -13,8 +13,8 @@ export type CartItem = {
 type CartContextType = {
   items: CartItem[]
   addToCart: (product: any, qty: number) => void
-  removeFromCart: (id: string) => void
-  updateQty: (id: string, qty: number) => void
+  removeFromCart: (id: string, name?: string) => void
+  updateQty: (id: string, qty: number, name?: string) => void
   clearCart: () => void
   isCartOpen: boolean
   setIsCartOpen: (open: boolean) => void
