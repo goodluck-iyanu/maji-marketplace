@@ -108,7 +108,7 @@ export function OnboardingWizard() {
         <div className="w-full bg-gray-200 h-2 rounded-full mt-3 overflow-hidden">
           <div 
             className="bg-black h-full transition-all duration-300"
-            style={{ width: \`\${(currentStepNum / totalSteps) * 100}%\` }}
+            style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
           />
         </div>
       </div>
