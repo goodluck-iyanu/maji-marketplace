@@ -95,6 +95,6 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
     return { error: 'Failed to save settings' }
   }
 
-  revalidatePath('/dashboard/settings')
+  revalidatePath('/', 'layout')
   return { success: true }
 }

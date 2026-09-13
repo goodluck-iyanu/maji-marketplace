@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 export async function createStoreAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
@@ -106,5 +107,6 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   }
 
   // Redirect to their dashboard
+  revalidatePath('/', 'layout')
   redirect('/dashboard')
 }

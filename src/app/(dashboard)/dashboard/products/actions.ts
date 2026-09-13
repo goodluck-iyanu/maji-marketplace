@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function createProductAction(prevState: any, formData: FormData) {
@@ -99,6 +100,7 @@ export async function createProductAction(prevState: any, formData: FormData) {
     }
   }
 
+  revalidatePath('/', 'layout')
   redirect('/dashboard/products')
 }
 
@@ -118,6 +120,7 @@ export async function deleteProductAction(productId: string) {
     return { error: 'Failed to delete product' }
   }
   
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -136,6 +139,7 @@ export async function togglePublishProductAction(productId: string, currentStatu
     return { error: 'Failed to update product status' }
   }
   
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -154,6 +158,7 @@ export async function updateStockAction(productId: string, newStock: number) {
     return { error: 'Failed to update stock' }
   }
   
+  revalidatePath('/', 'layout')
   return { success: true }
 }
 
@@ -191,5 +196,6 @@ export async function editProductAction(prevState: any, formData: FormData) {
     return { error: 'Failed to edit product' }
   }
 
+  revalidatePath('/', 'layout')
   redirect('/dashboard/products')
 }
