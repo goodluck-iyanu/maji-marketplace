@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useActionState, useEffect } from 'react'
-import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Instagram, Facebook, Twitter, Youtube, Linkedin, Send, MessageCircle } from 'lucide-react'
+import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle } from 'lucide-react'
 import { createStoreAction } from './actions'
 
 type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'social_links' | 'creating'
@@ -108,7 +108,7 @@ export function OnboardingWizard() {
         <div className="w-full bg-gray-200 h-2 rounded-full mt-3 overflow-hidden">
           <div 
             className="bg-black h-full transition-all duration-300"
-            style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
+            style={{ width: \`\${(currentStepNum / totalSteps) * 100}%\` }}
           />
         </div>
       </div>
@@ -287,13 +287,13 @@ export function OnboardingWizard() {
         
         <div className="grid grid-cols-4 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { id: 'instagram', icon: Instagram, label: 'Instagram' },
-            { id: 'tiktok', icon: MessageCircle, label: 'TikTok' },
-            { id: 'facebook', icon: Facebook, label: 'Facebook' },
-            { id: 'x', icon: Twitter, label: 'X (Twitter)' },
-            { id: 'youtube', icon: Youtube, label: 'YouTube' },
+            { id: 'instagram', icon: Camera, label: 'Instagram' },
+            { id: 'tiktok', icon: Video, label: 'TikTok' },
+            { id: 'facebook', icon: Users, label: 'Facebook' },
+            { id: 'x', icon: Hash, label: 'X (Twitter)' },
+            { id: 'youtube', icon: PlaySquare, label: 'YouTube' },
             { id: 'whatsapp', icon: MessageCircle, label: 'WhatsApp' },
-            { id: 'linkedin', icon: Linkedin, label: 'LinkedIn' },
+            { id: 'linkedin', icon: Briefcase, label: 'LinkedIn' },
             { id: 'telegram', icon: Send, label: 'Telegram' },
           ].map((social) => (
             <button
