@@ -19,7 +19,7 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    redirect('/login?error=Could not authenticate user')
+    redirect(/login?error=${error.message})
   }
 
   redirect('/login?message=Check email to continue sign in process')
@@ -38,3 +38,4 @@ export async function signInWithGoogle() {
     redirect(data.url)
   }
 }
+
