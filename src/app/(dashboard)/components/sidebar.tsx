@@ -85,3 +85,4 @@ export function Sidebar({ storeName, storeSlug }: { storeName: string; storeSlug
     </>
   )
 }
+
