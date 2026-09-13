@@ -76,12 +76,12 @@ export default async function StorePage({
 
   return (
     <div style={themeStyles} className="min-h-screen bg-[var(--store-secondary)] text-[var(--store-primary)] font-sans">
-      <header className="border-b border-opacity-10 py-6 px-4 sm:px-8 flex justify-between items-center max-w-6xl mx-auto">
-        <Link href={`/store/${storeSlug}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+      <header className="border-b border-opacity-10 py-4 px-3 sm:py-6 sm:px-8 flex justify-between items-center max-w-6xl mx-auto">
+        <Link href={`/store/${storeSlug}`} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
           {settings.logo_url && (
-            <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-10 w-10 object-cover rounded-md" />
+            <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-md" />
           )}
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight line-clamp-1">
             {store.name}
           </h1>
         </Link>
@@ -99,10 +99,10 @@ export default async function StorePage({
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto py-12 px-4 sm:px-8">
+      <main className="max-w-6xl mx-auto py-6 px-3 sm:py-12 sm:px-8">
         {settings.about_text && (
-          <div className="mb-12 max-w-2xl">
-            <h2 className="text-xl font-semibold mb-2">About us</h2>
+          <div className="mb-8 sm:mb-12 max-w-2xl">
+            <h2 className="text-lg sm:text-xl font-semibold mb-2">About us</h2>
             <p className="text-opacity-80 leading-relaxed whitespace-pre-wrap">{settings.about_text}</p>
           </div>
         )}
@@ -114,7 +114,7 @@ export default async function StorePage({
             This store hasn't added any products yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
             {products.map(product => (
               <ProductCard 
                 key={product.id} 
