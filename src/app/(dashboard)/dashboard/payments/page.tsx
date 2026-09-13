@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Building2, ShieldAlert } from 'lucide-react'
 import Link from 'next/link'
 
@@ -6,16 +7,24 @@ export default async function PaymentsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
+  if (!user) {
+    redirect('/login')
+  }
+
   const { data: store } = await supabase
     .from('stores')
     .select('id')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .single()
+
+  if (!store) {
+    redirect('/onboarding')
+  }
 
   const { data: payoutAccount } = await supabase
     .from('payout_accounts')
     .select('*')
-    .eq('store_id', store!.id)
+    .eq('store_id', store.id)
     .single()
 
   return (

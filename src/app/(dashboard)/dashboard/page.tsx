@@ -13,14 +13,18 @@ export default async function DashboardOverview() {
   const { data: store } = await supabase
     .from('stores')
     .select('id, name')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .single()
+
+  if (!store) {
+    redirect('/onboarding')
+  }
 
   // Get quick stats
   const { count: productCount } = await supabase
     .from('products')
     .select('*', { count: 'exact', head: true })
-    .eq('store_id', store!.id)
+    .eq('store_id', store.id)
 
   const { data: allOrders } = await supabase
     .from('orders')

@@ -15,13 +15,17 @@ export default async function ProductsPage() {
   const { data: store } = await supabase
     .from('stores')
     .select('id')
-    .eq('user_id', user!.id)
+    .eq('user_id', user.id)
     .single()
+
+  if (!store) {
+    redirect('/onboarding')
+  }
 
   const { data: products } = await supabase
     .from('products')
     .select('*')
-    .eq('store_id', store!.id)
+    .eq('store_id', store.id)
     .order('created_at', { ascending: false })
 
   return (
