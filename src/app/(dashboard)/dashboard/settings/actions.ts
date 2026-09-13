@@ -17,7 +17,6 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
 
   if (!store) return { error: 'Store not found' }
 
-  const name = (formData.get('name') as string) || ''
   const about_text = (formData.get('about_text') as string) || ''
   const primary_color = (formData.get('primary_color') as string) || '#000000'
   const secondary_color = (formData.get('secondary_color') as string) || '#ffffff'
@@ -29,10 +28,6 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
   const instagram = (formData.get('instagram') as string) || ''
   const tiktok = (formData.get('tiktok') as string) || ''
   const logoFile = formData.get('logo') as File | null
-
-  if (!name.trim()) {
-    return { error: 'Store name is required' }
-  }
 
   // Handle Logo Upload
   let logo_url = undefined
@@ -51,10 +46,7 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
     }
   }
 
-  // Update store name
-  if (name) {
-    await supabase.from('stores').update({ name }).eq('id', store.id)
-  }
+  // Store name update removed
 
   const { createClient: createAdminClient } = await import('@supabase/supabase-js')
   const supabaseAdmin = createAdminClient(

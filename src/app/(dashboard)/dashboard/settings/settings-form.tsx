@@ -46,11 +46,24 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
             <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
             <input 
               type="text" 
-              name="name"
               defaultValue={store?.name} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              disabled
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed" 
             />
+            <p className="text-xs text-gray-500 mt-1">Store name cannot be changed.</p>
           </div>
+          {store?.product_type === 'physical' && store?.store_category && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Store Category</label>
+              <input 
+                type="text" 
+                defaultValue={store.store_category.charAt(0).toUpperCase() + store.store_category.slice(1)} 
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed" 
+              />
+              <p className="text-xs text-gray-500 mt-1">Products will be added under this category.</p>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Store URL Slug</label>
             <div className="flex rounded-md shadow-sm">
