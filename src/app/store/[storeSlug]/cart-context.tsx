@@ -69,17 +69,27 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
     setTimeout(() => setToast(null), 3000)
   }
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = (id: string, name?: string) => {
     setItems(prev => prev.filter(item => item.id !== id))
+    if (name) {
+      setToast(`Removed ${name} from cart`)
+      setTimeout(() => setToast(null), 3000)
+    }
   }
 
-  const updateQty = (id: string, qty: number) => {
+  const updateQty = (id: string, qty: number, name?: string) => {
     if (qty < 1) return
     setItems(prev => prev.map(item => item.id === id ? { ...item, qty } : item))
+    if (name) {
+      setToast(`Updated ${name} quantity to ${qty}`)
+      setTimeout(() => setToast(null), 3000)
+    }
   }
 
   const clearCart = useCallback(() => {
     setItems([])
+    setToast(`Cart cleared`)
+    setTimeout(() => setToast(null), 3000)
   }, [])
 
   const totalAmount = items.reduce((total, item) => total + (item.price * item.qty), 0)

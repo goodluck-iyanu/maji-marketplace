@@ -72,6 +72,24 @@ export function EditProductForm({ product }: { product: any }) {
                   className="w-full pl-8 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
               </div>
+            <div>
+              <label htmlFor="discount" className="block text-sm font-medium text-gray-700 mb-1">
+                Discount % (Optional)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  name="discount_percent"
+                  id="discount"
+                  min="0"
+                  max="100"
+                  defaultValue={product.discount_percent || 0}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                />
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
+                  %
+                </span>
+              </div>
             </div>
             
             <div>

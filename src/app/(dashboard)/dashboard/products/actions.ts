@@ -26,6 +26,8 @@ export async function createProductAction(prevState: any, formData: FormData) {
   const isPublished = formData.get('is_published') === 'true'
   const stockRaw = formData.get('stock')
   const stock = stockRaw ? parseInt(stockRaw as string) : 0
+  const discountRaw = formData.get('discount_percent')
+  const discount_percent = discountRaw ? parseInt(discountRaw as string) : 0
 
   if (!name.trim()) {
     return { error: 'Product name is required' }
@@ -54,6 +56,7 @@ export async function createProductAction(prevState: any, formData: FormData) {
     slug: uniqueSlug,
     description,
     price,
+    discount_percent,
     is_digital: isDigital,
     stock: isDigital ? 0 : stock,
     is_published: isPublished,
@@ -165,6 +168,8 @@ export async function editProductAction(prevState: any, formData: FormData) {
   const priceRaw = formData.get('price')
   const price = priceRaw ? parseFloat(priceRaw as string) : 0
   const isDigital = formData.get('is_digital') === 'true'
+  const discountRaw = formData.get('discount_percent')
+  const discount_percent = discountRaw ? parseInt(discountRaw as string) : 0
 
   if (!productId || !name.trim() || isNaN(price) || price < 0) {
     return { error: 'Missing or invalid required fields' }
@@ -176,6 +181,7 @@ export async function editProductAction(prevState: any, formData: FormData) {
       name,
       description,
       price,
+      discount_percent,
       is_digital: isDigital
     })
     .eq('id', productId)
