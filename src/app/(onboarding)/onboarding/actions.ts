@@ -15,9 +15,11 @@ export async function createStoreAction(prevState: any, formData: FormData) {
 
   const name = formData.get('storeName') as string
   const productType = formData.get('productType') as string
+  const address = formData.get('address') as string
   const storeCategory = formData.get('storeCategory') as string
   
   const facebook = formData.get('facebook') as string
+  const twitter = formData.get('twitter') as string
   const x = formData.get('x') as string
   const instagram = formData.get('instagram') as string
   const tiktok = formData.get('tiktok') as string
@@ -88,6 +90,7 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   const settingsToInsert: any = {
     store_id: store.id,
   }
+  if (address) settingsToInsert.address = address
   if (logo_url) settingsToInsert.logo_url = logo_url
 
   const { error: settingsError } = await supabase
@@ -102,6 +105,7 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   // Insert Social Links
   const linksToInsert = []
   if (facebook) linksToInsert.push({ store_id: store.id, platform: 'facebook', url: facebook })
+  if (twitter) linksToInsert.push({ store_id: store.id, platform: 'twitter', url: twitter })
   if (x) linksToInsert.push({ store_id: store.id, platform: 'x', url: x })
   if (instagram) linksToInsert.push({ store_id: store.id, platform: 'instagram', url: instagram })
   if (tiktok) linksToInsert.push({ store_id: store.id, platform: 'tiktok', url: tiktok })
