@@ -1,10 +1,15 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Package, ShoppingCart, DollarSign } from 'lucide-react'
 
 export default async function DashboardOverview() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
+  if (!user) {
+    redirect('/login')
+  }
+
   const { data: store } = await supabase
     .from('stores')
     .select('id, name')

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Plus, MoreVertical } from 'lucide-react'
 import Link from 'next/link'
 import { ProductActionsDropdown } from './actions-dropdown'
@@ -7,6 +8,10 @@ export default async function ProductsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   
+  if (!user) {
+    redirect('/login')
+  }
+
   const { data: store } = await supabase
     .from('stores')
     .select('id')
