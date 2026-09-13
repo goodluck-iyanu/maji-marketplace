@@ -8,7 +8,7 @@ type Step = 'product_type' | 'store_name' | 'store_details' | 'creating'
 
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('product_type')
-  const [productType, setProductType] = useState<'physical' | 'digital' | 'both' | null>(null)
+  const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
   const [storeName, setStoreName] = useState('')
   
   const [state, formAction] = useActionState(createStoreAction, null)
@@ -79,19 +79,6 @@ export function OnboardingWizard() {
             <div className="text-left">
               <div className="font-medium text-gray-900">Digital Products</div>
               <div className="text-sm text-gray-500">E-books, courses, software, etc.</div>
-            </div>
-          </button>
-          
-          <button
-            onClick={() => setProductType('both')}
-            className={`w-full flex items-center p-4 border rounded-lg transition-colors ${
-              productType === 'both' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'
-            }`}
-          >
-            <Store className="h-6 w-6 mr-4 text-gray-700" />
-            <div className="text-left">
-              <div className="font-medium text-gray-900">Both</div>
-              <div className="text-sm text-gray-500">I sell a mix of physical and digital goods.</div>
             </div>
           </button>
 
