@@ -50,11 +50,11 @@ export function OnboardingWizard() {
   const [activeSocial, setActiveSocial] = useState<string | null>(null)
   const [acknowledgedName, setAcknowledgedName] = useState(false)
 
-  const [state, formAction] = useActionState(createStoreAction, null)
+  const [state, formAction, isPending] = useActionState(createStoreAction, null)
 
   useEffect(() => {
     if (state?.error) {
-      setStep('social_links') // or wherever makes sense to show error
+      setStep('social_links') 
     }
   }, [state])
 
@@ -74,10 +74,6 @@ export function OnboardingWizard() {
 
   const handleNextToSocials = () => {
     if (storeCategory) setStep('social_links')
-  }
-
-  const handleSubmit = () => {
-    setStep('creating')
   }
 
   const renderProgress = () => {
@@ -281,9 +277,15 @@ export function OnboardingWizard() {
         </div>
       </div>
 
-      <div className={step === 'social_links' ? 'block text-center' : 'hidden'}>
+      <div className={step === 'social_links' && !isPending ? 'block text-center' : 'hidden'}>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Connect your social pages</h2>
         <p className="text-gray-500 mb-8">Help customers find your business online. You can skip this and add them later.</p>
+        
+        {state?.error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-md border border-red-100">
+            {state.error}
+          </div>
+        )}
         
         <div className="grid grid-cols-4 sm:grid-cols-4 gap-4 mb-8">
           {[
@@ -344,6 +346,7 @@ export function OnboardingWizard() {
         <div className="flex gap-3">
           <button
             type="button"
+            disabled={isPending}
             onClick={() => setStep(productType === 'physical' ? 'store_category' : 'store_name_logo')}
             className="w-1/3 py-3 px-4 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
           >
@@ -351,15 +354,15 @@ export function OnboardingWizard() {
           </button>
           <button
             type="submit"
-            onClick={handleSubmit}
-            className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium hover:bg-gray-800 transition-colors flex items-center justify-center"
+            disabled={isPending}
+            className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium hover:bg-gray-800 transition-colors flex items-center justify-center disabled:opacity-70"
           >
-            {Object.values(socials).some(Boolean) ? 'Finish & Create' : 'Skip & Create'}
+            {isPending ? 'Creating...' : Object.values(socials).some(Boolean) ? 'Finish & Create' : 'Skip & Create'}
           </button>
         </div>
       </div>
 
-      <div className={step === 'creating' ? 'block text-center py-12' : 'hidden'}>
+      <div className={isPending ? 'block text-center py-12' : 'hidden'}>
         <div className="mx-auto h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
