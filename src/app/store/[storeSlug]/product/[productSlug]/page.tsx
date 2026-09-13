@@ -56,7 +56,7 @@ export default async function ProductPage({
     .from('products')
     .select(`
       *,
-      product_images(id, url, position),
+      product_images(id, image_url, display_order),
       product_options(*),
       product_variants(*)
     `)

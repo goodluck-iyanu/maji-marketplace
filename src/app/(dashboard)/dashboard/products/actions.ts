@@ -265,8 +265,8 @@ export async function createFashionProductAction(prevState: any, formData: FormD
         const { data: publicUrl } = supabase.storage.from('product-images').getPublicUrl(fileName)
         await supabase.from('product_images').insert({
           product_id: product.id,
-          url: publicUrl.publicUrl,
-          position
+          image_url: publicUrl.publicUrl,
+          display_order: position
         })
         position++
       }

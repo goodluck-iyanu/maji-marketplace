@@ -5,6 +5,18 @@ import Link from 'next/link'
 import { Plus, Minus, ShoppingCart } from 'lucide-react'
 import { useCart } from './cart-context'
 
+const colorMap: Record<string, string> = {
+  wine: '#722F37',
+  ash: '#B2BEB5',
+  nude: '#E3BC9A',
+  mustard: '#FFDB58',
+  olive: '#808000',
+  navy: '#000080',
+  cream: '#FFFDD0',
+  champagne: '#F7E7CE',
+  'sky blue': '#87CEEB',
+}
+
 export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }: any) {
   const { items, addToCart, removeFromCart, updateQty } = useCart()
 
@@ -15,7 +27,13 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    addToCart(product, 1) // Add 1
+    // For products with variants, redirect to product page instead of adding to cart directly
+    // since they need to choose options first
+    if (product.has_variants) {
+      window.location.href = \/store/\/product/\\
+    } else {
+      addToCart(product, 1)
+    }
   }
 
   const handleIncrease = (e: React.MouseEvent) => {
@@ -41,6 +59,10 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
     : product.price
   const originalPrice = product.price
 
+  // Extract color options
+  const colorOption = product.product_options?.find((opt: any) => opt.name.toLowerCase() === 'color')
+  const colors = colorOption?.values || []
+
   return (
     <div className="flex flex-col bg-white rounded-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow">
       
@@ -51,7 +73,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
         </div>
       )}
 
-      <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden group">
+      <Link href={\/store/\/product/\\} className="block relative aspect-square bg-gray-50 overflow-hidden group">
         {product.product_images && product.product_images.length > 0 ? (
           <img 
             src={product.product_images[0].image_url} 
@@ -63,26 +85,48 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
              <ShoppingCart className="h-10 w-10 opacity-20 mb-2" />
           </div>
         )}
+        
+        {/* Color circles overlay */}
+        {colors.length > 0 && (
+          <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
+            {colors.slice(0, 5).map((color: string, idx: number) => {
+              const hex = colorMap[color.toLowerCase()] || color.toLowerCase().replace(' ', '')
+              return (
+                <div 
+                  key={idx}
+                  title={color}
+                  className="w-4 h-4 rounded-full border border-gray-200 shadow-sm"
+                  style={{ backgroundColor: hex }}
+                />
+              )
+            })}
+            {colors.length > 5 && (
+              <div className="w-4 h-4 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-[8px] font-bold text-gray-600">
+                +
+              </div>
+            )}
+          </div>
+        )}
       </Link>
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">
-        <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block flex-1">
+        <Link href={\/store/\/product/\\} className="block flex-1">
           <h3 className="text-sm sm:text-base text-gray-800 line-clamp-2 leading-snug mb-2">{product.name}</h3>
           
           <div className="mb-3">
             <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
-              ₦{Math.round(currentPrice).toLocaleString()}
+              ?{Math.round(currentPrice).toLocaleString()}
             </p>
             {hasDiscount && (
               <p className="text-xs sm:text-sm text-gray-400 line-through mt-1">
-                ₦{Math.round(originalPrice).toLocaleString()}
+                ?{Math.round(originalPrice).toLocaleString()}
               </p>
             )}
           </div>
         </Link>
 
         <div className="mt-auto">
-          {inCartQty > 0 ? (
+          {inCartQty > 0 && !product.has_variants ? (
             <div className="flex items-center justify-between gap-3">
               <button 
                 onClick={handleDecrease}
@@ -110,7 +154,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
               style={{ backgroundColor: primaryColor, color: secondaryColor }}
               className="w-full py-2.5 sm:py-3 rounded-md font-semibold text-sm sm:text-base hover:opacity-90 transition-opacity flex items-center justify-center"
             >
-              Add to Cart
+              {product.has_variants ? 'Select Options' : 'Add to Cart'}
             </button>
           )}
         </div>

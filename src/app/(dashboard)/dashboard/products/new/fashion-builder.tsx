@@ -484,3 +484,4 @@ export default function FashionProductBuilder({ productType }: { productType: st
     </div>
   )
 }
+

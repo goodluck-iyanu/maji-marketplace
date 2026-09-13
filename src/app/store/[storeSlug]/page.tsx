@@ -61,7 +61,7 @@ export default async function StorePage({
 
   const { data: products } = await supabase
     .from('products')
-    .select('*, product_images(image_url)')
+    .select('*, product_images(image_url), product_options(*)')
     .eq('store_id', store.id)
     .eq('is_published', true)
     .order('created_at', { ascending: false })

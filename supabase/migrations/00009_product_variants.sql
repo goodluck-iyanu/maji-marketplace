@@ -83,3 +83,4 @@ CREATE TRIGGER update_product_options_modtime
 CREATE TRIGGER update_product_variants_modtime
     BEFORE UPDATE ON public.product_variants
     FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
+
