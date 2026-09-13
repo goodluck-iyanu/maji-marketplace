@@ -13,6 +13,9 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    console.error('Auth Callback Error:', error.message, error)
+  } else {
+    console.error('Auth Callback Error: No code provided in URL')
   }
 
   // return the user to an error page with instructions
