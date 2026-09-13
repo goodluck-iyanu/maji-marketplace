@@ -52,7 +52,7 @@ export function EditProductForm({ product }: { product: any }) {
             ></textarea>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
                 Price (₦)
@@ -72,6 +72,7 @@ export function EditProductForm({ product }: { product: any }) {
                   className="w-full pl-8 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
               </div>
+            </div>
             <div>
               <label htmlFor="discount" className="block text-sm font-medium text-gray-700 mb-1">
                 Discount % (Optional)
