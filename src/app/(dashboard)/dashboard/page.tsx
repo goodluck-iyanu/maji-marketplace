@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { Package, ShoppingCart, DollarSign } from 'lucide-react'
 
 export default async function DashboardOverview() {
@@ -101,13 +102,14 @@ export default async function DashboardOverview() {
                    <th className="px-6 py-4 font-semibold">Amount</th>
                    <th className="px-6 py-4 font-semibold">Date & Time</th>
                    <th className="px-6 py-4 font-semibold">Status</th>
+                   <th className="px-6 py-4 font-semibold"></th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-gray-100">
                  {orders.map((order: any) => (
-                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors">
+                   <tr key={order.id} className="hover:bg-gray-50/50 transition-colors group relative">
                      <td className="px-6 py-4">
-                       <p className="font-semibold text-gray-900">{order.customer_name}</p>
+                       <p className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{order.customer_name}</p>
                        <p className="text-gray-500">{order.customer_email}</p>
                      </td>
                      <td className="px-6 py-4">
@@ -136,6 +138,14 @@ export default async function DashboardOverview() {
                            Pending
                          </span>
                        )}
+                     </td>
+                     <td className="px-6 py-4 text-right">
+                       <Link 
+                         href={`/dashboard/orders/${order.id}`} 
+                         className="inline-flex items-center px-3 py-1.5 border border-gray-200 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors"
+                       >
+                         View
+                       </Link>
                      </td>
                    </tr>
                  ))}
