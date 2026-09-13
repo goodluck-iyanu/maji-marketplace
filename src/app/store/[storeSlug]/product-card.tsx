@@ -30,7 +30,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
     // For products with variants, redirect to product page instead of adding to cart directly
     // since they need to choose options first
     if (product.has_variants) {
-      window.location.href = \/store/\/product/\\
+      window.location.href = `/store/${storeSlug}/product/${product.slug}`
     } else {
       addToCart(product, 1)
     }
@@ -73,7 +73,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
         </div>
       )}
 
-      <Link href={\/store/\/product/\\} className="block relative aspect-square bg-gray-50 overflow-hidden group">
+      <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden group">
         {product.product_images && product.product_images.length > 0 ? (
           <img 
             src={product.product_images[0].image_url} 
@@ -110,7 +110,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
       </Link>
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">
-        <Link href={\/store/\/product/\\} className="block flex-1">
+        <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block flex-1">
           <h3 className="text-sm sm:text-base text-gray-800 line-clamp-2 leading-snug mb-2">{product.name}</h3>
           
           <div className="mb-3">
