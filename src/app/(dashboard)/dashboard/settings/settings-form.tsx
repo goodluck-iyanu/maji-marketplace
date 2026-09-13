@@ -109,3 +109,4 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
     </form>
   )
 }
+

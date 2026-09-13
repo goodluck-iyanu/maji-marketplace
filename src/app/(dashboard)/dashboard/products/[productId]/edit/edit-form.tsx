@@ -105,3 +105,4 @@ export function EditProductForm({ product }: { product: any }) {
     </form>
   )
 }
+
