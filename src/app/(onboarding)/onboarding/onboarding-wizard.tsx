@@ -173,33 +173,65 @@ export function OnboardingWizard() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (Optional)</label>
             <input
-              type="url"
-              name="facebook"
-              placeholder="https://facebook.com/..."
+              type="text"
+              name="whatsapp"
+              placeholder="+2349012345678"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter URL (Optional)</label>
-            <input
-              type="url"
-              name="twitter"
-              placeholder="https://twitter.com/..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">TikTok Username (Optional)</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input
+                type="text"
+                name="tiktok"
+                placeholder="yourstore"
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL (Optional)</label>
-            <input
-              type="url"
-              name="instagram"
-              placeholder="https://instagram.com/..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Username (Optional)</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input
+                type="text"
+                name="instagram"
+                placeholder="yourstore"
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter Username (Optional)</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input
+                type="text"
+                name="twitter"
+                placeholder="yourstore"
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Username (Optional)</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">fb.com/</span>
+              <input
+                type="text"
+                name="facebook"
+                placeholder="yourstore"
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">

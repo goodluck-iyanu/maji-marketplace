@@ -18,6 +18,8 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   const facebook = formData.get('facebook') as string
   const twitter = formData.get('twitter') as string
   const instagram = formData.get('instagram') as string
+  const tiktok = formData.get('tiktok') as string
+  const whatsapp = formData.get('whatsapp') as string
   const logoFile = formData.get('logo') as File | null
 
   if (!name || !name.trim()) {
@@ -96,6 +98,8 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   if (facebook) linksToInsert.push({ store_id: store.id, platform: 'facebook', url: facebook })
   if (twitter) linksToInsert.push({ store_id: store.id, platform: 'twitter', url: twitter })
   if (instagram) linksToInsert.push({ store_id: store.id, platform: 'instagram', url: instagram })
+  if (tiktok) linksToInsert.push({ store_id: store.id, platform: 'tiktok', url: tiktok })
+  if (whatsapp) linksToInsert.push({ store_id: store.id, platform: 'whatsapp', url: whatsapp })
   
   if (linksToInsert.length > 0) {
     await supabase.from('social_links').insert(linksToInsert)

@@ -74,40 +74,84 @@ export default async function StorePage({
     '--store-secondary': settings.secondary_color || '#ffffff',
   } as React.CSSProperties
 
+  // Helper to construct smart social URLs
+  const formatSocialUrl = (platform: string, handle: string) => {
+    let val = handle.trim()
+    if (val.startsWith('http')) return val
+
+    switch (platform.toLowerCase()) {
+      case 'facebook': return `https://facebook.com/${val}`
+      case 'twitter': return `https://twitter.com/${val.replace('@', '')}`
+      case 'instagram': return `https://instagram.com/${val.replace('@', '')}`
+      case 'tiktok': return `https://tiktok.com/@${val.replace('@', '')}`
+      case 'whatsapp': return `https://wa.me/${val.replace(/[^0-9]/g, '')}`
+      default: return val
+    }
+  }
+
   return (
     <div style={themeStyles} className="min-h-screen bg-[var(--store-secondary)] text-[var(--store-primary)] font-sans">
-      <header className="border-b border-opacity-10 py-4 px-3 sm:py-6 sm:px-8 flex justify-between items-center max-w-6xl mx-auto">
-        <Link href={`/store/${storeSlug}`} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
-          {settings.logo_url && (
-            <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-8 w-8 sm:h-10 sm:w-10 object-cover rounded-md" />
-          )}
-          <h1 className="text-lg sm:text-2xl font-bold tracking-tight line-clamp-1">
-            {store.name}
-          </h1>
+      {/* Sticky Top Bar */}
+      <div className="sticky top-0 z-50 bg-[var(--store-secondary)]/90 backdrop-blur-md border-b border-opacity-10 py-3 px-4 flex justify-between items-center">
+        <Link href={`/store/${storeSlug}`} className="font-bold tracking-tight text-lg line-clamp-1">
+          {store.name}
         </Link>
-        <nav>
-          <CartButton 
-            primaryColor={settings.primary_color || '#000000'} 
-            secondaryColor={settings.secondary_color || '#ffffff'} 
-          />
-        </nav>
-      </header>
-      
+        <CartButton 
+          primaryColor={settings.primary_color || '#000000'} 
+          secondaryColor={settings.secondary_color || '#ffffff'} 
+        />
+      </div>
+
       {settings.banner_url && (
-        <div className="w-full h-64 bg-gray-200">
+        <div className="w-full h-48 sm:h-64 bg-gray-200">
           <img src={settings.banner_url} alt={`${store.name} Banner`} className="w-full h-full object-cover" />
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto py-6 px-3 sm:py-12 sm:px-8">
-        {settings.about_text && (
-          <div className="mb-8 sm:mb-12 max-w-2xl">
-            <h2 className="text-lg sm:text-xl font-semibold mb-2">About us</h2>
-            <p className="text-opacity-80 leading-relaxed whitespace-pre-wrap">{settings.about_text}</p>
+      {/* Hero / Profile Section */}
+      <div className={`max-w-3xl mx-auto px-4 text-center flex flex-col items-center ${settings.banner_url ? '-mt-12 sm:-mt-16 relative z-10' : 'pt-10'}`}>
+        {settings.logo_url ? (
+          <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full shadow-lg border-4 border-[var(--store-secondary)] mb-4 bg-[var(--store-secondary)]" />
+        ) : (
+          <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full shadow-lg border-4 border-[var(--store-secondary)] mb-4 bg-gray-100 flex items-center justify-center">
+            <span className="text-3xl text-gray-400 font-bold">{store.name.charAt(0)}</span>
           </div>
         )}
+        
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
+          {store.name}
+        </h1>
+        
+        {settings.about_text && (
+          <p className="text-opacity-80 leading-relaxed max-w-xl mx-auto text-sm sm:text-base mb-6 whitespace-pre-wrap">
+            {settings.about_text}
+          </p>
+        )}
 
-        <h2 className="text-xl font-semibold mb-6">Latest Products</h2>
+        {/* Social Links Pills */}
+        {store.social_links && store.social_links.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-4">
+            {store.social_links.map((link: any) => (
+              <a 
+                key={link.platform} 
+                href={formatSocialUrl(link.platform, link.url)} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="px-4 py-2 rounded-full border border-opacity-20 hover:bg-[var(--store-primary)] hover:text-[var(--store-secondary)] transition-all text-xs sm:text-sm font-semibold capitalize"
+              >
+                {link.platform}
+              </a>
+            ))}
+          </div>
+        )}
+        
+        {settings.address && (
+          <p className="text-xs sm:text-sm text-opacity-60 mt-2 font-medium">📍 {settings.address}</p>
+        )}
+      </div>
+
+      <main className="max-w-6xl mx-auto py-10 px-3 sm:py-16 sm:px-8">
+        <h2 className="text-lg sm:text-xl font-bold mb-6 px-1">Latest Products</h2>
         
         {(!products || products.length === 0) ? (
           <div className="py-12 text-center text-opacity-60">
@@ -128,21 +172,7 @@ export default async function StorePage({
         )}
       </main>
 
-      <footer className="py-12 mt-12 border-t border-opacity-10 text-center text-sm text-opacity-60 flex flex-col items-center justify-center">
-        {settings.address && (
-          <p className="mb-6 whitespace-pre-wrap max-w-md mx-auto text-opacity-80">{settings.address}</p>
-        )}
-        
-        {store.social_links && store.social_links.length > 0 && (
-          <div className="flex justify-center gap-6 mb-6">
-            {store.social_links.map((link: any) => (
-              <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 opacity-70 transition-opacity capitalize font-medium">
-                {link.platform}
-              </a>
-            ))}
-          </div>
-        )}
-        
+      <footer className="py-8 border-t border-opacity-10 text-center text-sm text-opacity-60">
         <p>© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
         <p className="mt-2 text-xs opacity-50">Powered by Maji</p>
       </footer>

@@ -92,34 +92,66 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
             <input 
-              type="url" 
-              name="facebook"
-              defaultValue={store.social_links?.find((s: any) => s.platform === 'facebook')?.url || ''} 
+              type="text" 
+              name="whatsapp"
+              defaultValue={store.social_links?.find((s: any) => s.platform === 'whatsapp')?.url || ''} 
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
-              placeholder="https://facebook.com/yourstore"
+              placeholder="e.g. +2349012345678"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter URL</label>
-            <input 
-              type="url" 
-              name="twitter"
-              defaultValue={store.social_links?.find((s: any) => s.platform === 'twitter')?.url || ''} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
-              placeholder="https://twitter.com/yourstore"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">TikTok Username</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input 
+                type="text" 
+                name="tiktok"
+                defaultValue={store.social_links?.find((s: any) => s.platform === 'tiktok')?.url || ''} 
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                placeholder="yourstore"
+              />
+            </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
-            <input 
-              type="url" 
-              name="instagram"
-              defaultValue={store.social_links?.find((s: any) => s.platform === 'instagram')?.url || ''} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
-              placeholder="https://instagram.com/yourstore"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Username</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input 
+                type="text" 
+                name="instagram"
+                defaultValue={store.social_links?.find((s: any) => s.platform === 'instagram')?.url || ''} 
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                placeholder="yourstore"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter (X) Username</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+              <input 
+                type="text" 
+                name="twitter"
+                defaultValue={store.social_links?.find((s: any) => s.platform === 'twitter')?.url || ''} 
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                placeholder="yourstore"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Username / Page</label>
+            <div className="flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">facebook.com/</span>
+              <input 
+                type="text" 
+                name="facebook"
+                defaultValue={store.social_links?.find((s: any) => s.platform === 'facebook')?.url || ''} 
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                placeholder="yourstore"
+              />
+            </div>
           </div>
         </div>
       </div>
