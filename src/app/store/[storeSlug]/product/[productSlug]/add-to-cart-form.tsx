@@ -55,7 +55,11 @@ export function AddToCartForm({ product, primaryColor, secondaryColor }: any) {
                 key={val}
                 type="button"
                 onClick={() => handleOptionChange(opt.name, val)}
-                className={\px-4 py-2 border rounded-md text-sm font-medium transition-colors \\}
+                className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
+                  selectedOptions[opt.name] === val 
+                    ? 'ring-2 border-transparent' 
+                    : 'hover:border-gray-400'
+                }`}
                 style={selectedOptions[opt.name] === val ? { borderColor: primaryColor, backgroundColor: primaryColor, color: secondaryColor } : {}}
               >
                 {val}

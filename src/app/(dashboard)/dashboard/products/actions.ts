@@ -219,7 +219,7 @@ export async function createFashionProductAction(prevState: any, formData: FormD
   if (!name?.trim()) return { error: 'Product name is required' }
   
   const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'product'
-  const uniqueSlug = \\-\\
+  const uniqueSlug = `${baseSlug}-${Math.random().toString(36).substring(7)}`
   
   const targetAudience = targetAudienceStr ? JSON.parse(targetAudienceStr).join(', ') : ''
   const optionsDef = optionsDefStr ? JSON.parse(optionsDefStr) : { sizes: [], colors: [] }
@@ -258,7 +258,7 @@ export async function createFashionProductAction(prevState: any, formData: FormD
     let position = 0
     for (const file of validPhotos) {
       const fileExt = file.name.split('.').pop()
-      const fileName = \\/\-\.\\
+      const fileName = `${store.id}/${product.id}-${Math.random().toString(36).substring(7)}.${fileExt}`
       const { data: uploadData, error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file)
       
       if (!uploadError && uploadData) {
