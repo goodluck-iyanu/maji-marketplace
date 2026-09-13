@@ -1,37 +1,37 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useActionState, useEffect } from 'react'
 import { Store, Package, Box, ArrowRight, Loader2 } from 'lucide-react'
 import { createStoreAction } from './actions'
 
-type Step = 'product_type' | 'store_name' | 'creating'
+type Step = 'product_type' | 'store_name' | 'store_details' | 'creating'
 
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('product_type')
   const [productType, setProductType] = useState<'physical' | 'digital' | 'both' | null>(null)
   const [storeName, setStoreName] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  
+  const [state, formAction] = useActionState(createStoreAction, null)
 
-  const handleNext = () => {
-    if (step === 'product_type' && productType) {
-      setStep('store_name')
+  useEffect(() => {
+    // If the formAction finishes but has an error, go back to details
+    if (state?.error) {
+      setStep('store_details')
     }
+  }, [state])
+
+  const handleNextToName = () => {
+    if (productType) setStep('store_name')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextToDetails = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!storeName.trim()) return
+    if (storeName.trim()) setStep('store_details')
+  }
 
+  const handleSubmit = () => {
     setStep('creating')
-    setError(null)
-    
-    const result = await createStoreAction({ name: storeName, productType })
-    
-    if (result.error) {
-      setError(result.error)
-      setStep('store_name')
-    }
-    // if success, the action will redirect to /dashboard
+    // The form submission will trigger formAction automatically
   }
 
   return (
@@ -43,11 +43,13 @@ export function OnboardingWizard() {
         <h2 className="text-2xl font-bold tracking-tight text-gray-900">
           {step === 'product_type' && "What are you selling?"}
           {step === 'store_name' && "Name your store"}
+          {step === 'store_details' && "Store Details (Optional)"}
           {step === 'creating' && "Creating your store..."}
         </h2>
         <p className="mt-2 text-sm text-gray-500">
           {step === 'product_type' && "This helps us tailor your experience."}
           {step === 'store_name' && "You can always change your display name later."}
+          {step === 'store_details' && "Add your logo, address, and social links to complete your storefront."}
           {step === 'creating' && "Hold on a second, preparing your dashboard."}
         </p>
       </div>
@@ -94,7 +96,7 @@ export function OnboardingWizard() {
           </button>
 
           <button
-            onClick={handleNext}
+            onClick={handleNextToName}
             disabled={!productType}
             className="w-full mt-6 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors flex items-center justify-center"
           >
@@ -104,7 +106,7 @@ export function OnboardingWizard() {
       )}
 
       {step === 'store_name' && (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleNextToDetails} className="space-y-6">
           <div>
             <label htmlFor="store-name" className="block text-sm font-medium text-gray-700 mb-1">
               Store Name
@@ -119,12 +121,6 @@ export function OnboardingWizard() {
               className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-shadow"
             />
           </div>
-          
-          {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
-              {error}
-            </div>
-          )}
 
           <div className="flex gap-3">
             <button
@@ -139,7 +135,86 @@ export function OnboardingWizard() {
               disabled={!storeName.trim()}
               className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
             >
-              Create Store
+              Continue
+            </button>
+          </div>
+        </form>
+      )}
+
+      {step === 'store_details' && (
+        <form action={formAction} onSubmit={handleSubmit} className="space-y-5 text-left">
+          <input type="hidden" name="storeName" value={storeName} />
+          <input type="hidden" name="productType" value={productType || ''} />
+
+          {state?.error && (
+            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+              {state.error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Store Logo (Optional)</label>
+            <input 
+              type="file" 
+              name="logo"
+              accept="image/*"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black text-sm" 
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Address (Optional)</label>
+            <textarea
+              name="address"
+              rows={2}
+              placeholder="Your physical store address"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL (Optional)</label>
+            <input
+              type="url"
+              name="facebook"
+              placeholder="https://facebook.com/..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter URL (Optional)</label>
+            <input
+              type="url"
+              name="twitter"
+              placeholder="https://twitter.com/..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL (Optional)</label>
+            <input
+              type="url"
+              name="instagram"
+              placeholder="https://instagram.com/..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow text-sm"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setStep('store_name')}
+              className="w-1/3 py-3 px-4 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
+              Back
+            </button>
+            <button
+              type="submit"
+              className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium hover:bg-gray-800 transition-colors flex items-center justify-center"
+            >
+              Finish & Create
             </button>
           </div>
         </form>

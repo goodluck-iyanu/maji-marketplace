@@ -7,7 +7,7 @@ export default async function SettingsPage() {
   
   const { data: store } = await supabase
     .from('stores')
-    .select('*, store_settings(*)')
+    .select('*, store_settings(*), social_links(*)')
     .eq('user_id', user!.id)
     .single()
 

@@ -50,7 +50,7 @@ export default async function StorePage({
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, store_settings(*)')
+    .select('id, name, store_settings(*), social_links(*)')
     .eq('slug', storeSlug)
     .eq('is_active', true)
     .single()
@@ -77,9 +77,14 @@ export default async function StorePage({
   return (
     <div style={themeStyles} className="min-h-screen bg-[var(--store-secondary)] text-[var(--store-primary)] font-sans">
       <header className="border-b border-opacity-10 py-6 px-4 sm:px-8 flex justify-between items-center max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold tracking-tight">
-          {store.name}
-        </h1>
+        <Link href={`/store/${storeSlug}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          {settings.logo_url && (
+            <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-10 w-10 object-cover rounded-md" />
+          )}
+          <h1 className="text-2xl font-bold tracking-tight">
+            {store.name}
+          </h1>
+        </Link>
         <nav>
           <CartButton 
             primaryColor={settings.primary_color || '#000000'} 
@@ -98,7 +103,7 @@ export default async function StorePage({
         {settings.about_text && (
           <div className="mb-12 max-w-2xl">
             <h2 className="text-xl font-semibold mb-2">About us</h2>
-            <p className="text-opacity-80 leading-relaxed">{settings.about_text}</p>
+            <p className="text-opacity-80 leading-relaxed whitespace-pre-wrap">{settings.about_text}</p>
           </div>
         )}
 
@@ -123,9 +128,23 @@ export default async function StorePage({
         )}
       </main>
 
-      <footer className="py-12 mt-12 border-t border-opacity-10 text-center text-sm text-opacity-60">
+      <footer className="py-12 mt-12 border-t border-opacity-10 text-center text-sm text-opacity-60 flex flex-col items-center justify-center">
+        {settings.address && (
+          <p className="mb-6 whitespace-pre-wrap max-w-md mx-auto text-opacity-80">{settings.address}</p>
+        )}
+        
+        {store.social_links && store.social_links.length > 0 && (
+          <div className="flex justify-center gap-6 mb-6">
+            {store.social_links.map((link: any) => (
+              <a key={link.platform} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:opacity-100 opacity-70 transition-opacity capitalize font-medium">
+                {link.platform}
+              </a>
+            ))}
+          </div>
+        )}
+        
         <p>© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
-        <p className="mt-2 text-xs">Powered by Maji</p>
+        <p className="mt-2 text-xs opacity-50">Powered by Maji</p>
       </footer>
     </div>
   )

@@ -26,6 +26,21 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
         </div>
         <div className="p-6 space-y-4">
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Store Logo</label>
+            {settings.logo_url && (
+              <div className="mb-2">
+                <img src={settings.logo_url} alt="Store Logo" className="h-16 w-16 object-cover rounded-md border" />
+              </div>
+            )}
+            <input 
+              type="file" 
+              name="logo"
+              accept="image/*"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+            />
+            <p className="text-xs text-gray-500 mt-1">Upload a square image (optional).</p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
             <input 
               type="text" 
@@ -49,13 +64,61 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">About Store</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Store Address (Optional)</label>
+            <textarea 
+              name="address"
+              defaultValue={settings.address || ''} 
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              placeholder="123 Main St, Lagos, Nigeria"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">About Store (Optional)</label>
             <textarea 
               name="about_text"
               defaultValue={settings.about_text || ''} 
-              rows={4}
+              rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
               placeholder="Tell customers about your store..."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-medium text-gray-900">Social Links (Optional)</h2>
+        </div>
+        <div className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook URL</label>
+            <input 
+              type="url" 
+              name="facebook"
+              defaultValue={store.social_links?.find((s: any) => s.platform === 'facebook')?.url || ''} 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              placeholder="https://facebook.com/yourstore"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter URL</label>
+            <input 
+              type="url" 
+              name="twitter"
+              defaultValue={store.social_links?.find((s: any) => s.platform === 'twitter')?.url || ''} 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              placeholder="https://twitter.com/yourstore"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
+            <input 
+              type="url" 
+              name="instagram"
+              defaultValue={store.social_links?.find((s: any) => s.platform === 'instagram')?.url || ''} 
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              placeholder="https://instagram.com/yourstore"
             />
           </div>
         </div>
