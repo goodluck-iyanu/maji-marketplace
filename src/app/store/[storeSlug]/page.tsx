@@ -90,9 +90,9 @@ export default async function StorePage({
   }
 
   return (
-    <div style={themeStyles} className="min-h-screen bg-[var(--store-secondary)] text-[var(--store-primary)] font-sans">
+    <div style={themeStyles} className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Sticky Top Bar */}
-      <div className="sticky top-0 z-50 bg-[var(--store-secondary)]/90 backdrop-blur-md border-b border-opacity-10 py-3 px-4 flex justify-between items-center">
+      <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 py-3 px-4 flex justify-between items-center">
         <Link href={`/store/${storeSlug}`} className="font-bold tracking-tight text-lg line-clamp-1">
           {store.name}
         </Link>
@@ -111,9 +111,9 @@ export default async function StorePage({
       {/* Hero / Profile Section */}
       <div className={`max-w-3xl mx-auto px-4 text-center flex flex-col items-center ${settings.banner_url ? '-mt-12 sm:-mt-16 relative z-10' : 'pt-10'}`}>
         {settings.logo_url ? (
-          <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full shadow-lg border-4 border-[var(--store-secondary)] mb-4 bg-[var(--store-secondary)]" />
+          <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full shadow-lg border-4 border-white mb-4 bg-white" />
         ) : (
-          <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full shadow-lg border-4 border-[var(--store-secondary)] mb-4 bg-gray-100 flex items-center justify-center">
+          <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full shadow-lg border-4 border-white mb-4 bg-gray-100 flex items-center justify-center">
             <span className="text-3xl text-gray-400 font-bold">{store.name.charAt(0)}</span>
           </div>
         )}
@@ -123,7 +123,7 @@ export default async function StorePage({
         </h1>
         
         {settings.about_text && (
-          <p className="text-opacity-80 leading-relaxed max-w-xl mx-auto text-sm sm:text-base mb-6 whitespace-pre-wrap">
+          <p className="text-gray-600 leading-relaxed max-w-xl mx-auto text-sm sm:text-base mb-6 whitespace-pre-wrap">
             {settings.about_text}
           </p>
         )}
@@ -137,7 +137,7 @@ export default async function StorePage({
                 href={formatSocialUrl(link.platform, link.url)} 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="px-4 py-2 rounded-full border border-opacity-20 hover:bg-[var(--store-primary)] hover:text-[var(--store-secondary)] transition-all text-xs sm:text-sm font-semibold capitalize"
+                className="px-4 py-2 rounded-full border border-gray-200 text-gray-700 hover:bg-[var(--store-primary)] hover:text-[var(--store-secondary)] hover:border-[var(--store-primary)] transition-all text-xs sm:text-sm font-semibold capitalize"
               >
                 {link.platform}
               </a>
@@ -146,7 +146,7 @@ export default async function StorePage({
         )}
         
         {settings.address && (
-          <p className="text-xs sm:text-sm text-opacity-60 mt-2 font-medium">📍 {settings.address}</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-2 font-medium">📍 {settings.address}</p>
         )}
       </div>
 
@@ -154,7 +154,7 @@ export default async function StorePage({
         <h2 className="text-lg sm:text-xl font-bold mb-6 px-1">Latest Products</h2>
         
         {(!products || products.length === 0) ? (
-          <div className="py-12 text-center text-opacity-60">
+          <div className="py-12 text-center text-gray-500">
             This store hasn't added any products yet.
           </div>
         ) : (
@@ -172,9 +172,9 @@ export default async function StorePage({
         )}
       </main>
 
-      <footer className="py-8 border-t border-opacity-10 text-center text-sm text-opacity-60">
+      <footer className="py-8 border-t border-gray-100 text-center text-sm text-gray-500">
         <p>© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
-        <p className="mt-2 text-xs opacity-50">Powered by Maji</p>
+        <p className="mt-2 text-xs text-gray-400">Powered by Maji</p>
       </footer>
     </div>
   )
