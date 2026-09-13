@@ -56,17 +56,23 @@ export function CartProvider({ children, storeSlug }: { children: ReactNode, sto
         return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + qty } : item)
       }
       const itemPrice = product.discount_percent ? product.price * (1 - product.discount_percent / 100) : product.price
+      
+      // Handle both generic products and variants
+      const itemName = product.title ? `${product.parent_name} - ${product.title}` : product.name
+      const itemImage = product.image_url || product.product_images?.[0]?.image_url || ''
+
       return [...prev, {
         id: product.id,
-        name: product.name,
+        name: itemName,
         price: itemPrice,
-        image: product.product_images?.[0]?.image_url || '',
+        image: itemImage,
         qty
       }]
     })
     
     // Show toast
-    setToast(`Added ${qty} ${product.name} to cart`)
+    const toastName = product.title ? product.title : product.name
+    setToast(`Added ${qty} ${toastName} to cart`)
     setTimeout(() => setToast(null), 3000)
   }
 

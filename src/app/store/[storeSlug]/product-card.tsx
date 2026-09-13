@@ -154,7 +154,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
               style={{ backgroundColor: primaryColor, color: secondaryColor }}
               className="w-full py-2.5 sm:py-3 rounded-md font-semibold text-sm sm:text-base hover:opacity-90 transition-opacity flex items-center justify-center"
             >
-              {product.has_variants ? 'Select Options' : 'Add to Cart'}
+              {product.has_variants ? 'Choose Options' : 'Add to Cart'}
             </button>
           )}
         </div>

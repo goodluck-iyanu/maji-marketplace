@@ -67,10 +67,8 @@ export function EditProductForm({ product, productType }: { product: any, produc
                   id="price"
                   min="0"
                   step="1"
-                  required
                   defaultValue={product.price}
-                  disabled={product.has_variants}
-                  className={`w-full pl-12 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow ${product.has_variants ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                  className="w-full pl-12 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
               </div>
             </div>
@@ -88,19 +86,17 @@ export function EditProductForm({ product, productType }: { product: any, produc
                   name="discount_percent"
                   id="discount_percent"
                   min="0"
-                  max="100"
                   step="1"
                   defaultValue={product.discount_percent || 0}
-                  disabled={product.has_variants}
-                  className={`w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow ${product.has_variants ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
               </div>
             </div>
           </div>
 
           {product.has_variants && (
-            <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-lg text-yellow-800 text-sm">
-              <strong>Note:</strong> This product has variants (like sizes/colors). The base price above is locked. To change variant prices and stock combinations, please delete this product and recreate it. A full variant editor will be added in a future update.
+            <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-blue-800 text-sm">
+              <strong>Note:</strong> This product has variants (like sizes/colors). Updating the Price here will <strong>bulk-update</strong> all your variants to match this new price. A full individual variant editor will be added in a future update.
               
               {product.product_variants && product.product_variants.length > 0 && (
                 <div className="mt-4 bg-white border border-yellow-200 rounded overflow-hidden">

@@ -36,14 +36,27 @@ export function AddToCartForm({ product, primaryColor, secondaryColor }: any) {
     })
   }, [hasVariants, selectedOptions, product.product_variants])
 
-  const currentPrice = matchedVariant ? matchedVariant.price : product.price
+  const basePrice = matchedVariant ? matchedVariant.price : product.price
+  const hasDiscount = Boolean(product.discount_percent && product.discount_percent > 0)
+  const currentPrice = hasDiscount 
+    ? (basePrice * (1 - (product.discount_percent / 100))) 
+    : basePrice
+
+  const originalPrice = basePrice
   const inStock = matchedVariant ? matchedVariant.stock > 0 : product.stock > 0
 
   return (
     <div className="space-y-6">
       
       {/* Dynamic Price Display */}
-      <p className="text-2xl font-semibold mb-6">₦{Number(currentPrice).toLocaleString()}</p>
+      <div className="mb-6">
+        <p className="text-2xl font-semibold">₦{Number(currentPrice).toLocaleString()}</p>
+        {hasDiscount && (
+          <p className="text-sm text-gray-400 line-through mt-1">
+            ₦{Number(originalPrice).toLocaleString()}
+          </p>
+        )}
+      </div>
 
       {/* Option Selectors */}
       {hasVariants && product.product_options?.map((opt: any) => (
@@ -87,7 +100,16 @@ export function AddToCartForm({ product, primaryColor, secondaryColor }: any) {
       </div>
 
       <button 
-        onClick={() => addToCart(matchedVariant || product, qty)}
+        onClick={() => {
+          const itemToAdd = matchedVariant 
+            ? { 
+                ...matchedVariant, 
+                parent_name: product.name,
+                image_url: product.product_images?.[0]?.image_url 
+              } 
+            : product;
+          addToCart(itemToAdd, qty)
+        }}
         disabled={!inStock}
         className="w-full py-4 rounded-md font-medium text-lg transition-opacity flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed"
         style={{ backgroundColor: primaryColor, color: secondaryColor }}

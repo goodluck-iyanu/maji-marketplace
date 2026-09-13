@@ -196,6 +196,13 @@ export async function editProductAction(prevState: any, formData: FormData) {
     return { error: 'Failed to edit product' }
   }
 
+  // Also bulk-update all variants to match the new base price
+  // so the user sees the changes reflect immediately across all combinations
+  await supabase
+    .from('product_variants')
+    .update({ price })
+    .eq('product_id', productId)
+
   revalidatePath('/', 'layout')
   redirect('/dashboard/products')
 }
