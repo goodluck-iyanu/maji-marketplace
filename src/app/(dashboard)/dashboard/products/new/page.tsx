@@ -12,12 +12,18 @@ export default async function NewProductPage() {
 
   const { data: store } = await supabase
     .from('stores')
-    .select('product_type')
+    .select('product_type, store_category')
     .eq('user_id', user.id)
     .single()
 
   if (!store) {
     redirect('/onboarding')
+  }
+
+  if (store.store_category === 'fashion') {
+    // Dynamic import to keep this page light for non-fashion sellers
+    const FashionProductBuilder = (await import('./fashion-builder')).default
+    return <FashionProductBuilder productType={store.product_type} />
   }
 
   return <NewProductForm productType={store.product_type} />

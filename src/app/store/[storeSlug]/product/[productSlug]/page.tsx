@@ -54,7 +54,12 @@ export default async function ProductPage({
 
   const { data: product } = await supabase
     .from('products')
-    .select('*, product_images(image_url)')
+    .select(`
+      *,
+      product_images(id, url, position),
+      product_options(*),
+      product_variants(*)
+    `)
     .eq('store_id', store.id)
     .eq('slug', productSlug)
     .eq('is_published', true)
@@ -95,7 +100,6 @@ export default async function ProductPage({
           {/* Product Info */}
           <div>
             <h1 className="text-3xl font-bold tracking-tight mb-4">{product.name}</h1>
-            <p className="text-2xl font-semibold mb-6">₦{product.price.toLocaleString()}</p>
             
             <div className="prose prose-sm text-current opacity-80 mb-8 whitespace-pre-wrap">
               {product.description || "No description provided."}

@@ -199,3 +199,111 @@ export async function editProductAction(prevState: any, formData: FormData) {
   revalidatePath('/', 'layout')
   redirect('/dashboard/products')
 }
+
+export async function createFashionProductAction(prevState: any, formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).single()
+  if (!store) return { error: 'Store not found' }
+
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const subCategory = formData.get('subCategory') as string
+  const targetAudienceStr = formData.get('targetAudience') as string
+  const material = formData.get('material') as string
+  const hasOptions = formData.get('hasOptions') === 'true'
+  const optionsDefStr = formData.get('optionsDef') as string
+  const variantsJsonStr = formData.get('variantsJson') as string
+
+  if (!name?.trim()) return { error: 'Product name is required' }
+  
+  const baseSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || 'product'
+  const uniqueSlug = \\-\\
+  
+  const targetAudience = targetAudienceStr ? JSON.parse(targetAudienceStr).join(', ') : ''
+  const optionsDef = optionsDefStr ? JSON.parse(optionsDefStr) : { sizes: [], colors: [] }
+  const variants = variantsJsonStr ? JSON.parse(variantsJsonStr) : []
+
+  // Extract base price and stock from first variant or form directly
+  const basePrice = variants.length > 0 ? parseFloat(variants[0].price || 0) : parseFloat((formData.get('price') as string) || '0')
+  const baseStock = variants.length > 0 ? parseInt(variants[0].stock || 0) : parseInt((formData.get('stock') as string) || '0')
+
+  // Insert product
+  const { data: product, error: productError } = await supabase.from('products').insert({
+    store_id: store.id,
+    name,
+    slug: uniqueSlug,
+    description,
+    price: basePrice,
+    stock: baseStock,
+    is_digital: false,
+    is_published: true,
+    sub_category: subCategory,
+    target_audience: targetAudience,
+    material: material,
+    has_variants: hasOptions && variants.length > 0
+  }).select().single()
+
+  if (productError || !product) {
+    console.error('Fashion product error:', productError)
+    return { error: 'Failed to create product' }
+  }
+
+  // Handle Photos
+  const photos = formData.getAll('photos') as File[]
+  const validPhotos = photos.filter(f => f && f.size > 0 && f.name)
+  
+  if (validPhotos.length > 0) {
+    let position = 0
+    for (const file of validPhotos) {
+      const fileExt = file.name.split('.').pop()
+      const fileName = \\/\-\.\\
+      const { data: uploadData, error: uploadError } = await supabase.storage.from('product-images').upload(fileName, file)
+      
+      if (!uploadError && uploadData) {
+        const { data: publicUrl } = supabase.storage.from('product-images').getPublicUrl(fileName)
+        await supabase.from('product_images').insert({
+          product_id: product.id,
+          url: publicUrl.publicUrl,
+          position
+        })
+        position++
+      }
+    }
+  }
+
+  // If variants exist, insert options and variants
+  if (hasOptions && variants.length > 0) {
+    // Insert Product Options
+    let pos = 0
+    if (optionsDef.sizes && optionsDef.sizes.length > 0) {
+      await supabase.from('product_options').insert({
+        product_id: product.id, name: 'Size', position: pos++, values: optionsDef.sizes
+      })
+    }
+    if (optionsDef.colors && optionsDef.colors.length > 0) {
+      await supabase.from('product_options').insert({
+        product_id: product.id, name: 'Color', position: pos++, values: optionsDef.colors
+      })
+    }
+
+    // Insert Product Variants
+    const variantsToInsert = variants.map((v: any) => ({
+      product_id: product.id,
+      title: v.title,
+      price: parseFloat(v.price || basePrice),
+      stock: parseInt(v.stock || baseStock),
+      sku: v.sku || null,
+      options: v.options || {}
+    }))
+
+    const { error: variantsError } = await supabase.from('product_variants').insert(variantsToInsert)
+    if (variantsError) {
+      console.error('Variants error:', variantsError)
+    }
+  }
+
+  revalidatePath('/', 'layout')
+  redirect('/dashboard/products')
+}
