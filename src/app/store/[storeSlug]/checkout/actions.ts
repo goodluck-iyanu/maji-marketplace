@@ -74,15 +74,18 @@ export async function processCheckout(formData: FormData) {
 
     // Check if it's a variant
     const variant = variants?.find(v => v.id === item.id)
-    if (variant && variant.products?.is_published) {
-      const discount = variant.products.discount_percent || 0
-      const finalPrice = discount > 0 ? variant.price * (1 - discount / 100) : variant.price
-      totalAmount += (finalPrice * item.qty)
-      orderItemsData.push({
-        product_id: variant.product_id, // Link to base product
-        quantity: item.qty,
-        price_at_purchase: finalPrice,
-      })
+    if (variant) {
+      const parentProduct: any = Array.isArray(variant.products) ? variant.products[0] : variant.products;
+      if (parentProduct && parentProduct.is_published) {
+        const discount = parentProduct.discount_percent || 0
+        const finalPrice = discount > 0 ? variant.price * (1 - discount / 100) : variant.price
+        totalAmount += (finalPrice * item.qty)
+        orderItemsData.push({
+          product_id: variant.product_id, // Link to base product
+          quantity: item.qty,
+          price_at_purchase: finalPrice,
+        })
+      }
     }
   }
 
