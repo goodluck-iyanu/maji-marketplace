@@ -100,6 +100,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
                 <ExternalLink className="h-3 w-3 ml-1 opacity-50" />
               </a>
             </div>
+            {order.customer_whatsapp && (
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">WhatsApp Number</p>
+                <a href={`https://wa.me/${order.customer_whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-green-600 hover:underline flex items-center">
+                  {order.customer_whatsapp}
+                  <ExternalLink className="h-3 w-3 ml-1 opacity-50" />
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -208,3 +217,4 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
     </div>
   )
 }
+

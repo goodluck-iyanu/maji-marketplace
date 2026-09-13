@@ -138,6 +138,15 @@ export default function CartPage() {
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (Optional)</label>
+                  <input 
+                    type="tel" 
+                    name="whatsapp" 
+                    placeholder="e.g. +2348012345678" 
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+                  />
+                </div>
                 
                 <button 
                   type="submit" 

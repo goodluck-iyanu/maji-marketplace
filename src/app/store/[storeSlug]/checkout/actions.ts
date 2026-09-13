@@ -10,6 +10,7 @@ export async function processCheckout(formData: FormData) {
   const cartJson = formData.get('cart') as string
   const customerEmail = formData.get('email') as string
   const customerName = formData.get('name') as string
+  const customerWhatsapp = formData.get('whatsapp') as string
   
   if (!storeSlug || !cartJson || !customerEmail) {
     return { error: 'Missing required fields' }
@@ -120,6 +121,7 @@ export async function processCheckout(formData: FormData) {
       store_id: storeId,
       customer_name: customerName,
       customer_email: customerEmail,
+      customer_whatsapp: customerWhatsapp || null,
       total_amount: totalAmount,
       payment_reference: reference,
       payment_status: 'pending',
