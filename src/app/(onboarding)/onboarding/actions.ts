@@ -62,11 +62,11 @@ export async function createStoreAction(prevState: any, formData: FormData) {
     .single()
 
   if (storeError) {
-    console.error('Store error:', storeError)
+    console.error('Store error full object:', JSON.stringify(storeError, null, 2))
     if (storeError.code === '23505') {
       return { error: 'This store name is currently unavailable. Please try another.' }
     }
-    return { error: 'Could not create store. Please try again.' }
+    return { error: `Database error: ${storeError.message || 'Could not create store.'}` }
   }
 
   // Handle Logo Upload
