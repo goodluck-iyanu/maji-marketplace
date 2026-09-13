@@ -44,7 +44,7 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
+      <form className="flex flex-col w-full justify-center gap-2 text-foreground">
         <label className="text-md" htmlFor="email">
           Email
         </label>
@@ -60,16 +60,18 @@ export default async function LoginPage({
         >
           Continue with Email (Magic Link)
         </button>
+      </form>
         
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or continue with</span>
-          </div>
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
         </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
 
+      <form className="flex flex-col w-full justify-center gap-2 text-foreground">
         <button
           formAction={signInWithGoogle}
           className="border border-gray-300 bg-white text-black rounded-md px-4 py-2 mb-2 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
@@ -94,7 +96,9 @@ export default async function LoginPage({
           </svg>
           Google
         </button>
+      </form>
 
+      <div className="w-full mt-2">
         {error && (
           <p className="mt-4 p-4 bg-red-50 text-red-600 text-center text-sm border-red-200 border rounded-md">
             {error}
@@ -105,7 +109,7 @@ export default async function LoginPage({
             {message}
           </p>
         )}
-      </form>
+      </div>
     </div>
   )
 }
