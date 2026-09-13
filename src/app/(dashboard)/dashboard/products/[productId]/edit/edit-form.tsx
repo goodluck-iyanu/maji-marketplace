@@ -69,7 +69,8 @@ export function EditProductForm({ product, productType }: { product: any, produc
                   step="1"
                   required
                   defaultValue={product.price}
-                  className="w-full pl-12 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                  disabled={product.has_variants}
+                  className={`w-full pl-12 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow ${product.has_variants ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
                 />
               </div>
             </div>
@@ -90,11 +91,41 @@ export function EditProductForm({ product, productType }: { product: any, produc
                   max="100"
                   step="1"
                   defaultValue={product.discount_percent || 0}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                  disabled={product.has_variants}
+                  className={`w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow ${product.has_variants ? 'bg-gray-100 cursor-not-allowed text-gray-500' : ''}`}
                 />
               </div>
             </div>
           </div>
+
+          {product.has_variants && (
+            <div className="bg-yellow-50 border border-yellow-100 p-4 rounded-lg text-yellow-800 text-sm">
+              <strong>Note:</strong> This product has variants (like sizes/colors). The base price above is locked. To change variant prices and stock combinations, please delete this product and recreate it. A full variant editor will be added in a future update.
+              
+              {product.product_variants && product.product_variants.length > 0 && (
+                <div className="mt-4 bg-white border border-yellow-200 rounded overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-yellow-100/50">
+                      <tr>
+                        <th className="px-3 py-2 font-semibold">Variant</th>
+                        <th className="px-3 py-2 font-semibold">Price</th>
+                        <th className="px-3 py-2 font-semibold">Stock</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-yellow-100">
+                      {product.product_variants.map((v: any) => (
+                        <tr key={v.id}>
+                          <td className="px-3 py-2 font-medium">{v.title}</td>
+                          <td className="px-3 py-2">₦{v.price.toLocaleString()}</td>
+                          <td className="px-3 py-2">{v.stock}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="pt-4 border-t border-gray-100">
             <div>

@@ -101,8 +101,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
     handleNext()
   }
 
-  // Pre-submit hook to inject variants JSON into form
-  const [variantsJson, setVariantsJson] = useState('')
+  // We don't need variantsJson state, we can just stringify variants directly in the input
   
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-20">
@@ -130,13 +129,13 @@ export default function FashionProductBuilder({ productType }: { productType: st
         </div>
       )}
 
-      <form action={formAction} onSubmit={() => setVariantsJson(JSON.stringify(variants))}>
+      <form action={formAction}>
         <input type="hidden" name="subCategory" value={subCategory} />
         <input type="hidden" name="targetAudience" value={JSON.stringify(targetAudience)} />
         <input type="hidden" name="material" value={material} />
         <input type="hidden" name="hasOptions" value={hasOptions ? 'true' : 'false'} />
         <input type="hidden" name="optionsDef" value={JSON.stringify({ sizes, colors })} />
-        <input type="hidden" name="variantsJson" value={variantsJson} />
+        <input type="hidden" name="variantsJson" value={JSON.stringify(variants)} />
         <input type="hidden" name="productType" value={productType || 'physical'} />
 
         {/* --- STEP 0: TYPE --- */}
