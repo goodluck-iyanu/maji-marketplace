@@ -19,7 +19,7 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    redirect(/login?error=${error.message})
+    redirect(`/login?error=${error.message}`)
   }
 
   redirect('/login?message=Check email to continue sign in process')
