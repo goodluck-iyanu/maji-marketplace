@@ -115,11 +115,11 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
           
           <div className="mb-3">
             <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
-              ?{Math.round(currentPrice).toLocaleString()}
+              ₦{Math.round(currentPrice).toLocaleString()}
             </p>
             {hasDiscount && (
               <p className="text-xs sm:text-sm text-gray-400 line-through mt-1">
-                ?{Math.round(originalPrice).toLocaleString()}
+                ₦{Math.round(originalPrice).toLocaleString()}
               </p>
             )}
           </div>

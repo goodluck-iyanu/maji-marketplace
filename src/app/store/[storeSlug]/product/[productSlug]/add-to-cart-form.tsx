@@ -43,7 +43,7 @@ export function AddToCartForm({ product, primaryColor, secondaryColor }: any) {
     <div className="space-y-6">
       
       {/* Dynamic Price Display */}
-      <p className="text-2xl font-semibold mb-6">?{Number(currentPrice).toLocaleString()}</p>
+      <p className="text-2xl font-semibold mb-6">₦{Number(currentPrice).toLocaleString()}</p>
 
       {/* Option Selectors */}
       {hasVariants && product.product_options?.map((opt: any) => (

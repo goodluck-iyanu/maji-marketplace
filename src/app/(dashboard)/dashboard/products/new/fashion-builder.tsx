@@ -384,7 +384,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
           {!hasOptions || variants.length === 0 ? (
             <div className="space-y-6 mt-6">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">Price (') *</label>
+                <label className="block text-sm font-medium text-gray-900 mb-1">Price (₦) *</label>
                 <input type="number" name="price" value={basePrice} onChange={e=>setBasePrice(e.target.value)} className="w-full px-4 py-3 border rounded-lg" placeholder="0.00" required={!hasOptions} />
               </div>
               <div>
@@ -396,7 +396,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
             <div className="space-y-6 mt-6">
               <div className="p-4 bg-gray-50 border rounded-xl mb-6 flex items-end gap-4">
                 <div className="flex-1">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Base Price (')</label>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Base Price (₦)</label>
                   <input type="number" value={basePrice} onChange={e=>setBasePrice(e.target.value)} className="w-full px-3 py-2 border rounded-md" placeholder="e.g. 25000" />
                 </div>
                 <div className="flex-1">
@@ -413,7 +413,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
                   <thead className="bg-gray-50 text-gray-500 font-medium border-b">
                     <tr>
                       <th className="px-4 py-3">Variant</th>
-                      <th className="px-4 py-3">Price (')</th>
+                      <th className="px-4 py-3">Price (₦)</th>
                       <th className="px-4 py-3">Stock</th>
                     </tr>
                   </thead>
@@ -467,7 +467,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
               <div><span className="text-gray-500 block">Category</span> <span className="font-medium capitalize">{subCategory}</span></div>
               <div><span className="text-gray-500 block">Audience</span> <span className="font-medium">{targetAudience.join(', ') || 'Any'}</span></div>
               {hasOptions && <div><span className="text-gray-500 block">Variants</span> <span className="font-medium">{variants.length} combinations</span></div>}
-              <div><span className="text-gray-500 block">Price</span> <span className="font-medium">'{basePrice || variants[0]?.price}</span></div>
+              <div><span className="text-gray-500 block">Price</span> <span className="font-medium">₦{basePrice || variants[0]?.price}</span></div>
             </div>
           </div>
 
