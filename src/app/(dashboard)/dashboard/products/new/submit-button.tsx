@@ -17,7 +17,6 @@ export function SubmitButton({ label = 'Save Product' }: { label?: string }) {
       ) : (
         <Save className="h-4 w-4 mr-2" />
       )}
-      {pending ? 'Saving Product...' : 'Save Product'}
       {pending ? 'Saving...' : label}
     </button>
   )

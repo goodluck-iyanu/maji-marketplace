@@ -4,11 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 
-export async function createProductAction(formData: FormData) {
+export async function createProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: store } = await supabase
     .from('stores')
@@ -16,7 +16,7 @@ export async function createProductAction(formData: FormData) {
     .eq('user_id', user.id)
     .single()
 
-  if (!store) throw new Error('Store not found')
+  if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
   const description = formData.get('description') as string
@@ -30,7 +30,7 @@ export async function createProductAction(formData: FormData) {
   const validImages = imageFiles.filter(f => f.size > 0 && f.name)
   
   if (validImages.length > 0 && validImages.length < 2) {
-    throw new Error('Please upload at least 2 images')
+    return { error: 'Please upload at least 2 images' }
   }
 
   // Basic slugify
@@ -51,7 +51,7 @@ export async function createProductAction(formData: FormData) {
 
   if (error || !product) {
     console.error('Failed to create product:', error)
-    throw new Error('Failed to create product')
+    return { error: 'Failed to create product. Please check your inputs.' }
   }
 
   // 3. Upload images
@@ -144,10 +144,10 @@ export async function updateStockAction(productId: string, newStock: number) {
   return { success: true }
 }
 
-export async function editProductAction(formData: FormData) {
+export async function editProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const productId = formData.get('productId') as string
   const name = formData.get('name') as string
@@ -156,7 +156,7 @@ export async function editProductAction(formData: FormData) {
   const isDigital = formData.get('is_digital') === 'true'
 
   if (!productId || !name || !price) {
-    throw new Error('Missing required fields')
+    return { error: 'Missing required fields' }
   }
 
   const { error } = await supabase
@@ -171,7 +171,7 @@ export async function editProductAction(formData: FormData) {
 
   if (error) {
     console.error('Edit product error:', error)
-    throw new Error('Failed to edit product')
+    return { error: 'Failed to edit product' }
   }
 
   redirect('/dashboard/products')

@@ -1,11 +1,16 @@
+'use client'
+
 import { ArrowLeft } from 'lucide-react'
 import { SubmitButton } from './submit-button'
 import Link from 'next/link'
 import { createProductAction } from '../actions'
+import { useActionState } from 'react'
 
 import { ImageUploader } from './image-uploader'
 
 export default function NewProductPage() {
+  const [state, formAction] = useActionState(createProductAction, null)
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-4">
@@ -15,7 +20,13 @@ export default function NewProductPage() {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">Add New Product</h1>
       </div>
 
-      <form action={createProductAction} className="space-y-6">
+      {state?.error && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium">
+          {state.error}
+        </div>
+      )}
+
+      <form action={formAction} className="space-y-6">
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="p-6 space-y-6">
             <ImageUploader />

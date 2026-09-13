@@ -3,11 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function saveSettingsAction(formData: FormData) {
+export async function saveSettingsAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+  if (!user) return { error: 'Not authenticated' }
 
   const { data: store } = await supabase
     .from('stores')
@@ -15,7 +15,7 @@ export async function saveSettingsAction(formData: FormData) {
     .eq('user_id', user.id)
     .single()
 
-  if (!store) throw new Error('Store not found')
+  if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
   const about_text = formData.get('about_text') as string
@@ -49,12 +49,10 @@ export async function saveSettingsAction(formData: FormData) {
   }, { onConflict: 'store_id' })
 
   if (error) {
-    console.error('Upsert settings error:', error)
-    throw new Error('Failed to save settings')
+    console.error('Save settings error:', error)
+    return { error: 'Failed to save settings' }
   }
 
-  revalidatePath('/', 'layout')
-  
+  revalidatePath('/dashboard/settings')
+  return { success: true }
 }
-
-
