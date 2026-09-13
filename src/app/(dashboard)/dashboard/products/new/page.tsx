@@ -22,3 +22,4 @@ export default async function NewProductPage() {
 
   return <NewProductForm productType={store.product_type} />
 }
+
