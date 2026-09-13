@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { editProductAction } from '../../actions'
 import { SubmitButton } from '../../new/submit-button'
 
-export function EditProductForm({ product }: { product: any }) {
+export function EditProductForm({ product, productType }: { product: any, productType: string | null }) {
   const [state, formAction] = useActionState(editProductAction, null)
 
   return (
@@ -49,79 +49,84 @@ export function EditProductForm({ product }: { product: any }) {
               rows={4}
               defaultValue={product.description || ''}
               className="w-full px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
-            ></textarea>
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                Price (₦)
+                Price
               </label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                  ₦
-                </span>
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">NGN</span>
+                </div>
                 <input
                   type="number"
                   name="price"
                   id="price"
                   min="0"
-                  step="0.01"
-                  defaultValue={product.price}
+                  step="1"
                   required
-                  className="w-full pl-8 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                  defaultValue={product.price}
+                  className="w-full pl-12 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
               </div>
             </div>
+
             <div>
-              <label htmlFor="discount" className="block text-sm font-medium text-gray-700 mb-1">
-                Discount % (Optional)
+              <label htmlFor="discount_percent" className="block text-sm font-medium text-gray-700 mb-1">
+                Discount (%)
               </label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-500 sm:text-sm">%</span>
+                </div>
                 <input
                   type="number"
                   name="discount_percent"
-                  id="discount"
+                  id="discount_percent"
                   min="0"
                   max="100"
+                  step="1"
                   defaultValue={product.discount_percent || 0}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black transition-shadow"
                 />
-                <span className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500">
-                  %
-                </span>
               </div>
             </div>
-            
+          </div>
+
+          <div className="pt-4 border-t border-gray-100">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Product Type
               </label>
               <div className="flex items-center space-x-4 mt-2">
-                <label className="flex items-center">
-                  <input type="radio" name="is_digital" value="false" defaultChecked={!product.is_digital} className="h-4 w-4 text-black focus:ring-black border-gray-300" />
+                <label className={`flex items-center ${productType === 'physical' ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}>
+                  <input type="radio" name="is_digital_radio" value="false" checked={productType === 'physical'} disabled className="h-4 w-4 text-black focus:ring-black border-gray-300 disabled:cursor-not-allowed" readOnly />
                   <span className="ml-2 text-sm text-gray-700">Physical (Ships)</span>
                 </label>
-                <label className="flex items-center">
-                  <input type="radio" name="is_digital" value="true" defaultChecked={product.is_digital} className="h-4 w-4 text-black focus:ring-black border-gray-300" />
+                <label className={`flex items-center ${productType === 'digital' ? 'opacity-100' : 'opacity-50 cursor-not-allowed'}`}>
+                  <input type="radio" name="is_digital_radio" value="true" checked={productType === 'digital'} disabled className="h-4 w-4 text-black focus:ring-black border-gray-300 disabled:cursor-not-allowed" readOnly />
                   <span className="ml-2 text-sm text-gray-700">Digital (Download)</span>
                 </label>
+                {/* Hidden input to ensure value is submitted since disabled fields are ignored */}
+                <input type="hidden" name="is_digital" value={productType === 'digital' ? 'true' : 'false'} />
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-        </div>
-        <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end">
-          <Link 
-            href="/dashboard/products"
-            className="px-6 py-2 border border-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-100 transition-colors mr-3"
-          >
-            Cancel
-          </Link>
-          <SubmitButton label="Save Changes" />
-        </div>
+      <div className="flex justify-end gap-3">
+        <Link 
+          href="/dashboard/products"
+          className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </Link>
+        <SubmitButton label="Save Changes" />
       </div>
     </form>
   )
 }
-

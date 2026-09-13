@@ -49,6 +49,7 @@ export async function createStoreAction(prevState: any, formData: FormData) {
       user_id: user.id,
       name: name,
       slug: uniqueSlug,
+      product_type: productType,
     })
     .select('id')
     .single()
