@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, Clock, Package } from 'lucide-react'
 import { OrderSuccess } from './order-success'
+import { ClearCartListener } from './clear-cart'
 
 export default async function OrderConfirmationPage({
   params,
@@ -41,6 +42,7 @@ export default async function OrderConfirmationPage({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 px-4">
+      <ClearCartListener storeSlug={storeSlug} />
       <div className="max-w-2xl w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           {isPaid ? (
             <OrderSuccess storeSlug={storeSlug} />

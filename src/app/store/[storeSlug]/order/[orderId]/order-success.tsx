@@ -14,6 +14,7 @@ export function OrderSuccess({ storeSlug }: { storeSlug: string }) {
     // Clear the cart securely
     clearCart()
     localStorage.removeItem('maji_cart')
+    localStorage.removeItem(`maji_cart_${storeSlug}`)
 
     // Redirect countdown
     const timer = setInterval(() => {

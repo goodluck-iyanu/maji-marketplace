@@ -69,7 +69,11 @@ export function Sidebar({ storeName, storeSlug }: { storeName: string; storeSlug
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-           <form action="/auth/signout" method="post">
+           <form action="/auth/signout" method="post" onSubmit={(e) => {
+             if (!window.confirm("Are you sure you want to sign out?")) {
+               e.preventDefault();
+             }
+           }}>
               <button className="flex items-center px-3 py-2 w-full text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md transition-colors">
                 <LogOut className="mr-3 h-5 w-5 text-gray-400" />
                 Sign out
