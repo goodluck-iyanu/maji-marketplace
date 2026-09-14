@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useActionState, useRef } from 'react'
-import { ArrowLeft, Smartphone, Laptop, Headphones, Battery, Watch, Gamepad2, Camera, Tv, Home, Wifi, Mouse, Cpu, Check, Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Smartphone, Laptop, Headphones, Battery, Watch, Gamepad2, Camera, Tv, Home, Wifi, Mouse, Cpu, Check, Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { createGadgetProductAction } from '../actions'
 
