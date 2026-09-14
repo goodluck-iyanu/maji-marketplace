@@ -25,6 +25,49 @@ const PRODUCT_TYPES = [
 
 const TARGET_AUDIENCES = ['Men', 'Women', 'Unisex', 'Kids']
 
+const compressImage = async (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new window.Image()
+      img.src = event.target?.result as string
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const MAX_WIDTH = 1200
+        const MAX_HEIGHT = 1200
+        let width = img.width
+        let height = img.height
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width
+            width = MAX_WIDTH
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height
+            height = MAX_HEIGHT
+          }
+        }
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d')
+        ctx?.drawImage(img, 0, 0, width, height)
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+          } else {
+            reject(new Error('Canvas to Blob failed'))
+          }
+        }, 'image/jpeg', 0.8)
+      }
+      img.onerror = (e) => reject(e)
+    }
+    reader.onerror = (e) => reject(e)
+  })
+}
+
 export default function FashionProductBuilder({ productType }: { productType: string | null }) {
   const [currentStep, setCurrentStep] = useState(0)
   
@@ -48,6 +91,8 @@ export default function FashionProductBuilder({ productType }: { productType: st
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [state, formAction, isPending] = useActionState(createFashionProductAction, null)
+  const [isCompressing, setIsCompressing] = useState(false)
+  const isLoading = isPending || isCompressing
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
   const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))
@@ -129,7 +174,32 @@ export default function FashionProductBuilder({ productType }: { productType: st
         </div>
       )}
 
-      <form action={formAction}>
+      <form action={async (formData) => {
+        setIsCompressing(true)
+        try {
+          const compressedFormData = new FormData()
+          // Copy all non-image fields
+          for (const [key, value] of formData.entries()) {
+            if (key !== 'images') {
+              compressedFormData.append(key, value)
+            }
+          }
+          
+          // Compress and append all selected photos from state
+          for (const file of photos) {
+            try {
+              const compressed = await compressImage(file)
+              compressedFormData.append('images', compressed)
+            } catch (e) {
+              compressedFormData.append('images', file) // fallback to original
+            }
+          }
+          
+          formAction(compressedFormData)
+        } finally {
+          setIsCompressing(false)
+        }
+      }}>
         <input type="hidden" name="subCategory" value={subCategory} />
         <input type="hidden" name="targetAudience" value={JSON.stringify(targetAudience)} />
         <input type="hidden" name="material" value={material} />
@@ -471,10 +541,10 @@ export default function FashionProductBuilder({ productType }: { productType: st
           </div>
 
           <div className="flex justify-between gap-4">
-            <button type="button" disabled={isPending} onClick={handleBack} className="flex-1 py-4 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Back to Edit</button>
-            <button type="submit" disabled={isPending} className="flex-[2] bg-black text-white py-4 rounded-xl font-bold text-lg disabled:opacity-70 flex items-center justify-center">
-              {isPending ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : null}
-              {isPending ? 'Publishing...' : 'Publish Product'}
+            <button type="button" disabled={isLoading} onClick={handleBack} className="flex-1 py-4 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Back to Edit</button>
+            <button type="submit" disabled={isLoading} className="flex-[2] bg-black text-white py-4 rounded-xl font-bold text-lg disabled:opacity-70 flex items-center justify-center">
+              {isLoading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : null}
+              {isLoading ? 'Publishing...' : 'Publish Product'}
             </button>
           </div>
         </div>

@@ -18,3 +18,4 @@ export function ClearCartListener({ storeSlug }: { storeSlug: string }) {
 
   return null
 }
+
