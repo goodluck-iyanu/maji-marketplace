@@ -178,9 +178,9 @@ export default function FashionProductBuilder({ productType }: { productType: st
         setIsCompressing(true)
         try {
           const compressedFormData = new FormData()
-          // Copy all non-image fields
+          // Copy all non-photo fields
           for (const [key, value] of formData.entries()) {
-            if (key !== 'images') {
+            if (key !== 'photos') {
               compressedFormData.append(key, value)
             }
           }
@@ -189,9 +189,9 @@ export default function FashionProductBuilder({ productType }: { productType: st
           for (const file of photos) {
             try {
               const compressed = await compressImage(file)
-              compressedFormData.append('images', compressed)
+              compressedFormData.append('photos', compressed)
             } catch (e) {
-              compressedFormData.append('images', file) // fallback to original
+              compressedFormData.append('photos', file) // fallback to original
             }
           }
           
@@ -283,7 +283,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
             type="file" 
             name="photos" 
             multiple 
-            accept="image/*" 
+            accept="image/jpeg, image/png, image/webp" 
             className="hidden" 
             ref={fileInputRef}
             onChange={handlePhotoUpload}
