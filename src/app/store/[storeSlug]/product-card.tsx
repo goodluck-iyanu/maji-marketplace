@@ -111,8 +111,14 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block flex-1">
-          <h3 className="text-sm sm:text-base text-gray-800 line-clamp-2 leading-snug mb-2">{product.name}</h3>
+          <h3 className="text-sm sm:text-base font-medium text-gray-800 line-clamp-2 leading-snug mb-1">{product.name}</h3>
           
+          {product.description && (
+            <p className="text-xs text-gray-500 line-clamp-1 mb-2 opacity-80">
+              {product.description}
+            </p>
+          )}
+
           <div className="mb-3">
             <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
               ₦{Math.round(currentPrice).toLocaleString()}
