@@ -233,8 +233,8 @@ export async function createFashionProductAction(prevState: any, formData: FormD
   const variants = variantsJsonStr ? JSON.parse(variantsJsonStr) : []
 
   // Extract base price and stock from first variant or form directly
-  const basePrice = variants.length > 0 ? parseFloat(variants[0].price || 0) : parseFloat((formData.get('price') as string) || '0')
-  const baseStock = variants.length > 0 ? parseInt(variants[0].stock || 0) : parseInt((formData.get('stock') as string) || '0')
+  const basePrice = variants.length > 0 ? (Number(variants[0].price) || 0) : (Number(formData.get('price')) || 0)
+  const baseStock = variants.length > 0 ? (Number(variants[0].stock) || 0) : (Number(formData.get('stock')) || 0)
 
   // Insert product
   const { data: product, error: productError } = await supabase.from('products').insert({
