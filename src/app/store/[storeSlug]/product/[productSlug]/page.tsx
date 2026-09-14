@@ -105,6 +105,44 @@ export default async function ProductPage({
               {product.description || "No description provided."}
             </div>
 
+            {/* Smart Specifications Display */}
+            {(product.brand || product.condition || (product.attributes && Object.keys(product.attributes).length > 0)) && (
+              <div className="mb-8 p-6 rounded-2xl bg-black/5 border border-black/10">
+                <h3 className="font-semibold text-lg mb-4">Specifications</h3>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 text-sm">
+                  {product.sub_category && (
+                    <div>
+                      <dt className="opacity-60 text-xs uppercase tracking-wider mb-1">Category</dt>
+                      <dd className="font-medium">{product.sub_category}</dd>
+                    </div>
+                  )}
+                  {product.brand && (
+                    <div>
+                      <dt className="opacity-60 text-xs uppercase tracking-wider mb-1">Brand</dt>
+                      <dd className="font-medium">{product.brand}</dd>
+                    </div>
+                  )}
+                  {product.condition && (
+                    <div>
+                      <dt className="opacity-60 text-xs uppercase tracking-wider mb-1">Condition</dt>
+                      <dd className="font-medium">{product.condition}</dd>
+                    </div>
+                  )}
+                  {product.attributes && Object.entries(product.attributes).map(([key, value]) => (
+                    value ? (
+                      <div key={key}>
+                        <dt className="opacity-60 text-xs uppercase tracking-wider mb-1">
+                          {/* Add spaces to CamelCase keys like BatteryLife -> Battery Life */}
+                          {key.replace(/([A-Z])/g, ' $1').trim()}
+                        </dt>
+                        <dd className="font-medium">{String(value)}</dd>
+                      </div>
+                    ) : null
+                  ))}
+                </dl>
+              </div>
+            )}
+
             <div className="pt-8 border-t border-opacity-10">
               <AddToCartForm 
                 product={product}
