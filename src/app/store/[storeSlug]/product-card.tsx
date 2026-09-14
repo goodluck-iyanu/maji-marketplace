@@ -63,6 +63,20 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
   const colorOption = product.product_options?.find((opt: any) => opt.name.toLowerCase() === 'color')
   const colors = colorOption?.values || []
 
+  // Generate a smart specs summary string (e.g. "Apple • New • 256GB • 8GB RAM")
+  const specParts = []
+  if (product.brand) specParts.push(product.brand)
+  if (product.condition && product.condition !== 'New') specParts.push(product.condition) // Skip 'New' to save space if needed, but let's include it
+  else if (product.condition) specParts.push(product.condition)
+  
+  if (product.attributes) {
+    if (product.attributes.Storage) specParts.push(product.attributes.Storage)
+    if (product.attributes.RAM) specParts.push(`${product.attributes.RAM} RAM`)
+    if (product.attributes.Capacity) specParts.push(product.attributes.Capacity)
+    if (product.attributes.ScreenSize) specParts.push(product.attributes.ScreenSize)
+  }
+  const specsSummary = specParts.slice(0, 3).join(' • ')
+
   return (
     <div className="flex flex-col bg-white rounded-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow">
       
@@ -113,11 +127,15 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
         <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block flex-1">
           <h3 className="text-sm sm:text-base font-medium text-gray-800 line-clamp-2 leading-snug mb-1">{product.name}</h3>
           
-          {product.description && (
+          {specsSummary ? (
+            <p className="text-xs font-medium text-blue-600/80 line-clamp-1 mb-2">
+              {specsSummary}
+            </p>
+          ) : product.description ? (
             <p className="text-xs text-gray-500 line-clamp-1 mb-2 opacity-80">
               {product.description}
             </p>
-          )}
+          ) : null}
 
           <div className="mb-3">
             <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
