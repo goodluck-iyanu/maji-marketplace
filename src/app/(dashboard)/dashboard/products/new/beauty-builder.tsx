@@ -644,3 +644,4 @@ export default function BeautyProductBuilder({ productType }: { productType: str
     </div>
   )
 }
+
