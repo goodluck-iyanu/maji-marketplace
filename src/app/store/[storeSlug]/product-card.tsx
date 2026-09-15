@@ -70,10 +70,11 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
   else if (product.condition) specParts.push(product.condition)
   
   if (product.attributes) {
-    if (product.attributes.Storage) specParts.push(product.attributes.Storage)
-    if (product.attributes.RAM) specParts.push(`${product.attributes.RAM} RAM`)
-    if (product.attributes.Capacity) specParts.push(product.attributes.Capacity)
-    if (product.attributes.ScreenSize) specParts.push(product.attributes.ScreenSize)
+    Object.entries(product.attributes).slice(0, 3).forEach(([key, val]) => {
+      if (val && typeof val === 'string' && val.length < 20) {
+        specParts.push(key === 'RAM' ? `${val} RAM` : val)
+      }
+    })
   }
   const specsSummary = specParts.slice(0, 3).join(' • ')
 
