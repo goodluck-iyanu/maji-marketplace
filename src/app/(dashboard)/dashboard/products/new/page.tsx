@@ -43,6 +43,11 @@ export default async function NewProductPage() {
     return <GadgetsProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'health') {
+    const HealthProductBuilder = (await import('./health-builder')).default
+    return <HealthProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
