@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { createHealthProductAction } from '../actions'
 
 const STEPS = [
-  { id: 'type', label: 'Beauty Category' },
+  { id: 'type', label: 'Health Category' },
   { id: 'photos', label: 'Photos' },
   { id: 'specs', label: 'Details' },
   { id: 'basic', label: 'Basic Info' },
@@ -16,22 +16,26 @@ const STEPS = [
 ]
 
 const HEALTH_CATEGORIES = [
-  { id: 'skincare', label: 'Skincare', icon: Droplet, subs: ['Face Wash & Cleansers', 'Facial Moisturizers', 'Serums', 'Toners', 'Face Masks', 'Exfoliators & Scrubs', 'Sunscreen', 'Acne Treatment', 'Dark Spot Treatment', 'Body Lotion', 'Body Cream', 'Body Butter', 'Body Scrub', 'Body Oils', 'Hand & Foot Care', 'Lip Care', 'Other Skincare'] },
-  { id: 'haircare', label: 'Hair Care', icon: Scissors, subs: ['Shampoo', 'Conditioner', 'Hair Mask', 'Hair Oil', 'Hair Cream', 'Hair Gel', 'Edge Control', 'Hair Treatment', 'Hair Growth Products', 'Hair Relaxers', 'Hair Texturizers', 'Leave-in Conditioner', 'Hair Spray', 'Hair Dye & Color', 'Hair Styling Products', 'Other Hair Care'] },
-  { id: 'wigs', label: 'Wigs & Extensions', icon: Sparkles, subs: ['Wigs', 'Human Hair', 'Bone Straight', 'Water Wave', 'Body Wave', 'Deep Wave', 'Kinky Hair', 'Braids', 'Closures', 'Frontals', 'Hair Bundles', 'Ponytails', 'Crochet Hair', 'Synthetic Hair', 'Hair Extensions', 'Other Hair Extensions'] },
-  { id: 'makeup', label: 'Makeup', icon: Star, subs: ['Foundation', 'Concealer', 'Powder', 'Blush', 'Bronzer', 'Highlighter', 'Primer', 'Setting Spray', 'Lipstick', 'Lip Gloss', 'Lip Liner', 'Eyeliner', 'Mascara', 'Eyeshadow', 'Eyebrow Products', 'Makeup Remover', 'Makeup Palettes', 'Other Makeup'] },
-  { id: 'nails', label: 'Nails & Nail Care', icon: Heart, subs: ['Nail Polish', 'Gel Polish', 'Acrylic Powder', 'Nail Tips', 'Press-on Nails', 'Nail Glue', 'Nail Art', 'Nail Stickers', 'Nail Files', 'Nail Clippers', 'Cuticle Oil', 'Nail Kits', 'Other Nail Products'] },
-  { id: 'bath', label: 'Bath & Body', icon: Bath, subs: ['Body Wash', 'Shower Gel', 'Bar Soap', 'Bath Salts', 'Body Scrub', 'Body Lotion', 'Body Butter', 'Body Oil', 'Deodorant', 'Antiperspirant', 'Hand Wash', 'Hand Cream', 'Foot Care', 'Bath Accessories', 'Other Bath & Body'] },
-  { id: 'fragrance', label: 'Fragrance & Perfume', icon: Sun, subs: ['Perfume', 'Eau de Parfum', 'Eau de Toilette', 'Body Spray', 'Body Mist', 'Perfume Oil', 'Roll-on', 'Deodorant', 'Fragrance Gift Sets', 'Air/Fabric Fragrance', 'Other Fragrance'] },
-  { id: 'mens', label: 'Men’s Grooming', icon: Activity, subs: ['Beard Oil', 'Beard Balm', 'Beard Shampoo', 'Beard Growth Products', 'Shaving Cream', 'Shaving Gel', 'Razors', 'Aftershave', 'Hair Pomade', 'Hair Wax', 'Hair Styling Products', 'Men’s Skincare', 'Men’s Deodorant', 'Grooming Kits', 'Other Men’s Grooming'] },
-  { id: 'oral', label: 'Oral Care', icon: Smile, subs: ['Toothpaste', 'Toothbrushes', 'Electric Toothbrushes', 'Mouthwash', 'Dental Floss', 'Teeth Whitening', 'Whitening Strips', 'Tongue Cleaners', 'Oral Care Kits', 'Other Oral Care'] },
-  { id: 'tools', label: 'Beauty Tools', icon: Brush, subs: ['Hair Dryers', 'Hair Straighteners', 'Curling Irons', 'Hair Clippers', 'Trimmers', 'Facial Cleansing Devices', 'Facial Steamers', 'Massage Devices', 'Makeup Mirrors', 'Beauty Fridges', 'Nail Lamps', 'Nail Drills', 'Makeup Brushes', 'Makeup Sponges', 'Beauty Accessories', 'Other Beauty Devices'] },
-  { id: 'accessories', label: 'Beauty Accessories', icon: Briefcase, subs: ['Makeup Bags', 'Cosmetic Cases', 'Hair Brushes', 'Combs', 'Hair Clips', 'Hair Bands', 'Bonnets', 'Shower Caps', 'Mirrors', 'Beauty Organizers', 'Makeup Brushes', 'Beauty Sponges', 'Other Beauty Accessories'] },
-  { id: 'giftsets', label: 'Gift Sets', icon: Gift, subs: ['Skincare Sets', 'Makeup Sets', 'Perfume Sets', 'Hair Care Sets', 'Bath & Body Sets', 'Men’s Grooming Sets', 'Beauty Boxes', 'Self-Care Boxes', 'Custom Beauty Bundles', 'Other Beauty Gift Sets'] },
-  { id: 'other', label: 'Other', icon: MoreHorizontal, subs: ['Other Health & Wellness'] },
+  { id: 'supplements', label: 'Vitamins, Supplements & Nutrition', icon: Heart, subs: ['Multivitamins', 'Vitamin C', 'Vitamin D', 'Vitamin B Complex', 'Iron Supplements', 'Calcium Supplements', 'Magnesium Supplements', 'Zinc Supplements', 'Omega-3 & Fish Oil', 'Protein Supplements', 'Amino Acids', 'Herbal Supplements', 'Probiotics', 'Electrolytes', 'Children’s Supplements', 'Other Supplements'] },
+  { id: 'devices', label: 'Health Devices & Equipment', icon: Activity, subs: ['Blood Pressure Monitors', 'Blood Glucose Monitors', 'Thermometers', 'Pulse Oximeters', 'Nebulizers', 'Weighing Scales', 'Digital Scales', 'ECG Devices', 'Medical Monitoring Devices', 'Mobility Equipment', 'Medical Supports & Braces', 'Other Health Devices'] },
+  { id: 'first_aid', label: 'First Aid & Wound Care', icon: Briefcase, subs: ['First Aid Kits', 'Bandages', 'Adhesive Plasters', 'Gauze', 'Medical Tape', 'Antiseptic Products', 'Wound Dressings', 'Cotton Wool', 'Disposable Gloves', 'Hot & Cold Packs', 'First Aid Accessories', 'Other First Aid Products'] },
+  { id: 'fitness', label: 'Fitness & Exercise', icon: Dumbbell, subs: ['Dumbbells', 'Kettlebells', 'Resistance Bands', 'Yoga Mats', 'Exercise Mats', 'Skipping Ropes', 'Exercise Bikes', 'Treadmills', 'Gym Gloves', 'Weightlifting Belts', 'Foam Rollers', 'Exercise Balls', 'Home Gym Equipment', 'Fitness Accessories', 'Other Fitness Equipment'] },
+  { id: 'sports_nutrition', label: 'Sports Nutrition', icon: Droplet, subs: ['Protein Powder', 'Protein Bars', 'Mass Gainers', 'Pre-Workout', 'Electrolyte Products', 'Recovery Products', 'Creatine', 'Sports Drinks', 'Energy & Performance Products', 'Other Sports Nutrition'] },
+  { id: 'mental_wellness', label: 'Mental Wellness & Relaxation', icon: Sun, subs: ['Meditation Products', 'Stress Relief Products', 'Aromatherapy Products', 'Essential Oils', 'Diffusers', 'Relaxation Accessories', 'Wellness Journals', 'Wellness Kits', 'Other Wellness Products'] },
+  { id: 'sleep', label: 'Sleep & Recovery', icon: Star, subs: ['Pillows', 'Sleep Masks', 'Ear Plugs', 'Weighted Blankets', 'Mattress Toppers', 'Sleep Accessories', 'Recovery Tools', 'Other Sleep & Recovery Products'] },
+  { id: 'massage', label: 'Massage & Recovery', icon: Smile, subs: ['Massage Guns', 'Massage Rollers', 'Massage Balls', 'Foam Rollers', 'Massage Devices', 'Hot & Cold Therapy Products', 'Recovery Sleeves', 'Compression Products', 'Other Recovery Products'] },
+  { id: 'supports', label: 'Supports, Braces & Mobility', icon: Users, subs: ['Knee Supports', 'Ankle Supports', 'Wrist Supports', 'Elbow Supports', 'Back Supports', 'Waist Supports', 'Neck Supports', 'Compression Socks', 'Walking Canes', 'Crutches', 'Wheelchairs', 'Walking Frames', 'Mobility Accessories', 'Other Supports & Mobility Products'] },
+  { id: 'baby_health', label: 'Baby Health & Wellness', icon: Baby, subs: ['Baby Thermometers', 'Baby First Aid Kits', 'Baby Skincare', 'Baby Health Accessories', 'Baby Feeding Accessories', 'Baby Safety Products', 'Baby Wellness Kits', 'Other Baby Wellness Products'] },
+  { id: 'womens_health', label: 'Women’s Health & Wellness', icon: Heart, subs: ['Menstrual Products', 'Period Care Products', 'Maternity Wellness Products', 'Breastfeeding Accessories', 'Pregnancy Wellness Products', 'Women’s Supplements', 'Women’s Health Accessories', 'Other Women’s Wellness Products'] },
+  { id: 'mens_health', label: 'Men’s Health & Wellness', icon: Activity, subs: ['Men’s Supplements', 'Men’s Fitness Products', 'Men’s Personal Health Accessories', 'Men’s Wellness Kits', 'Other Men’s Wellness Products'] },
+  { id: 'hygiene', label: 'Hygiene & Wellness', icon: Bath, subs: ['Hand Sanitizers', 'Hand Wash', 'Disinfectants', 'Face Masks', 'Protective Gloves', 'Personal Hygiene Kits', 'Hygiene Accessories', 'Other Hygiene Products'] },
+  { id: 'natural', label: 'Natural & Herbal Wellness', icon: Leaf, subs: ['Herbal Teas', 'Herbal Products', 'Natural Oils', 'Natural Wellness Products', 'Traditional Wellness Products', 'Aromatherapy Products', 'Herbal Blends', 'Other Natural Wellness Products'] },
+  { id: 'self_care', label: 'Wellness & Self-Care', icon: Sparkles, subs: ['Wellness Kits', 'Self-Care Kits', 'Bath & Wellness Products', 'Aromatherapy Products', 'Relaxation Products', 'Wellness Accessories', 'Recovery Products', 'Other Self-Care Products'] },
+  { id: 'gifts', label: 'Health Gift Sets', icon: Gift, subs: ['Wellness Boxes', 'Fitness Bundles', 'Self-Care Boxes', 'First Aid Kits', 'Supplement Bundles', 'Recovery Kits', 'Men’s Wellness Sets', 'Women’s Wellness Sets', 'Other Wellness Bundles'] },
+  { id: 'other', label: 'Other', icon: MoreHorizontal, subs: ['Other Health & Wellness Products'] }
 ]
 
-const COMMON_OPTION_TYPES = ['Shade', 'Volume', 'Length', 'Hair Texture', 'Fragrance', 'Pack Size', 'Nail Shape', 'Size', 'Color']
+const COMMON_OPTION_TYPES = ['Resistance', 'Flavor', 'Count', 'Volume', 'Size', 'Color', 'Material', 'Weight', 'Scent']
 
 const compressImage = async (file: File): Promise<File> => {
   return new Promise((resolve, reject) => {
@@ -171,173 +175,149 @@ export default function HealthProductBuilder({ productType }: { productType: str
   const activeCategory = HEALTH_CATEGORIES.find(c => c.id === category)
 
   const renderDynamicSpecs = () => {
-    if (subCategory === 'Serums') {
+    if (subCategory === 'Resistance Bands') {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Skin Type</label>
-            <select value={attributes.SkinType || ''} onChange={e => handleAttributeChange('SkinType', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Skin Type</option>
-              <option value="All Skin Types">All Skin Types</option>
-              <option value="Dry">Dry</option>
-              <option value="Oily">Oily</option>
-              <option value="Combination">Combination</option>
-              <option value="Normal">Normal</option>
-              <option value="Sensitive">Sensitive</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Serum Purpose</label>
-            <select value={attributes.Purpose || ''} onChange={e => handleAttributeChange('Purpose', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Purpose</option>
-              <option value="Hydrating">Hydrating</option>
-              <option value="Brightening">Brightening</option>
-              <option value="Anti-aging">Anti-aging</option>
-              <option value="Acne Care">Acne Care</option>
-              <option value="Dark Spot Care">Dark Spot Care</option>
-              <option value="Exfoliating">Exfoliating</option>
+          <div><label className="block text-sm font-medium mb-1">Band Type</label>
+            <select value={attributes.BandType || ''} onChange={e => handleAttributeChange('BandType', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Band Type</option>
+              <option value="Loop Band">Loop Band</option>
+              <option value="Tube Band">Tube Band</option>
+              <option value="Resistance Band with Handles">Resistance Band with Handles</option>
+              <option value="Fabric Band">Fabric Band</option>
+              <option value="Therapy Band">Therapy Band</option>
               <option value="Other">Other</option>
             </select>
           </div>
-          <div><label className="block text-sm font-medium mb-1">Key Ingredient</label><input type="text" value={attributes.Ingredient || ''} onChange={e => handleAttributeChange('Ingredient', e.target.value)} placeholder="e.g. Vitamin C, Hyaluronic Acid" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        </div>
-      )
-    }
-    if (subCategory === 'Foundation') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Foundation Type</label>
-            <select value={attributes.Type || ''} onChange={e => handleAttributeChange('Type', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Type</option>
-              <option value="Liquid">Liquid</option>
-              <option value="Cream">Cream</option>
-              <option value="Powder">Powder</option>
-              <option value="Stick">Stick</option>
-              <option value="Serum Foundation">Serum Foundation</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Finish</label>
-            <select value={attributes.Finish || ''} onChange={e => handleAttributeChange('Finish', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Finish</option>
-              <option value="Matte">Matte</option>
-              <option value="Natural">Natural</option>
-              <option value="Dewy">Dewy</option>
-              <option value="Satin">Satin</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Coverage</label>
-            <select value={attributes.Coverage || ''} onChange={e => handleAttributeChange('Coverage', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Coverage</option>
+          <div><label className="block text-sm font-medium mb-1">Resistance Level</label>
+            <select value={attributes.ResistanceLevel || ''} onChange={e => handleAttributeChange('ResistanceLevel', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Resistance Level</option>
+              <option value="Extra Light">Extra Light</option>
               <option value="Light">Light</option>
               <option value="Medium">Medium</option>
-              <option value="Full">Full</option>
+              <option value="Heavy">Heavy</option>
+              <option value="Extra Heavy">Extra Heavy</option>
+              <option value="Custom">Custom</option>
             </select>
           </div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Set</label>
+            <select value={attributes.Set || ''} onChange={e => handleAttributeChange('Set', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Set</option>
+              <option value="Single Band">Single Band</option>
+              <option value="3-Piece Set">3-Piece Set</option>
+              <option value="5-Piece Set">5-Piece Set</option>
+              <option value="6-Piece Set">6-Piece Set</option>
+              <option value="11-Piece Set">11-Piece Set</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div><label className="block text-sm font-medium mb-1">Material</label><input type="text" value={attributes.Material || ''} onChange={e => handleAttributeChange('Material', e.target.value)} placeholder="e.g. Latex, Fabric" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Color</label><input type="text" value={attributes.Color || ''} onChange={e => handleAttributeChange('Color', e.target.value)} placeholder="e.g. Red, Blue, Multicolor" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
         </div>
       )
     }
-    if (subCategory === 'Wigs' || category === 'wigs') {
+
+    const lowerSub = subCategory.toLowerCase()
+
+    if (lowerSub.includes('supplements') || lowerSub.includes('vitamins') || lowerSub.includes('protein') || lowerSub.includes('pre-workout') || lowerSub.includes('creatine')) {
       return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Hair Type</label>
-            <select value={attributes.HairType || ''} onChange={e => handleAttributeChange('HairType', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Hair Type</option>
-              <option value="Human Hair">Human Hair</option>
-              <option value="Synthetic">Synthetic</option>
-              <option value="Human Hair Blend">Human Hair Blend</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Lace Type</label>
-            <select value={attributes.LaceType || ''} onChange={e => handleAttributeChange('LaceType', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Lace</option>
-              <option value="None">None</option>
-              <option value="Closure">Closure</option>
-              <option value="Frontal">Frontal</option>
-              <option value="4x4">4x4</option>
-              <option value="5x5">5x5</option>
-              <option value="13x4">13x4</option>
-              <option value="13x6">13x6</option>
+          <div><label className="block text-sm font-medium mb-1">Form</label>
+            <select value={attributes.Form || ''} onChange={e => handleAttributeChange('Form', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Form</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Powder">Powder</option>
+              <option value="Liquid">Liquid</option>
+              <option value="Gummy">Gummy</option>
+              <option value="Softgel">Softgel</option>
               <option value="Other">Other</option>
             </select>
           </div>
-          <div><label className="block text-sm font-medium mb-1">Density</label><input type="text" value={attributes.Density || ''} onChange={e => handleAttributeChange('Density', e.target.value)} placeholder="e.g. 150%, 200%" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        </div>
-      )
-    }
-    if (category === 'fragrance') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Fragrance Type</label>
-            <select value={attributes.Type || ''} onChange={e => handleAttributeChange('Type', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select Type</option>
-              <option value="Eau de Parfum">Eau de Parfum</option>
-              <option value="Eau de Toilette">Eau de Toilette</option>
-              <option value="Perfume Oil">Perfume Oil</option>
-              <option value="Body Mist">Body Mist</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Gender</label>
-            <select value={attributes.Gender || ''} onChange={e => handleAttributeChange('Gender', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select...</option>
-              <option value="Men">Men</option>
-              <option value="Women">Women</option>
-              <option value="Unisex">Unisex</option>
-            </select>
-          </div>
-          <div><label className="block text-sm font-medium mb-1">Scent Family</label><input type="text" value={attributes.ScentFamily || ''} onChange={e => handleAttributeChange('ScentFamily', e.target.value)} placeholder="e.g. Floral, Woody, Citrus" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        </div>
-      )
-    }
-    if (subCategory === 'Shampoo') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Hair Type</label><input type="text" value={attributes.HairType || ''} onChange={e => handleAttributeChange('HairType', e.target.value)} placeholder="e.g. All Hair Types, Curly, Dry" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Purpose</label><input type="text" value={attributes.Purpose || ''} onChange={e => handleAttributeChange('Purpose', e.target.value)} placeholder="e.g. Moisturizing, Anti-dandruff" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        </div>
-      )
-    }
-    if (subCategory === 'Press-on Nails') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Set Size</label><input type="text" value={attributes.SetSize || ''} onChange={e => handleAttributeChange('SetSize', e.target.value)} placeholder="e.g. 10 pieces, 24 pieces" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Custom Design?</label>
-            <select value={attributes.Customizable || ''} onChange={e => handleAttributeChange('Customizable', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
-              <option value="">Select...</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-          </div>
-        </div>
-      )
-    }
-    if (subCategory === 'Makeup Brushes') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Bristle Type</label><input type="text" value={attributes.BristleType || ''} onChange={e => handleAttributeChange('BristleType', e.target.value)} placeholder="e.g. Synthetic, Natural" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Number of Brushes</label><input type="text" value={attributes.Count || ''} onChange={e => handleAttributeChange('Count', e.target.value)} placeholder="e.g. 5, 10" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        </div>
-      )
-    }
-    if (subCategory === 'Body Lotion') {
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div><label className="block text-sm font-medium mb-1">Skin Type</label><input type="text" value={attributes.SkinType || ''} onChange={e => handleAttributeChange('SkinType', e.target.value)} placeholder="e.g. Dry, All Skin Types" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Purpose</label><input type="text" value={attributes.Purpose || ''} onChange={e => handleAttributeChange('Purpose', e.target.value)} placeholder="e.g. Moisturizing, Brightening" className="w-full border rounded-md px-3 py-2" /></div>
-          <div><label className="block text-sm font-medium mb-1">Brand</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Dietary Preference</label><input type="text" value={attributes.Dietary || ''} onChange={e => handleAttributeChange('Dietary', e.target.value)} placeholder="e.g. Vegan, Gluten-Free, Sugar-Free" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Count / Volume</label><input type="text" value={attributes.Count || ''} onChange={e => handleAttributeChange('Count', e.target.value)} placeholder="e.g. 60 capsules, 500g" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Flavor</label><input type="text" value={attributes.Flavor || ''} onChange={e => handleAttributeChange('Flavor', e.target.value)} placeholder="e.g. Vanilla, Unflavored" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
         </div>
       )
     }
     
-    // Generic Beauty Attributes
+    if (lowerSub.includes('monitors') || lowerSub.includes('devices') || lowerSub.includes('scales') || lowerSub.includes('thermometers')) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-medium mb-1">Power Source</label>
+            <select value={attributes.PowerSource || ''} onChange={e => handleAttributeChange('PowerSource', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Power Source</option>
+              <option value="Battery">Battery</option>
+              <option value="Rechargeable">Rechargeable</option>
+              <option value="Plug-in">Plug-in</option>
+              <option value="Manual">Manual</option>
+            </select>
+          </div>
+          <div><label className="block text-sm font-medium mb-1">Warranty</label><input type="text" value={attributes.Warranty || ''} onChange={e => handleAttributeChange('Warranty', e.target.value)} placeholder="e.g. 1 Year" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Features</label><input type="text" value={attributes.Features || ''} onChange={e => handleAttributeChange('Features', e.target.value)} placeholder="e.g. Bluetooth, Memory, Digital Display" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+        </div>
+      )
+    }
+
+    if (lowerSub.includes('supports') || lowerSub.includes('braces') || lowerSub.includes('socks') || lowerSub.includes('gloves') || lowerSub.includes('belts')) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-medium mb-1">Size</label>
+            <select value={attributes.Size || ''} onChange={e => handleAttributeChange('Size', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Size</option>
+              <option value="Small">Small</option>
+              <option value="Medium">Medium</option>
+              <option value="Large">Large</option>
+              <option value="Extra Large">Extra Large</option>
+              <option value="Adjustable">Adjustable</option>
+              <option value="One Size Fits All">One Size Fits All</option>
+            </select>
+          </div>
+          <div><label className="block text-sm font-medium mb-1">Material</label><input type="text" value={attributes.Material || ''} onChange={e => handleAttributeChange('Material', e.target.value)} placeholder="e.g. Neoprene, Nylon" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Body Part</label><input type="text" value={attributes.BodyPart || ''} onChange={e => handleAttributeChange('BodyPart', e.target.value)} placeholder="e.g. Knee, Wrist, Back" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+        </div>
+      )
+    }
+
+    if (lowerSub.includes('massage') || lowerSub.includes('rollers')) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-medium mb-1">Power Source</label>
+            <select value={attributes.PowerSource || ''} onChange={e => handleAttributeChange('PowerSource', e.target.value)} className="w-full border rounded-md px-3 py-2 bg-white">
+              <option value="">Select Power Source</option>
+              <option value="Rechargeable">Rechargeable</option>
+              <option value="Plug-in">Plug-in</option>
+              <option value="Manual">Manual</option>
+              <option value="Battery">Battery</option>
+            </select>
+          </div>
+          <div><label className="block text-sm font-medium mb-1">Speed Settings</label><input type="text" value={attributes.Speeds || ''} onChange={e => handleAttributeChange('Speeds', e.target.value)} placeholder="e.g. 3 Speeds, Variable" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Attachments</label><input type="text" value={attributes.Attachments || ''} onChange={e => handleAttributeChange('Attachments', e.target.value)} placeholder="e.g. 4 Heads included" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+        </div>
+      )
+    }
+
+    if (lowerSub.includes('yoga') || lowerSub.includes('mats')) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-medium mb-1">Thickness</label><input type="text" value={attributes.Thickness || ''} onChange={e => handleAttributeChange('Thickness', e.target.value)} placeholder="e.g. 6mm, 10mm" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Material</label><input type="text" value={attributes.Material || ''} onChange={e => handleAttributeChange('Material', e.target.value)} placeholder="e.g. TPE, PVC, Rubber" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Color</label><input type="text" value={attributes.Color || ''} onChange={e => handleAttributeChange('Color', e.target.value)} placeholder="e.g. Purple, Blue" className="w-full border rounded-md px-3 py-2" /></div>
+          <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
+        </div>
+      )
+    }
+
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div><label className="block text-sm font-medium mb-1">Brand (Optional)</label><input type="text" value={attributes.Brand || ''} onChange={e => handleAttributeChange('Brand', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
-        <div><label className="block text-sm font-medium mb-1">Additional Details</label><input type="text" value={attributes.Details || ''} onChange={e => handleAttributeChange('Details', e.target.value)} placeholder="e.g. Vegan, Cruelty-Free..." className="w-full border rounded-md px-3 py-2" /></div>
+        <div><label className="block text-sm font-medium mb-1">Weight / Volume</label><input type="text" value={attributes.Weight || ''} onChange={e => handleAttributeChange('Weight', e.target.value)} placeholder="e.g. 50ml, 100g" className="w-full border rounded-md px-3 py-2" /></div>
+        <div><label className="block text-sm font-medium mb-1">Key Ingredient / Material</label><input type="text" value={attributes.Ingredient || ''} onChange={e => handleAttributeChange('Ingredient', e.target.value)} className="w-full border rounded-md px-3 py-2" /></div>
       </div>
     )
   }
@@ -348,7 +328,7 @@ export default function HealthProductBuilder({ productType }: { productType: str
         <Link href="/dashboard/products" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
           <ArrowLeft className="h-6 w-6" />
         </Link>
-        <h1 className="text-2xl font-bold tracking-tight">Add Beauty Product</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Add Health Product</h1>
       </div>
 
       <div className="flex justify-between mb-8 overflow-x-auto pb-4 hide-scrollbar">
