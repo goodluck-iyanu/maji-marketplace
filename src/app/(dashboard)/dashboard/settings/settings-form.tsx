@@ -9,8 +9,47 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
   const [primaryColor, setPrimaryColor] = useState(settings.primary_color || '#000000')
   const [secondaryColor, setSecondaryColor] = useState(settings.secondary_color || '#ffffff')
 
+  const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = (event) => {
+        const img = new window.Image()
+        img.src = event.target?.result as string
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const MAX_WIDTH = 800 // sufficient for a logo
+          let width = img.width, height = img.height
+          if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH } } 
+          else { if (height > MAX_WIDTH) { width *= MAX_WIDTH / height; height = MAX_WIDTH } }
+          canvas.width = width; canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+          canvas.toBlob((blob) => {
+            if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+            else reject(new Error('Failed'))
+          }, 'image/jpeg', 0.8)
+        }
+      }
+      reader.onerror = error => reject(error)
+    })
+  }
+
+  const handleAction = async (formData: FormData) => {
+    const logoFile = formData.get('logo') as File | null
+    if (logoFile && logoFile.size > 0) {
+      try {
+        const compressed = await compressImage(logoFile)
+        formData.set('logo', compressed)
+      } catch (err) {
+        console.error('Compression failed', err)
+      }
+    }
+    formAction(formData)
+  }
+
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={handleAction} className="space-y-6">
       {state?.error && (
         <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium">
           {state.error}

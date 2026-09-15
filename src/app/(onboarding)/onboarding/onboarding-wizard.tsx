@@ -49,8 +49,54 @@ export function OnboardingWizard() {
   // UI State for socials
   const [activeSocial, setActiveSocial] = useState<string | null>(null)
   const [acknowledgedName, setAcknowledgedName] = useState(false)
+  const [isCompressing, setIsCompressing] = useState(false)
 
-  const [state, formAction, isPending] = useActionState(createStoreAction, null)
+  const compressImage = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = (event) => {
+        const img = new window.Image()
+        img.src = event.target?.result as string
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          const MAX_WIDTH = 800
+          let width = img.width, height = img.height
+          if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH } } 
+          else { if (height > MAX_WIDTH) { width *= MAX_WIDTH / height; height = MAX_WIDTH } }
+          canvas.width = width; canvas.height = height
+          const ctx = canvas.getContext('2d')
+          ctx?.drawImage(img, 0, 0, width, height)
+          canvas.toBlob((blob) => {
+            if (blob) resolve(new File([blob], file.name, { type: 'image/jpeg' }))
+            else reject(new Error('Failed'))
+          }, 'image/jpeg', 0.8)
+        }
+      }
+      reader.onerror = error => reject(error)
+    })
+  }
+
+  const [state, formAction, isServerPending] = useActionState(createStoreAction, null)
+  const isPending = isServerPending || isCompressing
+
+  const handleAction = async (formData: FormData) => {
+    setIsCompressing(true)
+    try {
+      const logo = formData.get('logo') as File | null
+      if (logo && logo.size > 0) {
+        try {
+          const compressed = await compressImage(logo)
+          formData.set('logo', compressed)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+      formAction(formData)
+    } finally {
+      setIsCompressing(false)
+    }
+  }
 
   useEffect(() => {
     if (state?.error) {
@@ -112,7 +158,7 @@ export function OnboardingWizard() {
   }
 
   return (
-    <form action={formAction} className="w-full max-w-2xl mx-auto">
+    <form action={handleAction} className="w-full max-w-2xl mx-auto">
       {renderProgress()}
 
       <div className={step === 'product_type' ? 'block' : 'hidden'}>
