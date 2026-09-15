@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useActionState, useRef } from 'react'
-import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Droplet, Sparkles, Scissors, Bath, Smile, Star, Heart, Sun, Activity, Brush, Briefcase, Gift, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Droplet, Sparkles, Scissors, Bath, Smile, Star, Heart, Sun, Activity, Brush, Briefcase, Gift, MoreHorizontal, Dumbbell, Users, Baby, Leaf } from 'lucide-react'
 import Link from 'next/link'
 import { createHealthProductAction } from '../actions'
 
