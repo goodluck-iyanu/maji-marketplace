@@ -31,6 +31,11 @@ export default async function NewProductPage() {
     return <FoodProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'beauty') {
+    const BeautyProductBuilder = (await import('./beauty-builder')).default
+    return <BeautyProductBuilder productType={store.product_type} />
+  }
+
   if (store.store_category === 'electronics') {
     const GadgetsProductBuilder = (await import('./gadgets-builder')).default
     return <GadgetsProductBuilder productType={store.product_type} />
