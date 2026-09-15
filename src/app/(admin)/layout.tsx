@@ -21,6 +21,8 @@ export default async function AdminLayout({
     .from('admin_users')
     .select('role')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!admin) {
@@ -72,4 +74,5 @@ export default async function AdminLayout({
     </div>
   )
 }
+
 

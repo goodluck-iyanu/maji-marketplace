@@ -15,6 +15,8 @@ export async function createProductAction(prevState: any, formData: FormData) {
     .from('stores')
     .select('id')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) return { error: 'Store not found' }
@@ -211,7 +213,7 @@ export async function createFashionProductAction(prevState: any, formData: FormD
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
-  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).single()
+  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single()
   if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
@@ -318,7 +320,7 @@ export async function createGadgetProductAction(prevState: any, formData: FormDa
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
-  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).single()
+  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single()
   if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
@@ -428,7 +430,7 @@ export async function createFoodProductAction(prevState: any, formData: FormData
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
-  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).single()
+  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single()
   if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
@@ -531,7 +533,7 @@ export async function createBeautyProductAction(prevState: any, formData: FormDa
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
-  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).single()
+  const { data: store } = await supabase.from('stores').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single()
   if (!store) return { error: 'Store not found' }
 
   const name = formData.get('name') as string
@@ -629,5 +631,6 @@ export async function createBeautyProductAction(prevState: any, formData: FormDa
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
+
 
 

@@ -52,6 +52,8 @@ export async function connectBankAccount(formData: FormData) {
     .from('stores')
     .select('id, name')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) throw new Error('Store not found')
@@ -92,4 +94,5 @@ export async function connectBankAccount(formData: FormData) {
 
   redirect('/dashboard/payments')
 }
+
 

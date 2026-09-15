@@ -14,6 +14,8 @@ export default async function SettingsPage() {
     .from('stores')
     .select('*, store_settings(*), social_links(*)')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) {
@@ -31,4 +33,5 @@ export default async function SettingsPage() {
     </div>
   )
 }
+
 

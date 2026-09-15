@@ -15,6 +15,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ pr
     .from('stores')
     .select('id, product_type')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) redirect('/dashboard')

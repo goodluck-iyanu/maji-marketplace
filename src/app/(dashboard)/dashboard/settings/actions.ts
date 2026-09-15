@@ -13,6 +13,8 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
     .from('stores')
     .select('id')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) return { error: 'Store not found' }
@@ -90,3 +92,4 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
   revalidatePath('/', 'layout')
   return { success: true }
 }
+

@@ -14,6 +14,8 @@ export default async function NewProductPage() {
     .from('stores')
     .select('product_type, store_category')
     .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single()
 
   if (!store) {
@@ -43,4 +45,5 @@ export default async function NewProductPage() {
 
   return <NewProductForm productType={store.product_type} />
 }
+
 
