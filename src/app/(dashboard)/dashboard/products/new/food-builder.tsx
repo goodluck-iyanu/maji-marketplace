@@ -10,7 +10,8 @@ const STEPS = [
   { id: 'photos', label: 'Photos' },
   { id: 'specs', label: 'Details' },
   { id: 'basic', label: 'Basic Info' },
-  { id: 'options', label: 'Variants (Weights, Sizes)' },
+  { id: 'options', label: 'Options' },
+  { id: 'variants', label: 'Variants' },
   { id: 'review', label: 'Review' },
 ]
 
