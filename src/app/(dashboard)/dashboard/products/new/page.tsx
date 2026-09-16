@@ -48,6 +48,11 @@ export default async function NewProductPage() {
     return <HealthProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'home') {
+    const HomeProductBuilder = (await import('./home-builder')).default
+    return <HomeProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
