@@ -63,6 +63,11 @@ export default async function NewProductPage() {
     return <BooksProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'kids') {
+    const KidsProductBuilder = (await import('./kids-builder')).default
+    return <KidsProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
