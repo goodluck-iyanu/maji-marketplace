@@ -53,6 +53,11 @@ export default async function NewProductPage() {
     return <HomeProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'jewelry') {
+    const JewelryProductBuilder = (await import('./jewelry-builder')).default
+    return <JewelryProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
