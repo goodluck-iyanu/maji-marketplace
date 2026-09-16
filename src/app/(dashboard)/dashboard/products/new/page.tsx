@@ -68,6 +68,11 @@ export default async function NewProductPage() {
     return <KidsProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'pets') {
+    const PetsProductBuilder = (await import('./pets-builder')).default
+    return <PetsProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
