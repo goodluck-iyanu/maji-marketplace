@@ -93,6 +93,11 @@ export default async function NewProductPage() {
     return <OfficeProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'other') {
+    const OtherProductBuilder = (await import('./other-builder')).default
+    return <OtherProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
