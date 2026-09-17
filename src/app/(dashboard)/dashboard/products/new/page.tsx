@@ -83,6 +83,11 @@ export default async function NewProductPage() {
     return <AgricultureProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'gaming') {
+    const GamingProductBuilder = (await import('./gaming-builder')).default
+    return <GamingProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
