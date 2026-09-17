@@ -73,6 +73,11 @@ export default async function NewProductPage() {
     return <PetsProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'tools') {
+    const ToolsProductBuilder = (await import('./tools-builder')).default
+    return <ToolsProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
