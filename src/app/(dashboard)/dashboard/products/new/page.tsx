@@ -88,6 +88,11 @@ export default async function NewProductPage() {
     return <GamingProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'office') {
+    const OfficeProductBuilder = (await import('./office-builder')).default
+    return <OfficeProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
