@@ -78,6 +78,11 @@ export default async function NewProductPage() {
     return <ToolsProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'agriculture') {
+    const AgricultureProductBuilder = (await import('./agriculture-builder')).default
+    return <AgricultureProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
