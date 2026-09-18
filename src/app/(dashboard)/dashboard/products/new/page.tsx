@@ -108,6 +108,11 @@ export default async function NewProductPage() {
     return <AutomotiveProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'arts') {
+    const ArtsProductBuilder = (await import('./arts-builder')).default
+    return <ArtsProductBuilder productType={store.product_type} />
+  }
+
   return <NewProductForm productType={store.product_type} />
 }
 
