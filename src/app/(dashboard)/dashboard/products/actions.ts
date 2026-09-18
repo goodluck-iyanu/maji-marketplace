@@ -2076,4 +2076,116 @@ export async function createArtsProductAction(prevState: any, formData: FormData
 
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
+}\n
+export async function createEbookProductAction(prevState: any, formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: store } = await supabase
+    .from('stores')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  if (!store) return { error: 'Store not found' }
+
+  const name = formData.get('name') as string
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + uuidv4().substring(0, 4)
+  const description = formData.get('description') as string
+  
+  // Format details for the description
+  const author = formData.get('author') as string
+  const language = formData.get('language') as string
+  const category = formData.get('category') as string
+  const format = formData.get('format') as string
+  const pages = formData.get('pages') as string
+  const includesStr = formData.get('includes') as string
+  
+  let includes = []
+  try {
+    includes = JSON.parse(includesStr || '[]')
+  } catch(e) {}
+  
+  let fullDescription = description
+  
+  let detailsObj: any = {}
+  if (author) detailsObj.Author = author
+  if (language) detailsObj.Language = language
+  if (category) detailsObj.Category = category
+  if (format) detailsObj.Format = format
+  if (pages) detailsObj.Pages = pages
+  if (includes.length > 0) detailsObj.Includes = includes.join(', ')
+  
+  if (Object.keys(detailsObj).length > 0) {
+    fullDescription += '\n\n**Ebook Details:**\n'
+    for (const [key, value] of Object.entries(detailsObj)) {
+      fullDescription += - **:** \n
+    }
+  }
+
+  const priceStr = formData.get('price') as string
+  const salePriceStr = formData.get('salePrice') as string
+  const price = salePriceStr ? parseFloat(salePriceStr) : parseFloat(priceStr || '0')
+
+  const digitalFileId = formData.get('digitalFileId') as string
+  const digitalFileSize = formData.get('digitalFileSize') as string
+  const downloadsAllowedStr = formData.get('downloadsAllowed') as string
+  const downloadsAllowed = parseInt(downloadsAllowedStr || '-1', 10)
+  
+  const productType = formData.get('productType') as string
+
+  // Insert product
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .insert({
+      store_id: store.id,
+      name,
+      slug,
+      description: fullDescription,
+      price,
+      is_digital: productType === 'digital',
+      stock: 1000000, // Unlimited for digital
+      digital_file_id: digitalFileId,
+      digital_file_size: digitalFileSize,
+      downloads_allowed: downloadsAllowed,
+      digital_format: format,
+    })
+    .select('id')
+    .single()
+
+  if (productError) {
+    console.error('Error creating product:', productError)
+    return { error: 'Failed to create product' }
+  }
+
+  // Upload cover photo
+  const coverPhoto = formData.get('coverPhoto') as File
+  if (coverPhoto && coverPhoto.size > 0) {
+    const ext = coverPhoto.name.split('.').pop()
+    const fileName = ${product.id}/cover-.
+    
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, coverPhoto)
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName)
+
+      await supabase
+        .from('product_images')
+        .insert({
+          product_id: product.id,
+          image_url: publicUrl,
+          display_order: 0
+        })
+    }
+  }
+
+  revalidatePath('/dashboard/products')
+  redirect('/dashboard/products')
 }
+\n

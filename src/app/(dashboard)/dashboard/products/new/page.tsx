@@ -98,6 +98,11 @@ export default async function NewProductPage() {
     return <OtherProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'ebooks') {
+    const EbooksProductBuilder = (await import('./ebooks-builder')).default
+    return <EbooksProductBuilder productType={store.product_type} />
+  }
+
   if (store.store_category === 'sports') {
     const SportsProductBuilder = (await import('./sports-builder')).default
     return <SportsProductBuilder productType={store.product_type} />
