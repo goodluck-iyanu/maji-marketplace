@@ -2122,7 +2122,7 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
   if (Object.keys(detailsObj).length > 0) {
     fullDescription += '\n\n**Ebook Details:**\n'
     for (const [key, value] of Object.entries(detailsObj)) {
-      fullDescription += - **:** \n
+      fullDescription += `\n- **${key}:** ${value}`
     }
   }
 
@@ -2229,7 +2229,7 @@ export async function createTemplateProductAction(prevState: any, formData: Form
   if (Object.keys(detailsObj).length > 0) {
     fullDescription += '\n\n**Template Details:**\n'
     for (const [key, value] of Object.entries(detailsObj)) {
-      fullDescription += - **:** \n
+      fullDescription += `\n- **${key}:** ${value}`
     }
   }
 
