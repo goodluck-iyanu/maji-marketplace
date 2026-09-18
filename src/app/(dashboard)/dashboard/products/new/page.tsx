@@ -103,6 +103,11 @@ export default async function NewProductPage() {
     return <EbooksProductBuilder productType={store.product_type} />
   }
 
+  if (store.store_category === 'templates') {
+    const TemplatesProductBuilder = (await import('./templates-builder')).default
+    return <TemplatesProductBuilder productType={store.product_type} />
+  }
+
   if (store.store_category === 'sports') {
     const SportsProductBuilder = (await import('./sports-builder')).default
     return <SportsProductBuilder productType={store.product_type} />

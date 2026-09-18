@@ -66,6 +66,12 @@ export async function GET(
       return NextResponse.json({ error: 'This is not a digital product or file is missing.' }, { status: 400 })
     }
 
+    // If it is a link instead of a Google Drive upload, just redirect them to the link
+    if (product.digital_file_id.startsWith('LINK::')) {
+      const url = product.digital_file_id.replace('LINK::', '')
+      return NextResponse.redirect(url)
+    }
+
     // 4. Connect to Google Drive
     const client = await getDriveAuth()
     const accessToken = await client.getAccessToken()
@@ -116,3 +122,4 @@ export async function GET(
     return NextResponse.json({ error: 'An unexpected error occurred during download.' }, { status: 500 })
   }
 }
+
