@@ -732,3 +732,4 @@ export default function TemplatesProductBuilder({ productType }: { productType: 
 
 with open('src/app/(dashboard)/dashboard/products/new/templates-builder.tsx', 'w', encoding='utf-8') as f:
     f.write(CODE)
+
