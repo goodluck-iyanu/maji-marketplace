@@ -108,6 +108,12 @@ export default async function NewProductPage() {
     return <TemplatesProductBuilder productType={store.product_type} />
   }
 
+  const genericDigitalCategories = ['graphics', 'photography', 'audio', 'video', 'software', 'courses', 'fonts', '3d', 'memberships', 'other_digital']
+  if (genericDigitalCategories.includes(store.store_category)) {
+    const DigitalProductBuilder = (await import('./digital-builder')).default
+    return <DigitalProductBuilder productType={store.product_type} storeCategory={store.store_category} />
+  }
+
   if (store.store_category === 'sports') {
     const SportsProductBuilder = (await import('./sports-builder')).default
     return <SportsProductBuilder productType={store.product_type} />
