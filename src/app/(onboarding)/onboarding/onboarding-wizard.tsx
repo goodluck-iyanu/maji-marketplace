@@ -27,6 +27,21 @@ const PHYSICAL_CATEGORIES = [
   { id: 'other', name: 'Other', icon: MoreHorizontal },
 ]
 
+const DIGITAL_CATEGORIES = [
+  { id: 'ebooks', name: 'Ebooks & Documents', icon: Book },
+  { id: 'templates', name: 'Templates & Productivity', icon: Briefcase },
+  { id: 'graphics', name: 'Graphics & Design', icon: Palette },
+  { id: 'photography', name: 'Photography & Presets', icon: Camera },
+  { id: 'audio', name: 'Music & Audio', icon: PlaySquare },
+  { id: 'video', name: 'Video & Motion', icon: Video },
+  { id: 'software', name: 'Software & Digital Tools', icon: Smartphone },
+  { id: 'courses', name: 'Courses & Learning', icon: Users },
+  { id: 'fonts', name: 'Fonts & Typography', icon: Hash },
+  { id: '3d', name: '3D & Game Assets', icon: Gamepad2 },
+  { id: 'memberships', name: 'Memberships & Digital Access', icon: Home },
+  { id: 'other_digital', name: 'Other', icon: MoreHorizontal },
+]
+
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('product_type')
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
@@ -110,11 +125,7 @@ export function OnboardingWizard() {
 
   const handleNextToCategory = () => {
     if (storeName.trim() && acknowledgedName) {
-      if (productType === 'physical') {
-        setStep('store_category')
-      } else {
-        setStep('social_links')
-      }
+      setStep('store_category')
     }
   }
 
@@ -125,9 +136,8 @@ export function OnboardingWizard() {
   const renderProgress = () => {
     if (step === 'product_type' || step === 'creating') return null
     
-    const isPhysical = productType === 'physical'
     let currentStepNum = 1
-    let totalSteps = isPhysical ? 3 : 2
+    const totalSteps = 3
     let msg = ''
 
     if (step === 'store_name_logo') {
@@ -137,7 +147,7 @@ export function OnboardingWizard() {
       currentStepNum = 2
       msg = 'Great — one important choice done.'
     } else if (step === 'social_links') {
-      currentStepNum = isPhysical ? 3 : 2
+      currentStepNum = 3
       msg = 'You’re almost there.'
     }
 
@@ -172,7 +182,10 @@ export function OnboardingWizard() {
           <div className="space-y-4 mt-8">
             <button
               type="button"
-              onClick={() => setProductType('physical')}
+              onClick={() => {
+                if (productType !== 'physical') setStoreCategory('')
+                setProductType('physical')
+              }}
               className={`w-full flex items-center p-4 border rounded-lg transition-colors ${
                 productType === 'physical' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -186,7 +199,10 @@ export function OnboardingWizard() {
             
             <button
               type="button"
-              onClick={() => setProductType('digital')}
+              onClick={() => {
+                if (productType !== 'digital') setStoreCategory('')
+                setProductType('digital')
+              }}
               className={`w-full flex items-center p-4 border rounded-lg transition-colors ${
                 productType === 'digital' ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -287,7 +303,7 @@ export function OnboardingWizard() {
         <input type="hidden" name="storeCategory" value={storeCategory} />
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-left mb-8 max-h-[60vh] overflow-y-auto p-1">
-          {PHYSICAL_CATEGORIES.map((cat) => (
+          {(productType === 'digital' ? DIGITAL_CATEGORIES : PHYSICAL_CATEGORIES).map((cat) => (
             <button
               key={cat.id}
               type="button"
