@@ -60,6 +60,7 @@ export default async function OrderConfirmationPage({
         
         <div className="border-t border-gray-100 pt-8">
           <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
+          <div className="space-y-4">
             {order.order_items.map((item: any) => {
               const isDigital = item.products.is_digital
               

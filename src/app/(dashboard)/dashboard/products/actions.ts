@@ -2076,7 +2076,8 @@ export async function createArtsProductAction(prevState: any, formData: FormData
 
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
-}\n
+}
+
 export async function createEbookProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
