@@ -1,6 +1,7 @@
 'use server'
 
 import { GoogleAuth } from 'google-auth-library'
+import { headers } from 'next/headers'
 
 // Helper to get Google Drive auth
 async function getDriveAuth() {
@@ -42,6 +43,15 @@ export async function getResumableUploadUrl(fileName: string, mimeType: string, 
       name: fileName,
       parents: [folderId],
     }
+    
+    // Get the exact origin the browser is using to prevent CORS mismatch
+    const headersList = await headers()
+    let requestOrigin = headersList.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng'
+    
+    // Force HTTPS in production just in case the env var accidentally has http://
+    if (!requestOrigin.startsWith('http://localhost') && requestOrigin.startsWith('http://')) {
+      requestOrigin = requestOrigin.replace('http://', 'https://')
+    }
 
     // Initialize resumable upload
     const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', {
@@ -51,7 +61,7 @@ export async function getResumableUploadUrl(fileName: string, mimeType: string, 
         'Content-Type': 'application/json',
         'X-Upload-Content-Type': mimeType,
         'X-Upload-Content-Length': fileSize.toString(),
-        'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng',
+        'Origin': requestOrigin,
       },
       body: JSON.stringify(metadata)
     })
