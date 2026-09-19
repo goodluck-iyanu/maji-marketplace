@@ -179,8 +179,11 @@ export default function DigitalProductBuilder({ productType, storeCategory }: { 
           if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100))
         })
         xhr.addEventListener('load', () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText).id)
-          else reject(new Error(`Upload failed`))
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText).id)
+          } else {
+            reject(new Error(`Upload failed with status ${xhr.status}. Details: ${xhr.responseText}`))
+          }
         })
         xhr.addEventListener('error', () => reject(new Error('Network error')))
       })

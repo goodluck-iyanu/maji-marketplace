@@ -18,7 +18,7 @@ async function getDriveAuth() {
       client_email: clientEmail,
       private_key: privateKey,
     },
-    scopes: ['https://www.googleapis.com/auth/drive.file'],
+    scopes: ['https://www.googleapis.com/auth/drive'],
   })
 
   return auth.getClient()

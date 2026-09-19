@@ -191,7 +191,7 @@ export default function TemplatesProductBuilder({ productType }: { productType: 
             const response = JSON.parse(xhr.responseText)
             resolve(response.id)
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`))
+            reject(new Error(`Upload failed with status ${xhr.status}. Details: ${xhr.responseText}`))
           }
         })
 

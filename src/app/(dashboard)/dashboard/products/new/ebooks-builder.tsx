@@ -193,7 +193,7 @@ export default function EbooksProductBuilder({ productType }: { productType: str
             // response.id contains the Google Drive File ID
             resolve(response.id)
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`))
+            reject(new Error(`Upload failed with status ${xhr.status}. Details: ${xhr.responseText}`))
           }
         })
 
