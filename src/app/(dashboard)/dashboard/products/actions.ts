@@ -2128,7 +2128,13 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
-  const price = salePriceStr ? parseFloat(salePriceStr) : parseFloat(priceStr || '0')
+  
+  const basePrice = parseFloat(priceStr || '0')
+  const salePrice = parseFloat(salePriceStr || '0')
+  
+  const discount_percent = salePrice > 0 && salePrice < basePrice 
+    ? Math.round(((basePrice - salePrice) / basePrice) * 100)
+    : 0
 
   const digitalFileId = formData.get('digitalFileId') as string
   const digitalFileSize = formData.get('digitalFileSize') as string
@@ -2145,7 +2151,8 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
       name,
       slug,
       description: fullDescription,
-      price,
+      price: basePrice,
+      discount_percent,
       is_digital: productType === 'digital',
       stock: 1000000, // Unlimited for digital
       digital_file_id: digitalFileId,
@@ -2235,7 +2242,13 @@ export async function createTemplateProductAction(prevState: any, formData: Form
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
-  const price = salePriceStr ? parseFloat(salePriceStr) : parseFloat(priceStr || '0')
+  
+  const basePrice = parseFloat(priceStr || '0')
+  const salePrice = parseFloat(salePriceStr || '0')
+  
+  const discount_percent = salePrice > 0 && salePrice < basePrice 
+    ? Math.round(((basePrice - salePrice) / basePrice) * 100)
+    : 0
 
   const deliveryType = formData.get('deliveryType') as string
   let digitalFileId = null
@@ -2260,7 +2273,8 @@ export async function createTemplateProductAction(prevState: any, formData: Form
       name,
       slug,
       description: fullDescription,
-      price,
+      price: basePrice,
+      discount_percent,
       is_digital: productType === 'digital',
       stock: 1000000,
       digital_file_id: digitalFileId,
@@ -2350,7 +2364,13 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
-  const price = salePriceStr ? parseFloat(salePriceStr) : parseFloat(priceStr || '0')
+  
+  const basePrice = parseFloat(priceStr || '0')
+  const salePrice = parseFloat(salePriceStr || '0')
+  
+  const discount_percent = salePrice > 0 && salePrice < basePrice 
+    ? Math.round(((basePrice - salePrice) / basePrice) * 100)
+    : 0
 
   const deliveryType = formData.get('deliveryType') as string
   let digitalFileId = null
@@ -2374,7 +2394,8 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
       name,
       slug,
       description: fullDescription,
-      price,
+      price: basePrice,
+      discount_percent,
       is_digital: productType === 'digital',
       stock: 1000000,
       digital_file_id: digitalFileId,
