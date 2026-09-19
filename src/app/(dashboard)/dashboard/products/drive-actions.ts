@@ -51,6 +51,7 @@ export async function getResumableUploadUrl(fileName: string, mimeType: string, 
         'Content-Type': 'application/json',
         'X-Upload-Content-Type': mimeType,
         'X-Upload-Content-Length': fileSize.toString(),
+        'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng',
       },
       body: JSON.stringify(metadata)
     })
