@@ -240,6 +240,19 @@ export default function EbooksProductBuilder({ productType }: { productType: str
       formData.append('digitalFileId', uploadedFileId)
       formData.append('digitalFileSize', ebookFile ? formatFileSize(ebookFile.size) : 'Unknown')
       
+      // Fix multi-step form data loss: append all state variables to formData because they aren't in the DOM on Step 6
+      formData.set('name', name)
+      formData.set('description', description)
+      formData.set('author', author)
+      formData.set('language', language)
+      formData.set('category', category)
+      formData.set('format', format)
+      formData.set('pages', pages)
+      formData.set('includes', JSON.stringify(includes))
+      formData.set('price', isFree ? '0' : price || '0')
+      formData.set('salePrice', salePrice || '0')
+      formData.set('downloadsAllowed', downloadsAllowed)
+
       formAction(formData)
     } catch (error) {
       console.error(error)

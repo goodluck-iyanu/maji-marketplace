@@ -249,6 +249,18 @@ export default function TemplatesProductBuilder({ productType }: { productType: 
         formData.set('format', 'LINK')
       }
       
+      // Fix multi-step form data loss
+      formData.set('name', name)
+      formData.set('description', description)
+      formData.set('category', category)
+      formData.set('deliveryType', deliveryType)
+      formData.set('templateLink', templateLink)
+      formData.set('app', app)
+      formData.set('includes', JSON.stringify(includes))
+      formData.set('price', isFree ? '0' : price || '0')
+      formData.set('salePrice', salePrice || '0')
+      formData.set('downloadsAllowed', downloadsAllowed)
+
       formAction(formData)
     } catch (error) {
       console.error(error)
