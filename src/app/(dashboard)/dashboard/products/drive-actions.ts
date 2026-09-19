@@ -1,27 +1,22 @@
 'use server'
 
-import { GoogleAuth } from 'google-auth-library'
+import { OAuth2Client } from 'google-auth-library'
 import { headers } from 'next/headers'
 
-// Helper to get Google Drive auth
+// Helper to get Google Drive auth using OAuth 2.0 (User Quota)
 async function getDriveAuth() {
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-  // The private key from the environment variable might have literal \n that we need to convert to actual newlines
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN
 
-  if (!clientEmail || !privateKey) {
-    throw new Error('Google Drive credentials are not configured.')
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Google Drive OAuth credentials are not configured.')
   }
 
-  const auth = new GoogleAuth({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey,
-    },
-    scopes: ['https://www.googleapis.com/auth/drive'],
-  })
+  const auth = new OAuth2Client(clientId, clientSecret)
+  auth.setCredentials({ refresh_token: refreshToken })
 
-  return auth.getClient()
+  return auth
 }
 
 /**

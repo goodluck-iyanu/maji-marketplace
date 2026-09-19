@@ -1,25 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { GoogleAuth } from 'google-auth-library'
+import { OAuth2Client } from 'google-auth-library'
 
-// Initialize Google Drive Auth
+// Helper to get Google Drive auth using OAuth 2.0
 async function getDriveAuth() {
-  const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+  const clientId = process.env.GOOGLE_CLIENT_ID
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET
+  const refreshToken = process.env.GOOGLE_REFRESH_TOKEN
 
-  if (!clientEmail || !privateKey) {
-    throw new Error('Google Drive credentials are not configured.')
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Google Drive OAuth credentials are not configured.')
   }
 
-  const auth = new GoogleAuth({
-    credentials: {
-      client_email: clientEmail,
-      private_key: privateKey,
-    },
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-  })
+  const auth = new OAuth2Client(clientId, clientSecret)
+  auth.setCredentials({ refresh_token: refreshToken })
 
-  return auth.getClient()
+  return auth
 }
 
 export async function GET(
