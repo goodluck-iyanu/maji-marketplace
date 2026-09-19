@@ -2165,7 +2165,7 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
   const coverPhoto = formData.get('coverPhoto') as File
   if (coverPhoto && coverPhoto.size > 0) {
     const ext = coverPhoto.name.split('.').pop()
-    const fileName = ${product.id}/cover-.
+    const fileName = `${product.id}/cover-${uuidv4()}.${ext}`
     
     const { error: uploadError } = await supabase.storage
       .from('product-images')
@@ -2189,7 +2189,7 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
-\n\n
+
 export async function createTemplateProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
@@ -2279,7 +2279,7 @@ export async function createTemplateProductAction(prevState: any, formData: Form
   const coverPhoto = formData.get('coverPhoto') as File
   if (coverPhoto && coverPhoto.size > 0) {
     const ext = coverPhoto.name.split('.').pop()
-    const fileName = ${product.id}/cover-.
+    const fileName = `${product.id}/cover-${uuidv4()}.${ext}`
     
     const { error: uploadError } = await supabase.storage
       .from('product-images')
@@ -2303,7 +2303,7 @@ export async function createTemplateProductAction(prevState: any, formData: Form
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
-\n\n
+
 export async function createDigitalProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
@@ -2417,4 +2417,4 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
-\n
+

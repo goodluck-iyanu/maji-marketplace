@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useActionState, useRef } from 'react'
-import { ArrowLeft, ArrowRight, Layout, Sparkles, Check, Upload, X, Loader2, Image as ImageIcon, FileText, File } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Layout, Sparkles, Check, Upload, X, Loader2, Image as ImageIcon, FileText, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { createTemplateProductAction } from '../actions'
 import { getResumableUploadUrl } from '../drive-actions'
