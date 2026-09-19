@@ -681,7 +681,17 @@ export default function EbooksProductBuilder({ productType }: { productType: str
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <form action={handleSubmit}>
+        <form 
+          action={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+              e.preventDefault();
+              if (currentStep < STEPS.length - 1 && !isNextDisabled()) {
+                handleNext();
+              }
+            }
+          }}
+        >
           {/* Hidden inputs to preserve state across steps */}
           <input type="hidden" name="productType" value={productType || 'digital'} />
           

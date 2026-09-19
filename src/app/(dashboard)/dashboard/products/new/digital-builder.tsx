@@ -460,7 +460,17 @@ export default function DigitalProductBuilder({ productType, storeCategory }: { 
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <form action={handleSubmit}>
+        <form 
+          action={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
+              e.preventDefault();
+              if (currentStep < STEPS.length - 1 && !isNextDisabled()) {
+                handleNext();
+              }
+            }
+          }}
+        >
           <input type="hidden" name="productType" value={productType || 'digital'} />
           <input type="hidden" name="storeCategory" value={storeCategory} />
           
