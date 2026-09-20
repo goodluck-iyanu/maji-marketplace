@@ -39,13 +39,14 @@ export default async function OrderConfirmationPage({
   if (!order) notFound()
 
   const isPaid = order.payment_status === 'paid'
+  const hasDigitalProducts = order.order_items.some((item: any) => item.products.is_digital)
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 px-4">
       <ClearCartListener storeSlug={storeSlug} />
       <div className="max-w-2xl w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
           {isPaid ? (
-            <OrderSuccess storeSlug={storeSlug} />
+            <OrderSuccess storeSlug={storeSlug} autoRedirectSeconds={hasDigitalProducts ? 30 : 5} />
           ) : (
             <div className="flex flex-col items-center text-center mb-8">
               <div className="h-16 w-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4">

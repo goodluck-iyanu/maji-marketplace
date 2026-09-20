@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useCart } from '../../cart-context'
 
-export function OrderSuccess({ storeSlug }: { storeSlug: string }) {
+export function OrderSuccess({ storeSlug, autoRedirectSeconds = 5 }: { storeSlug: string, autoRedirectSeconds?: number }) {
   const router = useRouter()
-  const [countdown, setCountdown] = useState(5)
+  const [countdown, setCountdown] = useState(autoRedirectSeconds)
   const { clearCart } = useCart()
 
   useEffect(() => {
