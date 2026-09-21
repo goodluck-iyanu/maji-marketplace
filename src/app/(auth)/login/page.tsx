@@ -49,16 +49,29 @@ export default async function LoginPage({
           Email
         </label>
         <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          className="rounded-md px-4 py-2 bg-inherit border mb-4"
           name="email"
+          type="email"
           placeholder="you@example.com"
           required
         />
+        
+        <label className="text-md" htmlFor="phone">
+          Phone Number (Required)
+        </label>
+        <input
+          className="rounded-md px-4 py-2 bg-inherit border mb-6"
+          name="phone"
+          type="tel"
+          placeholder="e.g. +2348012345678"
+          required
+        />
+
         <button
           formAction={login}
           className="bg-black text-white rounded-md px-4 py-2 mb-2 hover:bg-gray-800 transition-colors"
         >
-          Continue with Email (Magic Link)
+          Send Magic Link
         </button>
       </form>
         

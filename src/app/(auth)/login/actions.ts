@@ -9,12 +9,16 @@ export async function login(formData: FormData) {
 
   const data = {
     email: formData.get('email') as string,
+    phone: formData.get('phone') as string,
   }
 
   const { error } = await supabase.auth.signInWithOtp({
     email: data.email,
     options: {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      data: {
+        phone: data.phone, // Save the phone number to the user's auth metadata
+      }
     }
   })
 
