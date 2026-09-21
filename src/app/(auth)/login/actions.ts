@@ -23,10 +23,10 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    redirect(`/login?error=${error.message}`)
+    return { error: error.message }
   }
 
-  redirect('/login?message=Check email to continue sign in process')
+  return { success: true }
 }
 
 export async function signInWithGoogle() {

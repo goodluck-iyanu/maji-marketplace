@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { login, signInWithGoogle } from './actions'
+import { signInWithGoogle } from './actions'
 import { Store } from 'lucide-react'
+import { LoginForm } from './login-form'
 
 export default async function LoginPage({
   searchParams,
@@ -44,36 +45,7 @@ export default async function LoginPage({
         </p>
       </div>
 
-      <form className="flex flex-col w-full justify-center gap-2 text-foreground">
-        <label className="text-md" htmlFor="email">
-          Email
-        </label>
-        <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-4"
-          name="email"
-          type="email"
-          placeholder="you@example.com"
-          required
-        />
-        
-        <label className="text-md" htmlFor="phone">
-          Phone Number (Required)
-        </label>
-        <input
-          className="rounded-md px-4 py-2 bg-inherit border mb-6"
-          name="phone"
-          type="tel"
-          placeholder="e.g. +2348012345678"
-          required
-        />
-
-        <button
-          formAction={login}
-          className="bg-black text-white rounded-md px-4 py-2 mb-2 hover:bg-gray-800 transition-colors"
-        >
-          Send Magic Link
-        </button>
-      </form>
+      <LoginForm />
         
       <div className="relative my-4">
         <div className="absolute inset-0 flex items-center">
@@ -87,7 +59,7 @@ export default async function LoginPage({
       <form className="flex flex-col w-full justify-center gap-2 text-foreground">
         <button
           formAction={signInWithGoogle}
-          className="border border-gray-300 bg-white text-black rounded-md px-4 py-2 mb-2 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+          className="border border-gray-300 bg-white text-black rounded-md px-4 py-2 mb-2 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 font-medium"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -110,19 +82,6 @@ export default async function LoginPage({
           Google
         </button>
       </form>
-
-      <div className="w-full mt-2">
-        {error && (
-          <p className="mt-4 p-4 bg-red-50 text-red-600 text-center text-sm border-red-200 border rounded-md">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p className="mt-4 p-4 bg-green-50 text-green-700 text-center text-sm border-green-200 border rounded-md">
-            {message}
-          </p>
-        )}
-      </div>
     </div>
   )
 }
