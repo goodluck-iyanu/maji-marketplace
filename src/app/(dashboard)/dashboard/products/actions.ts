@@ -2109,22 +2109,7 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
     includes = JSON.parse(includesStr || '[]')
   } catch(e) {}
   
-  let fullDescription = description
-  
-  let detailsObj: any = {}
-  if (author) detailsObj.Author = author
-  if (language) detailsObj.Language = language
-  if (category) detailsObj.Category = category
-  if (format) detailsObj.Format = format
-  if (pages) detailsObj.Pages = pages
-  if (includes.length > 0) detailsObj.Includes = includes.join(', ')
-  
-  if (Object.keys(detailsObj).length > 0) {
-    fullDescription += '\n\n**Ebook Details:**\n'
-    for (const [key, value] of Object.entries(detailsObj)) {
-      fullDescription += `\n- **${key}:** ${value}`
-    }
-  }
+
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
@@ -2150,7 +2135,7 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
       store_id: store.id,
       name,
       slug,
-      description: fullDescription,
+      description,
       price: basePrice,
       discount_percent,
       is_digital: productType === 'digital',
@@ -2225,20 +2210,7 @@ export async function createTemplateProductAction(prevState: any, formData: Form
     includes = JSON.parse(includesStr || '[]')
   } catch(e) {}
   
-  let fullDescription = description
-  
-  let detailsObj: any = {}
-  if (category) detailsObj.Category = category
-  if (app) detailsObj.Software = app
-  if (format && format !== 'LINK') detailsObj.Format = format
-  if (includes.length > 0) detailsObj.Includes = includes.join(', ')
-  
-  if (Object.keys(detailsObj).length > 0) {
-    fullDescription += '\n\n**Template Details:**\n'
-    for (const [key, value] of Object.entries(detailsObj)) {
-      fullDescription += `\n- **${key}:** ${value}`
-    }
-  }
+
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
@@ -2272,7 +2244,7 @@ export async function createTemplateProductAction(prevState: any, formData: Form
       store_id: store.id,
       name,
       slug,
-      description: fullDescription,
+      description,
       price: basePrice,
       discount_percent,
       is_digital: productType === 'digital',
@@ -2347,20 +2319,7 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
     includes = JSON.parse(includesStr || '[]')
   } catch(e) {}
   
-  let fullDescription = description
-  
-  let detailsObj: any = {}
-  if (category) detailsObj.Category = category
-  if (app && app !== 'None' && app !== 'Any') detailsObj.Software = app
-  if (format && format !== 'LINK' && format !== 'OTHER') detailsObj.Format = format
-  if (includes.length > 0) detailsObj.Includes = includes.join(', ')
-  
-  if (Object.keys(detailsObj).length > 0) {
-    fullDescription += '\n\n**Product Details:**'
-    for (const [key, value] of Object.entries(detailsObj)) {
-      fullDescription += `\n- **${key}:** ${value}`
-    }
-  }
+
 
   const priceStr = formData.get('price') as string
   const salePriceStr = formData.get('salePrice') as string
@@ -2393,7 +2352,7 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
       store_id: store.id,
       name,
       slug,
-      description: fullDescription,
+      description,
       price: basePrice,
       discount_percent,
       is_digital: productType === 'digital',
