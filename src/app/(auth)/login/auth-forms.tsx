@@ -21,11 +21,57 @@ type AuthMode =
   | 'new-password'
   | 'success'
 
+// Shared input style
+const inputClass =
+  'w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-black focus:border-black focus:bg-white outline-none transition-all text-sm'
+
+const btnPrimary =
+  'w-full bg-black text-white rounded-lg px-4 py-3 hover:bg-gray-800 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
+
 function maskEmail(email: string) {
   if (!email.includes('@')) return email
   const [name, domain] = email.split('@')
   if (name.length <= 2) return name[0] + '***@' + domain
   return name[0] + name[1] + '***@' + domain
+}
+
+// =====================================================
+// PASSWORD INPUT — defined OUTSIDE AuthForms to avoid
+// keyboard dismissal on mobile (stable React identity)
+// =====================================================
+function PasswordInput({
+  value,
+  onChange,
+  placeholder = 'Enter password',
+  showPassword,
+  onToggle,
+}: {
+  value: string
+  onChange: (v: string) => void
+  placeholder?: string
+  showPassword: boolean
+  onToggle: () => void
+}) {
+  return (
+    <div className="relative">
+      <input
+        type={showPassword ? 'text' : 'password'}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={inputClass + ' pr-12'}
+        autoComplete="off"
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        tabIndex={-1}
+      >
+        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+      </button>
+    </div>
+  )
 }
 
 // =====================================================
@@ -122,6 +168,7 @@ export function AuthForms({
   const [showPassword, setShowPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
 
+  const togglePassword = () => setShowPassword((p) => !p)
   const clearError = () => setError('')
 
   const goTo = (next: AuthMode) => {
@@ -135,15 +182,12 @@ export function AuthForms({
 
   const handleSignUp = () => {
     clearError()
-    if (!email || !phone || !password || !confirmPassword) {
+    if (!email || !phone || !password || !confirmPassword)
       return setError('Please fill in all fields.')
-    }
-    if (password.length < 6) {
+    if (password.length < 6)
       return setError('Password must be at least 6 characters.')
-    }
-    if (password !== confirmPassword) {
+    if (password !== confirmPassword)
       return setError('Passwords do not match.')
-    }
 
     startTransition(async () => {
       const fd = new FormData()
@@ -247,65 +291,16 @@ export function AuthForms({
     })
   }
 
-  // ---------- SHARED UI PIECES ----------
-
-  const inputClass =
-    'w-full rounded-lg px-4 py-3 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-black focus:border-black focus:bg-white outline-none transition-all text-sm'
-
-  const btnPrimary =
-    'w-full bg-black text-white rounded-lg px-4 py-3 hover:bg-gray-800 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
-
-  const PasswordField = ({
-    val,
-    set,
-    placeholder = 'Enter password',
-  }: {
-    val: string
-    set: (v: string) => void
-    placeholder?: string
-  }) => (
-    <div className="relative">
-      <input
-        type={showPassword ? 'text' : 'password'}
-        value={val}
-        onChange={(e) => set(e.target.value)}
-        placeholder={placeholder}
-        className={inputClass + ' pr-12'}
-        required
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-      >
-        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-      </button>
-    </div>
-  )
-
-  const ErrorBox = () =>
-    error ? (
-      <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg mt-4">
-        {error}
-      </div>
-    ) : null
-
-  const BackBtn = ({ to, label = 'Back' }: { to: AuthMode; label?: string }) => (
-    <button
-      onClick={() => goTo(to)}
-      className="flex items-center text-sm text-gray-500 hover:text-black transition-colors"
-    >
-      <ArrowLeft className="h-4 w-4 mr-1" /> {label}
-    </button>
-  )
-
-  // ---------- SCREENS ----------
+  // ---------- RENDER ----------
 
   // ===== VERIFY SIGNUP OTP =====
   if (mode === 'verify-signup') {
     return (
       <div className="space-y-6">
-        <BackBtn to="signup" />
+        <button onClick={() => goTo('signup')} className="flex items-center text-sm text-gray-500 hover:text-black transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
+        </button>
+
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
             <Shield className="h-8 w-8" />
@@ -322,18 +317,21 @@ export function AuthForms({
 
         <button onClick={handleVerifySignup} disabled={isPending || otp.length !== 6} className={btnPrimary}>
           {isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Verifying...
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
           ) : (
             'Verify & Continue'
           )}
         </button>
 
         <p className="text-xs text-center text-gray-400">
-          Didn&apos;t receive the code? Check your spam folder or wait 60 seconds to request again.
+          Didn&apos;t receive the code? Check your spam folder or wait 60s to request again.
         </p>
-        <ErrorBox />
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
       </div>
     )
   }
@@ -342,7 +340,10 @@ export function AuthForms({
   if (mode === 'forgot-password') {
     return (
       <div className="space-y-6">
-        <BackBtn to="login" label="Back to login" />
+        <button onClick={() => goTo('login')} className="flex items-center text-sm text-gray-500 hover:text-black transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back to login
+        </button>
+
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="h-16 w-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center">
             <KeyRound className="h-8 w-8" />
@@ -368,14 +369,17 @@ export function AuthForms({
 
         <button onClick={handleForgotPassword} disabled={isPending || !identifier} className={btnPrimary}>
           {isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Sending code...
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Sending code...</>
           ) : (
             'Send Reset Code'
           )}
         </button>
-        <ErrorBox />
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
       </div>
     )
   }
@@ -384,7 +388,10 @@ export function AuthForms({
   if (mode === 'verify-reset') {
     return (
       <div className="space-y-6">
-        <BackBtn to="forgot-password" />
+        <button onClick={() => goTo('forgot-password')} className="flex items-center text-sm text-gray-500 hover:text-black transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
+        </button>
+
         <div className="flex flex-col items-center text-center space-y-3">
           <div className="h-16 w-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
             <Shield className="h-8 w-8" />
@@ -401,16 +408,19 @@ export function AuthForms({
 
         <button onClick={handleVerifyReset} disabled={isPending || otp.length !== 6} className={btnPrimary}>
           {isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Verifying...
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
           ) : (
             'Verify Code'
           )}
         </button>
 
         <p className="text-xs text-center text-gray-400">Didn&apos;t receive it? Check your spam folder.</p>
-        <ErrorBox />
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
       </div>
     )
   }
@@ -430,11 +440,23 @@ export function AuthForms({
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">New Password</label>
-            <PasswordField val={newPassword} set={setNewPassword} placeholder="At least 6 characters" />
+            <PasswordInput
+              value={newPassword}
+              onChange={setNewPassword}
+              placeholder="At least 6 characters"
+              showPassword={showPassword}
+              onToggle={togglePassword}
+            />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">Confirm New Password</label>
-            <PasswordField val={confirmNewPassword} set={setConfirmNewPassword} placeholder="Re-enter password" />
+            <PasswordInput
+              value={confirmNewPassword}
+              onChange={setConfirmNewPassword}
+              placeholder="Re-enter password"
+              showPassword={showPassword}
+              onToggle={togglePassword}
+            />
           </div>
         </div>
 
@@ -444,14 +466,17 @@ export function AuthForms({
           className={btnPrimary}
         >
           {isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> Updating...
-            </>
+            <><Loader2 className="h-4 w-4 animate-spin" /> Updating...</>
           ) : (
             'Update Password'
           )}
         </button>
-        <ErrorBox />
+
+        {error && (
+          <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg">
+            {error}
+          </div>
+        )}
       </div>
     )
   }
@@ -508,25 +533,31 @@ export function AuthForms({
               onChange={(e) => setIdentifier(e.target.value)}
               placeholder="you@example.com or +234..."
               className={inputClass}
-              required
             />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">Password</label>
-            <PasswordField val={password} set={setPassword} />
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              showPassword={showPassword}
+              onToggle={togglePassword}
+            />
           </div>
 
           <div className="flex justify-end">
-            <button type="button" onClick={() => goTo('forgot-password')} className="text-sm text-gray-500 hover:text-black transition-colors">
+            <button
+              type="button"
+              onClick={() => goTo('forgot-password')}
+              className="text-sm text-gray-500 hover:text-black transition-colors"
+            >
               Forgot password?
             </button>
           </div>
 
           <button onClick={handleSignIn} disabled={isPending} className={btnPrimary}>
             {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Signing in...
-              </>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Signing in...</>
             ) : (
               'Sign In'
             )}
@@ -545,7 +576,6 @@ export function AuthForms({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               className={inputClass}
-              required
             />
           </div>
           <div>
@@ -556,23 +586,32 @@ export function AuthForms({
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+2348012345678"
               className={inputClass}
-              required
             />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">Password</label>
-            <PasswordField val={password} set={setPassword} placeholder="At least 6 characters" />
+            <PasswordInput
+              value={password}
+              onChange={setPassword}
+              placeholder="At least 6 characters"
+              showPassword={showPassword}
+              onToggle={togglePassword}
+            />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1.5">Confirm Password</label>
-            <PasswordField val={confirmPassword} set={setConfirmPassword} placeholder="Re-enter password" />
+            <PasswordInput
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder="Re-enter password"
+              showPassword={showPassword}
+              onToggle={togglePassword}
+            />
           </div>
 
           <button onClick={handleSignUp} disabled={isPending} className={btnPrimary}>
             {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Creating account...
-              </>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Creating account...</>
             ) : (
               'Create Account'
             )}
@@ -580,7 +619,12 @@ export function AuthForms({
         </div>
       )}
 
-      <ErrorBox />
+      {/* Error Message */}
+      {error && (
+        <div className="p-3 bg-red-50 text-red-600 text-center text-sm border border-red-200 rounded-lg">
+          {error}
+        </div>
+      )}
 
       {/* ---- OR Divider + Google ---- */}
       <div className="relative">
@@ -621,4 +665,3 @@ export function AuthForms({
     </div>
   )
 }
-
