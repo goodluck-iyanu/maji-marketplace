@@ -75,7 +75,7 @@ function PasswordInput({
 }
 
 // =====================================================
-// OTP INPUT — 6 individual digit boxes
+// OTP INPUT — Standard input for flexible length
 // =====================================================
 function OtpInput({
   value,
@@ -86,58 +86,19 @@ function OtpInput({
   onChange: (v: string) => void
   disabled?: boolean
 }) {
-  const refs = useRef<(HTMLInputElement | null)[]>([])
-
-  useEffect(() => {
-    refs.current[0]?.focus()
-  }, [])
-
   return (
-    <div className="flex gap-3 justify-center">
-      {Array.from({ length: 6 }, (_, i) => (
-        <input
-          key={i}
-          ref={(el) => {
-            refs.current[i] = el
-          }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          disabled={disabled}
-          value={value[i] || ''}
-          onFocus={(e) => e.target.select()}
-          onChange={(e) => {
-            const digit = e.target.value.replace(/\D/g, '').slice(-1)
-            if (!digit) return
-            const before = value.slice(0, i)
-            const after = value.slice(i + 1)
-            const next = (before + digit + after).slice(0, 6)
-            onChange(next)
-            if (i < 5) refs.current[i + 1]?.focus()
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Backspace') {
-              e.preventDefault()
-              if (value[i]) {
-                onChange(value.slice(0, i) + value.slice(i + 1))
-              } else if (i > 0) {
-                onChange(value.slice(0, i - 1) + value.slice(i))
-                refs.current[i - 1]?.focus()
-              }
-            }
-            if (e.key === 'ArrowLeft' && i > 0) refs.current[i - 1]?.focus()
-            if (e.key === 'ArrowRight' && i < 5) refs.current[i + 1]?.focus()
-          }}
-          onPaste={(e) => {
-            e.preventDefault()
-            const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
-            onChange(pasted)
-            refs.current[Math.min(pasted.length, 5)]?.focus()
-          }}
-          className="w-12 h-14 text-center text-2xl font-bold border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all disabled:opacity-50 bg-gray-50 focus:bg-white"
-        />
-      ))}
-    </div>
+    <input
+      type="text"
+      inputMode="numeric"
+      disabled={disabled}
+      value={value}
+      placeholder="Enter code"
+      onChange={(e) => {
+        const digits = e.target.value.replace(/\D/g, '')
+        onChange(digits)
+      }}
+      className="w-full text-center tracking-[0.5em] text-2xl font-bold py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-black focus:border-black outline-none transition-all disabled:opacity-50 bg-gray-50 focus:bg-white"
+    />
   )
 }
 
@@ -209,7 +170,7 @@ export function AuthForms({
 
   const handleVerifySignup = () => {
     clearError()
-    if (otp.length !== 6) return setError('Please enter the full 6-digit code.')
+    if (!otp) return setError('Please enter the code.')
 
     startTransition(async () => {
       const res = await verifyOtpAction(email, otp, 'signup')
@@ -258,7 +219,7 @@ export function AuthForms({
 
   const handleVerifyReset = () => {
     clearError()
-    if (otp.length !== 6) return setError('Please enter the full 6-digit code.')
+    if (!otp) return setError('Please enter the code.')
 
     startTransition(async () => {
       const res = await verifyOtpAction(resetEmail, otp, 'recovery')
@@ -315,7 +276,7 @@ export function AuthForms({
 
         <OtpInput value={otp} onChange={setOtp} disabled={isPending} />
 
-        <button onClick={handleVerifySignup} disabled={isPending || otp.length !== 6} className={btnPrimary}>
+        <button onClick={handleVerifySignup} disabled={isPending || !otp} className={btnPrimary}>
           {isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
           ) : (
@@ -406,7 +367,7 @@ export function AuthForms({
 
         <OtpInput value={otp} onChange={setOtp} disabled={isPending} />
 
-        <button onClick={handleVerifyReset} disabled={isPending || otp.length !== 6} className={btnPrimary}>
+        <button onClick={handleVerifyReset} disabled={isPending || !otp} className={btnPrimary}>
           {isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" /> Verifying...</>
           ) : (
