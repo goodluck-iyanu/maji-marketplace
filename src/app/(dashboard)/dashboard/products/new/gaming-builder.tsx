@@ -96,17 +96,12 @@ export default function GamingProductBuilder({ productType }: { productType: str
   const [state, formAction, isPending] = useActionState(createGamingProductAction, null)
   const [isCompressing, setIsCompressing] = useState(false)
   const isLoading = isPending || isCompressing
-
-  
-
-  
-  const draftState = { currentStep, category, subCategory, photos, name, description, attributes, hasOptions, optionsDef, customValueInputs, basePrice, baseStock, variants }
-  
-  const { isRestoring, clearDraft } = useDraftAutoSave('gaming', draftState, (data) => {
+  // ── Auto-save draft to localStorage ──
+  const draftState = { currentStep, category, subCategory, name, description, attributes, hasOptions, optionsDef, customValueInputs, basePrice, baseStock, variants }
+  const { clearDraft } = useDraftAutoSave('gaming', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.category !== undefined) setCategory(data.category)
     if (data.subCategory !== undefined) setSubCategory(data.subCategory)
-    if (data.photos !== undefined) setPhotos(data.photos)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.attributes !== undefined) setAttributes(data.attributes)
@@ -117,6 +112,8 @@ export default function GamingProductBuilder({ productType }: { productType: str
     if (data.baseStock !== undefined) setBaseStock(data.baseStock)
     if (data.variants !== undefined) setVariants(data.variants)
   })
+
+  
 
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
@@ -335,6 +332,7 @@ export default function GamingProductBuilder({ productType }: { productType: str
               compressedFormData.append('photos', file) 
             }
           }
+          clearDraft()
           formAction(compressedFormData)
         } finally { setIsCompressing(false) }
       }}>

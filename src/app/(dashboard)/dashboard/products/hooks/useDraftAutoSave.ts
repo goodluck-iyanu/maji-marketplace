@@ -1,101 +1,75 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-import { saveDraftAction, getDraftAction, clearDraftAction } from '../draft-actions'
-import { saveDraftFiles, getDraftFiles, clearDraftFiles } from './idbFiles'
+import { useEffect, useRef, useCallback } from 'react'
 
-export function useDraftAutoSave(productType: string, currentState: any, onRestore: (data: any) => void) {
-  const [isRestoring, setIsRestoring] = useState(true)
-  const isFirstRender = useRef(true)
+const STORAGE_PREFIX = 'maji_draft_'
 
-  // Load draft on mount
+/**
+ * Auto-saves product builder state to localStorage.
+ * Restores it on mount. Clears it when clearDraft() is called.
+ * 
+ * IMPORTANT: File objects (images) cannot be saved to localStorage.
+ * Only text fields, selections, and step progress are persisted.
+ */
+export function useDraftAutoSave(
+  productType: string,
+  currentState: Record<string, any>,
+  onRestore: (data: Record<string, any>) => void
+) {
+  const storageKey = STORAGE_PREFIX + productType
+  const hasRestored = useRef(false)
+  const isFirstSave = useRef(true)
+
+  // ── Restore on mount (runs once) ──
   useEffect(() => {
-    let isMounted = true
-    const loadDraft = async () => {
-      let combinedData: any = {}
-      
-      // Load JSON state from backend
-      const res = await getDraftAction(productType)
-      if (res.success && res.data) {
-        combinedData = { ...res.data }
-      }
+    if (hasRestored.current) return
+    hasRestored.current = true
 
-      // Load File state from browser IndexedDB
-      try {
-        const idbFiles = await getDraftFiles(productType)
-        if (idbFiles) {
-          combinedData = { ...combinedData, ...idbFiles }
-        }
-      } catch (err) {
-        console.error('Failed to load local files from IDB', err)
+    try {
+      const raw = localStorage.getItem(storageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        onRestore(parsed)
       }
-
-      if (isMounted && Object.keys(combinedData).length > 0) {
-        onRestore(combinedData)
-      }
-      
-      if (isMounted) {
-        setIsRestoring(false)
-      }
+    } catch (e) {
+      // Corrupted data — clear it
+      localStorage.removeItem(storageKey)
     }
-    loadDraft()
-    return () => { isMounted = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productType])
+  }, [])
 
-  // Save draft on change (debounced)
+  // ── Auto-save on every change (debounced 1s) ──
   useEffect(() => {
-    // Prevent saving during the initial restore phase
-    if (isRestoring) return
-
-    // Prevent saving immediately on the first render
-    if (isFirstRender.current) {
-      isFirstRender.current = false
+    // Skip the very first render (the initial default state)
+    if (isFirstSave.current) {
+      isFirstSave.current = false
       return
     }
 
-    const handler = setTimeout(() => {
-      let fileData: any = {}
-      
-      // Separate files vs simple JSON
-      const cleanState = JSON.parse(JSON.stringify(currentState, (key, value) => {
-        // Intercept File objects and arrays of File objects
-        if (value && typeof value === 'object' && 'size' in value && 'name' in value && 'type' in value) {
-          // Found a file
-          if (!fileData[key]) fileData[key] = value
-          return undefined
+    const timer = setTimeout(() => {
+      try {
+        // Strip out File objects — they can't be serialised
+        const clean: Record<string, any> = {}
+        for (const [key, val] of Object.entries(currentState)) {
+          if (val instanceof File) continue
+          if (Array.isArray(val) && val.length > 0 && val[0] instanceof File) continue
+          clean[key] = val
         }
-        return value
-      }))
-      
-      // Since JSON.stringify intercepts properties recursively, we need to explicitly pull out the root file variables 
-      // just in case they are completely omitted. Let's do a fast manual scan of the root.
-      Object.entries(currentState).forEach(([key, val]) => {
-        if (val instanceof File) {
-          fileData[key] = val
-        } else if (Array.isArray(val) && val.length > 0 && val[0] instanceof File) {
-          fileData[key] = val
-        }
-      })
-
-      // 1. Save normal data to Backend
-      saveDraftAction(productType, cleanState)
-      
-      // 2. Save file data to IndexedDB
-      if (Object.keys(fileData).length > 0) {
-         saveDraftFiles(productType, fileData).catch(e => console.error(e))
+        localStorage.setItem(storageKey, JSON.stringify(clean))
+      } catch (e) {
+        // Storage full or private browsing — silently ignore
       }
-    }, 1500) // 1.5 second debounce
+    }, 1000)
 
-    return () => clearTimeout(handler)
-  }, [currentState, productType, isRestoring])
+    return () => clearTimeout(timer)
+  }, [currentState, storageKey])
 
-  const clearDraft = async () => {
-    await clearDraftAction(productType)
+  // ── Clear draft — call this RIGHT BEFORE formAction() ──
+  const clearDraft = useCallback(() => {
     try {
-      await clearDraftFiles(productType)
+      localStorage.removeItem(storageKey)
     } catch (e) {}
-  }
+  }, [storageKey])
 
-  return { isRestoring, clearDraft }
+  return { clearDraft }
 }

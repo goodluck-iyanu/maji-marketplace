@@ -113,21 +113,18 @@ export default function EbooksProductBuilder({ productType }: { productType: str
   const [state, formAction, isPending] = useActionState(createEbookProductAction, null)
   const [isCompressing, setIsCompressing] = useState(false)
   const isLoading = isPending || isCompressing
-
-  
-
-  
-  const draftState = { currentStep, name, description, author, language, category, coverPhoto, ebookFile, uploadedFileId, format, pages, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
-  
-  const { isRestoring, clearDraft } = useDraftAutoSave('ebooks', draftState, (data) => {
+  // ── Auto-save draft to localStorage ──
+  const draftState = { currentStep, name, description, author, language, category, ebookFile, uploadProgress, isUploadingDrive, uploadedFileId, format, pages, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
+  const { clearDraft } = useDraftAutoSave('ebooks', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.author !== undefined) setAuthor(data.author)
     if (data.language !== undefined) setLanguage(data.language)
     if (data.category !== undefined) setCategory(data.category)
-    if (data.coverPhoto !== undefined) setCoverPhoto(data.coverPhoto)
     if (data.ebookFile !== undefined) setEbookFile(data.ebookFile)
+    if (data.uploadProgress !== undefined) setUploadProgress(data.uploadProgress)
+    if (data.isUploadingDrive !== undefined) setIsUploadingDrive(data.isUploadingDrive)
     if (data.uploadedFileId !== undefined) setUploadedFileId(data.uploadedFileId)
     if (data.format !== undefined) setFormat(data.format)
     if (data.pages !== undefined) setPages(data.pages)
@@ -138,6 +135,8 @@ export default function EbooksProductBuilder({ productType }: { productType: str
     if (data.salePrice !== undefined) setSalePrice(data.salePrice)
     if (data.downloadsAllowed !== undefined) setDownloadsAllowed(data.downloadsAllowed)
   })
+
+  
 
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
@@ -281,6 +280,9 @@ export default function EbooksProductBuilder({ productType }: { productType: str
       formData.set('price', isFree ? '0' : price || '0')
       formData.set('salePrice', salePrice || '0')
       formData.set('downloadsAllowed', downloadsAllowed)
+
+      clearDraft()
+
 
       formAction(formData)
     } catch (error) {

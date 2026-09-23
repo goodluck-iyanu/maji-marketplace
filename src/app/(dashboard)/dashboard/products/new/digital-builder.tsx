@@ -142,21 +142,17 @@ export default function DigitalProductBuilder({ productType, storeCategory }: { 
   const [state, formAction, isPending] = useActionState(createDigitalProductAction, null)
   const [isCompressing, setIsCompressing] = useState(false)
   const isLoading = isPending || isCompressing
-
-  
-
-  
-  const draftState = { currentStep, name, description, category, coverPhoto, deliveryType, templateFile, templateLink, uploadedFileId, app, format, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
-  
-  const { isRestoring, clearDraft } = useDraftAutoSave('digital', draftState, (data) => {
+  // ── Auto-save draft to localStorage ──
+  const draftState = { currentStep, name, description, category, deliveryType, templateLink, uploadProgress, isUploadingDrive, uploadedFileId, app, format, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
+  const { clearDraft } = useDraftAutoSave('digital', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.category !== undefined) setCategory(data.category)
-    if (data.coverPhoto !== undefined) setCoverPhoto(data.coverPhoto)
     if (data.deliveryType !== undefined) setDeliveryType(data.deliveryType)
-    if (data.templateFile !== undefined) setTemplateFile(data.templateFile)
     if (data.templateLink !== undefined) setTemplateLink(data.templateLink)
+    if (data.uploadProgress !== undefined) setUploadProgress(data.uploadProgress)
+    if (data.isUploadingDrive !== undefined) setIsUploadingDrive(data.isUploadingDrive)
     if (data.uploadedFileId !== undefined) setUploadedFileId(data.uploadedFileId)
     if (data.app !== undefined) setApp(data.app)
     if (data.format !== undefined) setFormat(data.format)
@@ -167,6 +163,8 @@ export default function DigitalProductBuilder({ productType, storeCategory }: { 
     if (data.salePrice !== undefined) setSalePrice(data.salePrice)
     if (data.downloadsAllowed !== undefined) setDownloadsAllowed(data.downloadsAllowed)
   })
+
+  
 
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
@@ -260,6 +258,9 @@ export default function DigitalProductBuilder({ productType, storeCategory }: { 
       formData.set('price', isFree ? '0' : price || '0')
       formData.set('salePrice', salePrice || '0')
       formData.set('downloadsAllowed', downloadsAllowed)
+
+      clearDraft()
+
 
       formAction(formData)
     } catch (e) {
