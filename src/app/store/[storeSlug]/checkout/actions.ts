@@ -12,6 +12,13 @@ export async function processCheckout(formData: FormData) {
   const customerName = formData.get('name') as string
   const customerWhatsapp = formData.get('whatsapp') as string
   
+  const deliveryMethod = formData.get('deliveryMethod') as string || 'digital'
+  const state = formData.get('state') as string
+  const area = formData.get('area') as string
+  const address = formData.get('address') as string
+  const landmark = formData.get('landmark') as string
+  const instructions = formData.get('instructions') as string
+  
   if (!storeSlug || !cartJson || !customerEmail) {
     return { error: 'Missing required fields' }
   }
@@ -29,7 +36,7 @@ export async function processCheckout(formData: FormData) {
   // 1. Fetch store
   const { data: store } = await supabase
     .from('stores')
-    .select('id')
+    .select('id, product_type')
     .eq('slug', storeSlug)
     .single()
     
@@ -95,7 +102,20 @@ export async function processCheckout(formData: FormData) {
     return { error: 'Order total must be greater than 0' }
   }
 
-  // 3. Check if seller has a subaccount for split payment
+  // 3. Calculate delivery fee
+  let deliveryFee = 0
+  let finalDeliveryAddress = null
+
+  if (store.product_type === 'physical') {
+    if (deliveryMethod === 'delivery') {
+      deliveryFee = 2000 // Hardcoded for MVP
+      finalDeliveryAddress = { state, area, address, landmark, instructions }
+    }
+  }
+  
+  totalAmount += deliveryFee
+
+  // 4. Check if seller has a subaccount for split payment
   const { data: payoutAccount } = await supabase
     .from('payout_accounts')
     .select('subaccount_code')
@@ -103,7 +123,7 @@ export async function processCheckout(formData: FormData) {
     .eq('status', 'active')
     .maybeSingle()
 
-  // 4. Create a unique reference
+  // 5. Create a unique reference
   const reference = `ORD-${uuidv4()}`
 
   // Use Admin client for order creation to bypass RLS for anonymous buyers
@@ -112,7 +132,7 @@ export async function processCheckout(formData: FormData) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // 5. Create pending order in DB
+  // 6. Create pending order in DB
   const orderId = uuidv4()
   const { error: orderError } = await supabaseAdmin
     .from('orders')
@@ -121,7 +141,10 @@ export async function processCheckout(formData: FormData) {
       store_id: storeId,
       customer_name: customerName,
       customer_email: customerEmail,
-      customer_whatsapp: customerWhatsapp || null,
+      customer_phone: customerWhatsapp,
+      delivery_method: store.product_type === 'physical' ? deliveryMethod : 'digital',
+      delivery_fee: deliveryFee,
+      delivery_address: finalDeliveryAddress,
       total_amount: totalAmount,
       payment_reference: reference,
       payment_status: 'pending',

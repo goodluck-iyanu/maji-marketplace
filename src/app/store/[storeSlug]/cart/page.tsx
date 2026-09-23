@@ -1,18 +1,37 @@
 'use client'
 
 import { useCart } from '../cart-context'
-import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle } from 'lucide-react'
-import { useState } from 'react'
+import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { processCheckout } from '../checkout/actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/browser'
 
 export default function CartPage() {
   const params = useParams()
   const storeSlug = params.storeSlug as string
   const { items, updateQty, removeFromCart, totalAmount } = useCart()
+  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
+  const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'arrange'>('delivery')
+  
+  useEffect(() => {
+    async function fetchStore() {
+      const supabase = createClient()
+      const { data } = await supabase.from('stores').select('product_type').eq('slug', storeSlug).single()
+      if (data) {
+        setProductType(data.product_type as 'physical' | 'digital')
+      }
+    }
+    fetchStore()
+  }, [storeSlug])
+
+  const deliveryFee = (productType === 'physical' && deliveryMethod === 'delivery') ? 2000 : 0
+  const finalTotal = totalAmount + deliveryFee
 
   const handleCheckout = async (formData: FormData) => {
     setLoading(true)
@@ -21,6 +40,7 @@ export default function CartPage() {
     const cartData = items.map(item => ({ id: item.id, qty: item.qty }))
     formData.append('cart', JSON.stringify(cartData))
     formData.append('storeSlug', storeSlug)
+    formData.append('deliveryMethod', deliveryMethod)
     
     try {
       const res = await processCheckout(formData)
@@ -28,7 +48,7 @@ export default function CartPage() {
         setError(res.error)
         setLoading(false)
       } else if (res?.url) {
-        window.location.href = res.url // Redirect client-side for better reliability
+        window.location.href = res.url
       } else {
         setError("An unexpected error occurred. Please try again.")
         setLoading(false)
@@ -105,9 +125,27 @@ export default function CartPage() {
             <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-24">
               <h2 className="text-xl font-bold mb-6">Payment Summary</h2>
               
-              <div className="flex justify-between items-center mb-6 text-lg">
-                <span className="text-gray-600">Total Amount</span>
-                <span className="font-bold text-2xl text-gray-900">₦{totalAmount.toLocaleString()}</span>
+              <div className="space-y-3 mb-6 pb-6 border-b border-gray-100">
+                <div className="flex justify-between text-gray-600">
+                  <span>Product subtotal</span>
+                  <span>₦{totalAmount.toLocaleString()}</span>
+                </div>
+                
+                {productType === 'physical' && (
+                  <div className="flex justify-between text-gray-600">
+                    <span>Delivery</span>
+                    {deliveryMethod === 'delivery' ? (
+                      <span>₦{deliveryFee.toLocaleString()}</span>
+                    ) : (
+                      <span className="text-gray-400">— Not selected</span>
+                    )}
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-100 text-lg">
+                  <span className="text-gray-900 font-semibold">Total Amount</span>
+                  <span className="font-bold text-2xl text-gray-900">₦{finalTotal.toLocaleString()}</span>
+                </div>
               </div>
               
               {error && (
@@ -117,43 +155,155 @@ export default function CartPage() {
                 </div>
               )}
 
-              <form action={handleCheckout} className="space-y-4">
+              <form action={handleCheckout} className="space-y-6">
+                
+                {/* CUSTOMER INFORMATION */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input 
-                    type="text" 
-                    name="name" 
-                    placeholder="Enter your full name" 
-                    required 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-                  />
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Customer Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                      <input 
+                        type="text" 
+                        name="name" 
+                        placeholder="Enter your full name" 
+                        required 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                      <input 
+                        type="email" 
+                        name="email" 
+                        placeholder="Enter your email" 
+                        required 
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp / Phone Number</label>
+                      <input 
+                        type="tel" 
+                        name="whatsapp" 
+                        placeholder="e.g. +2348012345678" 
+                        required
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input 
-                    type="email" 
-                    name="email" 
-                    placeholder="Enter your email" 
-                    required 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (Optional)</label>
-                  <input 
-                    type="tel" 
-                    name="whatsapp" 
-                    placeholder="e.g. +2348012345678" 
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-                  />
-                </div>
+
+                {/* DELIVERY SELECTION (Physical Products Only) */}
+                {productType === 'physical' && (
+                  <div className="pt-4 border-t border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">How would you like to receive your order?</h3>
+                    <div className="space-y-3">
+                      <label className={`block p-4 border rounded-xl cursor-pointer transition-all ${deliveryMethod === 'delivery' ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <div className="flex items-start">
+                          <input 
+                            type="radio" 
+                            name="deliveryMethod" 
+                            value="delivery"
+                            checked={deliveryMethod === 'delivery'}
+                            onChange={() => setDeliveryMethod('delivery')}
+                            className="hidden"
+                          />
+                          <div className="flex-shrink-0 h-5 w-5 rounded-full border border-gray-300 flex items-center justify-center mt-0.5">
+                            {deliveryMethod === 'delivery' && <div className="h-2.5 w-2.5 rounded-full bg-black" />}
+                          </div>
+                          <div className="ml-3">
+                            <span className="block text-sm font-semibold text-gray-900">Delivery</span>
+                            <span className="block text-sm text-gray-500 mt-1">Have the product delivered to your address.</span>
+                          </div>
+                        </div>
+                      </label>
+                      
+                      <label className={`block p-4 border rounded-xl cursor-pointer transition-all ${deliveryMethod === 'arrange' ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <div className="flex items-start">
+                          <input 
+                            type="radio" 
+                            name="deliveryMethod" 
+                            value="arrange"
+                            checked={deliveryMethod === 'arrange'}
+                            onChange={() => setDeliveryMethod('arrange')}
+                            className="hidden"
+                          />
+                          <div className="flex-shrink-0 h-5 w-5 rounded-full border border-gray-300 flex items-center justify-center mt-0.5">
+                            {deliveryMethod === 'arrange' && <div className="h-2.5 w-2.5 rounded-full bg-black" />}
+                          </div>
+                          <div className="ml-3">
+                            <span className="block text-sm font-semibold text-gray-900">Arrange with seller</span>
+                            <span className="block text-sm text-gray-500 mt-1">Contact the seller and arrange pickup/delivery directly.</span>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* DELIVERY ADDRESS FORM */}
+                {productType === 'physical' && deliveryMethod === 'delivery' && (
+                  <div className="pt-4 border-t border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Delivery Address</h3>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                          <select name="state" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors">
+                            <option value="">Select state</option>
+                            <option value="Lagos">Lagos</option>
+                            <option value="Abuja">Abuja</option>
+                            <option value="Rivers">Rivers</option>
+                            <option value="Oyo">Oyo</option>
+                            {/* Add more states as needed */}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">City / Area</label>
+                          <input type="text" name="area" placeholder="e.g. Lekki" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Delivery Address</label>
+                        <input type="text" name="address" placeholder="Enter your full street address" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Bus Stop / Landmark</label>
+                        <input type="text" name="landmark" placeholder="e.g. Ikeja Along Bus Stop" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Instructions <span className="text-gray-400 font-normal">(Optional)</span></label>
+                        <input type="text" name="instructions" placeholder="e.g. Call me when you arrive" className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                      </div>
+                      
+                      <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mt-4">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-semibold text-blue-900">Maji Delivery</span>
+                          <span className="font-bold text-blue-900">₦2,000</span>
+                        </div>
+                        <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* ARRANGE WITH SELLER INFO */}
+                {productType === 'physical' && deliveryMethod === 'arrange' && (
+                  <div className="pt-4 border-t border-gray-100">
+                     <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex gap-3">
+                       <ShieldCheck className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                       <p className="text-sm text-gray-700">You'll arrange delivery or pickup directly with the seller. After payment, we'll provide the seller's relevant contact and order information.</p>
+                     </div>
+                  </div>
+                )}
                 
                 <button 
                   type="submit" 
                   disabled={loading}
                   className="w-full py-4 bg-black text-white rounded-lg font-bold text-lg hover:bg-gray-800 transition-colors flex justify-center items-center disabled:opacity-70 mt-4 shadow-md"
                 >
-                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : 'Pay Now'}
+                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : `Pay ₦${finalTotal.toLocaleString()}`}
                 </button>
               </form>
               
@@ -168,4 +318,3 @@ export default function CartPage() {
     </div>
   )
 }
-

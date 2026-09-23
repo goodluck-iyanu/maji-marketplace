@@ -1,0 +1,1 @@
+﻿ALTER TABLE public.orders ADD COLUMN customer_phone TEXT; ALTER TABLE public.orders ADD COLUMN delivery_method TEXT; ALTER TABLE public.orders ADD COLUMN delivery_fee DECIMAL(12, 2) DEFAULT 0; ALTER TABLE public.orders ADD COLUMN delivery_address JSONB;
