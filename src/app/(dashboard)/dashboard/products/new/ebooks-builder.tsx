@@ -115,7 +115,9 @@ export default function EbooksProductBuilder({ productType }: { productType: str
   const isLoading = isPending || isCompressing
 
   
-  const draftState = { currentStep, name, description, author, language, category, ebookFile, uploadProgress, isUploadingDrive, uploadedFileId, format, pages, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
+
+  
+  const draftState = { currentStep, name, description, author, language, category, coverPhoto, ebookFile, uploadedFileId, format, pages, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
   
   const { isRestoring, clearDraft } = useDraftAutoSave('ebooks', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
@@ -124,9 +126,8 @@ export default function EbooksProductBuilder({ productType }: { productType: str
     if (data.author !== undefined) setAuthor(data.author)
     if (data.language !== undefined) setLanguage(data.language)
     if (data.category !== undefined) setCategory(data.category)
+    if (data.coverPhoto !== undefined) setCoverPhoto(data.coverPhoto)
     if (data.ebookFile !== undefined) setEbookFile(data.ebookFile)
-    if (data.uploadProgress !== undefined) setUploadProgress(data.uploadProgress)
-    if (data.isUploadingDrive !== undefined) setIsUploadingDrive(data.isUploadingDrive)
     if (data.uploadedFileId !== undefined) setUploadedFileId(data.uploadedFileId)
     if (data.format !== undefined) setFormat(data.format)
     if (data.pages !== undefined) setPages(data.pages)

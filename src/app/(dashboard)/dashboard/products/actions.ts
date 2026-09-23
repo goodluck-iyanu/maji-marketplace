@@ -313,7 +313,8 @@ export async function createFashionProductAction(prevState: any, formData: FormD
     }
   }
 
-  revalidatePath('/', 'layout')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'fashion')
+    revalidatePath('/', 'layout')
   redirect('/dashboard/products')
 }
 export async function createGadgetProductAction(prevState: any, formData: FormData) {
@@ -422,7 +423,8 @@ export async function createGadgetProductAction(prevState: any, formData: FormDa
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'gadgets')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -525,7 +527,8 @@ export async function createFoodProductAction(prevState: any, formData: FormData
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'food')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -628,7 +631,8 @@ export async function createBeautyProductAction(prevState: any, formData: FormDa
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'beauty')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -838,7 +842,8 @@ export async function createHomeProductAction(prevState: any, formData: FormData
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'home')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -941,7 +946,8 @@ export async function createJewelryProductAction(prevState: any, formData: FormD
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'jewelry')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1044,7 +1050,8 @@ export async function createBooksProductAction(prevState: any, formData: FormDat
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'books')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1147,7 +1154,8 @@ export async function createKidsProductAction(prevState: any, formData: FormData
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'kids')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1250,7 +1258,8 @@ export async function createPetsProductAction(prevState: any, formData: FormData
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'pets')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1353,7 +1362,8 @@ export async function createToolsProductAction(prevState: any, formData: FormDat
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'tools')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1456,7 +1466,8 @@ export async function createAgricultureProductAction(prevState: any, formData: F
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'agriculture')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1559,7 +1570,8 @@ export async function createGamingProductAction(prevState: any, formData: FormDa
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'gaming')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1662,7 +1674,8 @@ export async function createOfficeProductAction(prevState: any, formData: FormDa
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'office')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1765,7 +1778,8 @@ export async function createOtherProductAction(prevState: any, formData: FormDat
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'other')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1868,7 +1882,8 @@ export async function createSportsProductAction(prevState: any, formData: FormDa
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'sports')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -1971,7 +1986,8 @@ export async function createAutomotiveProductAction(prevState: any, formData: Fo
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'automotive')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -2074,7 +2090,8 @@ export async function createArtsProductAction(prevState: any, formData: FormData
     await supabase.from('product_variants').insert(variantsToInsert)
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'arts')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -2178,7 +2195,8 @@ export async function createEbookProductAction(prevState: any, formData: FormDat
     }
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'ebooks')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -2286,7 +2304,8 @@ export async function createTemplateProductAction(prevState: any, formData: Form
     }
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'templates')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 
@@ -2394,7 +2413,8 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
     }
   }
 
-  revalidatePath('/dashboard/products')
+  await supabase.from('product_drafts').delete().eq('store_id', store.id).eq('product_type', 'digital')
+    revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
 

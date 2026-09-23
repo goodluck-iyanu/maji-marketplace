@@ -116,17 +116,19 @@ export default function TemplatesProductBuilder({ productType }: { productType: 
   const isLoading = isPending || isCompressing
 
   
-  const draftState = { currentStep, name, description, category, deliveryType, templateLink, uploadProgress, isUploadingDrive, uploadedFileId, app, format, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
+
+  
+  const draftState = { currentStep, name, description, category, coverPhoto, deliveryType, templateFile, templateLink, uploadedFileId, app, format, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
   
   const { isRestoring, clearDraft } = useDraftAutoSave('templates', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.category !== undefined) setCategory(data.category)
+    if (data.coverPhoto !== undefined) setCoverPhoto(data.coverPhoto)
     if (data.deliveryType !== undefined) setDeliveryType(data.deliveryType)
+    if (data.templateFile !== undefined) setTemplateFile(data.templateFile)
     if (data.templateLink !== undefined) setTemplateLink(data.templateLink)
-    if (data.uploadProgress !== undefined) setUploadProgress(data.uploadProgress)
-    if (data.isUploadingDrive !== undefined) setIsUploadingDrive(data.isUploadingDrive)
     if (data.uploadedFileId !== undefined) setUploadedFileId(data.uploadedFileId)
     if (data.app !== undefined) setApp(data.app)
     if (data.format !== undefined) setFormat(data.format)

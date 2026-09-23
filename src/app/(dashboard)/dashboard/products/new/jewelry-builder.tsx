@@ -100,12 +100,15 @@ export default function JewelryProductBuilder({ productType }: { productType: st
   const isLoading = isPending || isCompressing
 
   
-  const draftState = { currentStep, category, subCategory, name, description, attributes, hasOptions, optionsDef, customValueInputs, basePrice, baseStock, variants }
+
+  
+  const draftState = { currentStep, category, subCategory, photos, name, description, attributes, hasOptions, optionsDef, customValueInputs, basePrice, baseStock, variants }
   
   const { isRestoring, clearDraft } = useDraftAutoSave('jewelry', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.category !== undefined) setCategory(data.category)
     if (data.subCategory !== undefined) setSubCategory(data.subCategory)
+    if (data.photos !== undefined) setPhotos(data.photos)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.attributes !== undefined) setAttributes(data.attributes)

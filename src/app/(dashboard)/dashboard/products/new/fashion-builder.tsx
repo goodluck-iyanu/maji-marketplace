@@ -98,11 +98,14 @@ export default function FashionProductBuilder({ productType }: { productType: st
   const isLoading = isPending || isCompressing
 
   
-  const draftState = { currentStep, subCategory, name, description, targetAudience, material, hasOptions, sizes, colors, customSize, customColor, basePrice, baseStock, variants }
+
+  
+  const draftState = { currentStep, subCategory, photos, name, description, targetAudience, material, hasOptions, sizes, colors, customSize, customColor, basePrice, baseStock, variants }
   
   const { isRestoring, clearDraft } = useDraftAutoSave('fashion', draftState, (data) => {
     if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
     if (data.subCategory !== undefined) setSubCategory(data.subCategory)
+    if (data.photos !== undefined) setPhotos(data.photos)
     if (data.name !== undefined) setName(data.name)
     if (data.description !== undefined) setDescription(data.description)
     if (data.targetAudience !== undefined) setTargetAudience(data.targetAudience)
