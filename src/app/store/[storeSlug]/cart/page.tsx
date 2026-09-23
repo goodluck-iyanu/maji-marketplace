@@ -2,7 +2,7 @@
 
 import { useCart } from '../cart-context'
 import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { processCheckout } from '../checkout/actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
