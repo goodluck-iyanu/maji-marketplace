@@ -7,6 +7,7 @@ import { processCheckout } from '../checkout/actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
+import Script from 'next/script'
 
 export default function CartPage() {
   const params = useParams()
@@ -19,6 +20,17 @@ export default function CartPage() {
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'arrange'>('delivery')
   
+  const addressInputRef = useRef<HTMLInputElement>(null)
+  
+  const initAutocomplete = () => {
+    if (typeof window !== 'undefined' && (window as any).google && addressInputRef.current) {
+      new (window as any).google.maps.places.Autocomplete(addressInputRef.current, {
+        types: ['address'],
+        componentRestrictions: { country: 'ng' }
+      })
+    }
+  }
+
   useEffect(() => {
     async function fetchStore() {
       const supabase = createClient()
@@ -245,6 +257,13 @@ export default function CartPage() {
                 {/* DELIVERY ADDRESS FORM */}
                 {productType === 'physical' && deliveryMethod === 'delivery' && (
                   <div className="pt-4 border-t border-gray-100">
+                    {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+                      <Script 
+                        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+                        strategy="lazyOnload"
+                        onLoad={initAutocomplete}
+                      />
+                    )}
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Delivery Address</h3>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -266,7 +285,15 @@ export default function CartPage() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Full Delivery Address</label>
-                        <input type="text" name="address" placeholder="Enter your full street address" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                        <input 
+                          type="text" 
+                          name="address" 
+                          ref={addressInputRef}
+                          placeholder="Enter your full street address" 
+                          required 
+                          autoComplete="street-address"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Bus Stop / Landmark</label>

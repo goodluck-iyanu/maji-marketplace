@@ -100,6 +100,15 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
                 <ExternalLink className="h-3 w-3 ml-1 opacity-50" />
               </a>
             </div>
+            {order.customer_phone && (
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Phone Number</p>
+                <a href={`tel:${order.customer_phone}`} className="font-semibold text-gray-900 hover:underline flex items-center">
+                  {order.customer_phone}
+                  <ExternalLink className="h-3 w-3 ml-1 opacity-50" />
+                </a>
+              </div>
+            )}
             {order.customer_whatsapp && (
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">WhatsApp Number</p>
@@ -107,6 +116,27 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
                   {order.customer_whatsapp}
                   <ExternalLink className="h-3 w-3 ml-1 opacity-50" />
                 </a>
+              </div>
+            )}
+            
+            {order.delivery_method && (
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Delivery Method</p>
+                <p className="font-semibold text-gray-900 capitalize">
+                  {order.delivery_method === 'arrange' ? 'Arrange with Seller' : order.delivery_method}
+                </p>
+                
+                {order.delivery_method === 'delivery' && order.delivery_address && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Delivery Address</p>
+                    <p className="text-gray-900 font-medium">{order.delivery_address.address}</p>
+                    <p className="text-gray-700">{order.delivery_address.area}, {order.delivery_address.state}</p>
+                    <p className="text-gray-600 text-sm mt-1">Landmark: {order.delivery_address.landmark}</p>
+                    {order.delivery_address.instructions && (
+                      <p className="text-gray-500 text-sm mt-2 italic bg-white p-2 rounded border border-gray-100">Note: {order.delivery_address.instructions}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
