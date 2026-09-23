@@ -7,7 +7,6 @@ import { processCheckout } from '../checkout/actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
-import Script from 'next/script'
 
 export default function CartPage() {
   const params = useParams()
@@ -20,16 +19,35 @@ export default function CartPage() {
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'arrange'>('delivery')
   
-  const addressInputRef = useRef<HTMLInputElement>(null)
+  // OpenStreetMap Autocomplete State
+  const [addressQuery, setAddressQuery] = useState('')
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   
-  const initAutocomplete = () => {
-    if (typeof window !== 'undefined' && (window as any).google && addressInputRef.current) {
-      new (window as any).google.maps.places.Autocomplete(addressInputRef.current, {
-        types: ['address'],
-        componentRestrictions: { country: 'ng' }
-      })
+  useEffect(() => {
+    if (addressQuery.length < 3) {
+      setAddressSuggestions([])
+      return
     }
-  }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addressQuery)}&format=json&countrycodes=ng&limit=5`, {
+          headers: { 'Accept-Language': 'en' }
+        })
+        const data = await response.json()
+        setAddressSuggestions(data)
+      } catch (error) {
+        console.error('Error fetching addresses:', error)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 600)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [addressQuery])
 
   useEffect(() => {
     async function fetchStore() {
@@ -257,13 +275,6 @@ export default function CartPage() {
                 {/* DELIVERY ADDRESS FORM */}
                 {productType === 'physical' && deliveryMethod === 'delivery' && (
                   <div className="pt-4 border-t border-gray-100">
-                    {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
-                      <Script 
-                        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-                        strategy="lazyOnload"
-                        onLoad={initAutocomplete}
-                      />
-                    )}
                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4">Delivery Address</h3>
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -283,17 +294,43 @@ export default function CartPage() {
                           <input type="text" name="area" placeholder="e.g. Lekki" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
                         </div>
                       </div>
-                      <div>
+                      <div className="relative">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Full Delivery Address</label>
                         <input 
                           type="text" 
                           name="address" 
-                          ref={addressInputRef}
+                          value={addressQuery}
+                          onChange={(e) => {
+                            setAddressQuery(e.target.value)
+                            setShowSuggestions(true)
+                          }}
+                          onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                           placeholder="Enter your full street address" 
                           required 
-                          autoComplete="street-address"
+                          autoComplete="off"
                           className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
                         />
+                        {showSuggestions && addressSuggestions.length > 0 && (
+                          <ul className="absolute z-50 w-full bg-white border border-gray-200 shadow-lg rounded-lg mt-1 max-h-60 overflow-auto">
+                            {addressSuggestions.map((suggestion, index) => (
+                              <li 
+                                key={index} 
+                                className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 border-b border-gray-50 last:border-0"
+                                onClick={() => {
+                                  setAddressQuery(suggestion.display_name)
+                                  setShowSuggestions(false)
+                                }}
+                              >
+                                {suggestion.display_name}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {showSuggestions && isSearching && addressQuery.length >= 3 && addressSuggestions.length === 0 && (
+                           <div className="absolute z-50 w-full bg-white border border-gray-200 shadow-lg rounded-lg mt-1 px-4 py-3 text-sm text-gray-500">
+                             Searching...
+                           </div>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Bus Stop / Landmark</label>
