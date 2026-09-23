@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Store, Package, Settings, CreditCard, LogOut, Home, Menu, X } from 'lucide-react'
+import { Store, Package, Settings, CreditCard, LogOut, Home, Menu, X, MapPin } from 'lucide-react'
 
-export function Sidebar({ storeName, storeSlug }: { storeName: string; storeSlug: string }) {
+export function Sidebar({ storeName, storeSlug, productType }: { storeName: string; storeSlug: string; productType?: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -13,8 +13,13 @@ export function Sidebar({ storeName, storeSlug }: { storeName: string; storeSlug
     { name: 'Overview', href: '/dashboard', icon: Home },
     { name: 'Products', href: '/dashboard/products', icon: Package },
     { name: 'Payments', href: '/dashboard/payments', icon: CreditCard },
-    { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   ]
+  
+  if (productType === 'physical') {
+    links.push({ name: 'Pickup Address', href: '/dashboard/address', icon: MapPin })
+  }
+  
+  links.push({ name: 'Settings', href: '/dashboard/settings', icon: Settings })
 
   return (
     <>

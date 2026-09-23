@@ -4,7 +4,7 @@ import { useState, useActionState, useEffect } from 'react'
 import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle } from 'lucide-react'
 import { createStoreAction } from './actions'
 
-type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'social_links' | 'creating'
+type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'pickup_details' | 'social_links' | 'creating'
 
 const PHYSICAL_CATEGORIES = [
   { id: 'fashion', name: 'Fashion & Clothing', icon: Shirt },
@@ -50,6 +50,8 @@ export function OnboardingWizard() {
   const [storeName, setStoreName] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [storeCategory, setStoreCategory] = useState('')
+  const [pickupAddress, setPickupAddress] = useState('')
+  const [pickupPhone, setPickupPhone] = useState('')
   const [socials, setSocials] = useState({
     instagram: '',
     tiktok: '',
@@ -130,25 +132,40 @@ export function OnboardingWizard() {
   }
 
   const handleNextToSocials = () => {
-    if (storeCategory) setStep('social_links')
+    if (storeCategory) {
+      if (productType === 'physical') {
+        setStep('pickup_details')
+      } else {
+        setStep('social_links')
+      }
+    }
+  }
+
+  const handleNextFromPickup = () => {
+    if (pickupAddress.trim() && pickupPhone.trim()) {
+      setStep('social_links')
+    }
   }
 
   const renderProgress = () => {
     if (step === 'product_type' || step === 'creating') return null
     
     let currentStepNum = 1
-    const totalSteps = 3
+    const totalSteps = productType === 'physical' ? 4 : 3
     let msg = ''
 
     if (step === 'store_name_logo') {
       currentStepNum = 1
-      msg = 'Let’s get your store started.'
+      msg = 'Let\'s get your store started.'
     } else if (step === 'store_category') {
       currentStepNum = 2
-      msg = 'Great — one important choice done.'
-    } else if (step === 'social_links') {
+      msg = 'Great - one important choice done.'
+    } else if (step === 'pickup_details') {
       currentStepNum = 3
-      msg = 'You’re almost there.'
+      msg = 'Where should we pick up your orders?'
+    } else if (step === 'social_links') {
+      currentStepNum = productType === 'physical' ? 4 : 3
+      msg = 'You\'re almost there.'
     }
 
     return (
@@ -332,6 +349,54 @@ export function OnboardingWizard() {
             type="button"
             onClick={handleNextToSocials}
             disabled={!storeCategory}
+            className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+
+      <div className={step === 'pickup_details' ? 'block text-center' : 'hidden'}>
+        <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Set up your pickup address</h2>
+        <p className="text-gray-500 mb-8">This is where your physical products will be picked up for delivery. You can update this later in your dashboard.</p>
+        
+        <div className="space-y-6 text-left mb-8 max-w-md mx-auto">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Pickup Address</label>
+            <input 
+              type="text" 
+              name="pickupAddress"
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+              placeholder="E.g. 123 Store Ave, Lekki, Lagos"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone Number</label>
+            <input 
+              type="tel" 
+              name="pickupPhone"
+              value={pickupPhone}
+              onChange={(e) => setPickupPhone(e.target.value)}
+              placeholder="+234 800 000 0000"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent" 
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setStep('store_category')}
+            className="w-1/3 py-3 px-4 border border-gray-300 rounded-md text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+          >
+            Back
+          </button>
+          <button
+            type="button"
+            onClick={handleNextFromPickup}
+            disabled={!pickupAddress.trim() || !pickupPhone.trim()}
             className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
           >
             Continue

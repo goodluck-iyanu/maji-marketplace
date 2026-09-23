@@ -35,7 +35,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
-      <Sidebar storeName={store.name} storeSlug={store.slug} />
+      <Sidebar storeName={store.name} storeSlug={store.slug} productType={store.product_type} />
 
       {/* Main content */}
       <div className="flex-1 overflow-auto md:w-[calc(100%-16rem)]">
