@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useActionState, useRef } from 'react'
+import { useState, useEffect, useActionState, useRef } from 'react'
+import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, ArrowRight, Shirt, Briefcase, Sparkles, Check, Upload, X, Plus, Trash2, Loader2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { createFashionProductAction } from '../actions'
@@ -88,11 +89,40 @@ export default function FashionProductBuilder({ productType }: { productType: st
   const [baseStock, setBaseStock] = useState('')
   const [variants, setVariants] = useState<any[]>([])
 
+  
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   
   const [state, formAction, isPending] = useActionState(createFashionProductAction, null)
   const [isCompressing, setIsCompressing] = useState(false)
   const isLoading = isPending || isCompressing
+
+  
+  const draftState = { currentStep, subCategory, name, description, targetAudience, material, hasOptions, sizes, colors, customSize, customColor, basePrice, baseStock, variants }
+  
+  const { isRestoring, clearDraft } = useDraftAutoSave('fashion', draftState, (data) => {
+    if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
+    if (data.subCategory !== undefined) setSubCategory(data.subCategory)
+    if (data.name !== undefined) setName(data.name)
+    if (data.description !== undefined) setDescription(data.description)
+    if (data.targetAudience !== undefined) setTargetAudience(data.targetAudience)
+    if (data.material !== undefined) setMaterial(data.material)
+    if (data.hasOptions !== undefined) setHasOptions(data.hasOptions)
+    if (data.sizes !== undefined) setSizes(data.sizes)
+    if (data.colors !== undefined) setColors(data.colors)
+    if (data.customSize !== undefined) setCustomSize(data.customSize)
+    if (data.customColor !== undefined) setCustomColor(data.customColor)
+    if (data.basePrice !== undefined) setBasePrice(data.basePrice)
+    if (data.baseStock !== undefined) setBaseStock(data.baseStock)
+    if (data.variants !== undefined) setVariants(data.variants)
+  })
+
+  // Clear draft on successful submission
+  useEffect(() => {
+    if ((state as any)?.success) {
+      clearDraft()
+    }
+  }, [state, clearDraft])
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
   const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))

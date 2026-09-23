@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useActionState, useRef } from 'react'
+import { useState, useEffect, useActionState, useRef } from 'react'
+import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, ArrowRight, Layout, Sparkles, Check, Upload, X, Loader2, Image as ImageIcon, FileText, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { createTemplateProductAction } from '../actions'
@@ -105,12 +106,44 @@ export default function TemplatesProductBuilder({ productType }: { productType: 
   
   const [downloadsAllowed, setDownloadsAllowed] = useState('-1') // -1 for unlimited
   
+  
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const templateInputRef = useRef<HTMLInputElement>(null)
   
   const [state, formAction, isPending] = useActionState(createTemplateProductAction, null)
   const [isCompressing, setIsCompressing] = useState(false)
   const isLoading = isPending || isCompressing
+
+  
+  const draftState = { currentStep, name, description, category, deliveryType, templateLink, uploadProgress, isUploadingDrive, uploadedFileId, app, format, includes, isFree, price, hasDiscount, salePrice, downloadsAllowed }
+  
+  const { isRestoring, clearDraft } = useDraftAutoSave('templates', draftState, (data) => {
+    if (data.currentStep !== undefined) setCurrentStep(data.currentStep)
+    if (data.name !== undefined) setName(data.name)
+    if (data.description !== undefined) setDescription(data.description)
+    if (data.category !== undefined) setCategory(data.category)
+    if (data.deliveryType !== undefined) setDeliveryType(data.deliveryType)
+    if (data.templateLink !== undefined) setTemplateLink(data.templateLink)
+    if (data.uploadProgress !== undefined) setUploadProgress(data.uploadProgress)
+    if (data.isUploadingDrive !== undefined) setIsUploadingDrive(data.isUploadingDrive)
+    if (data.uploadedFileId !== undefined) setUploadedFileId(data.uploadedFileId)
+    if (data.app !== undefined) setApp(data.app)
+    if (data.format !== undefined) setFormat(data.format)
+    if (data.includes !== undefined) setIncludes(data.includes)
+    if (data.isFree !== undefined) setIsFree(data.isFree)
+    if (data.price !== undefined) setPrice(data.price)
+    if (data.hasDiscount !== undefined) setHasDiscount(data.hasDiscount)
+    if (data.salePrice !== undefined) setSalePrice(data.salePrice)
+    if (data.downloadsAllowed !== undefined) setDownloadsAllowed(data.downloadsAllowed)
+  })
+
+  // Clear draft on successful submission
+  useEffect(() => {
+    if ((state as any)?.success) {
+      clearDraft()
+    }
+  }, [state, clearDraft])
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
   const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))
