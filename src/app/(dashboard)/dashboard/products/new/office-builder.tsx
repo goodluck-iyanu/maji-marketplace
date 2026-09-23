@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useActionState, useRef } from 'react'
+import { useState, useActionState, useRef } from 'react'
 import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Pen, Book, Folder, Printer, Droplet, Monitor, Phone, Calculator, Archive, PieChart, Video, Home, Lock, CreditCard, Receipt, Package, Paperclip, Coffee, Shield, Tag, Gift, Store, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
@@ -123,12 +123,6 @@ export default function OfficeProductBuilder({ productType }: { productType: str
     if (data.variants !== undefined) setVariants(data.variants)
   })
 
-  // Clear draft on successful submission
-  useEffect(() => {
-    if ((state as any)?.success) {
-      clearDraft()
-    }
-  }, [state, clearDraft])
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
   const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))

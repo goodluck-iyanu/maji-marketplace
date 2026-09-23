@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useActionState, useRef } from 'react'
+import { useState, useActionState, useRef } from 'react'
 import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, ArrowRight, Shirt, Briefcase, Sparkles, Check, Upload, X, Plus, Trash2, Loader2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -120,12 +120,6 @@ export default function FashionProductBuilder({ productType }: { productType: st
     if (data.variants !== undefined) setVariants(data.variants)
   })
 
-  // Clear draft on successful submission
-  useEffect(() => {
-    if ((state as any)?.success) {
-      clearDraft()
-    }
-  }, [state, clearDraft])
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
   const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))

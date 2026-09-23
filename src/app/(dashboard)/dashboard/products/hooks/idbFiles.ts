@@ -50,3 +50,4 @@ export async function clearDraftFiles(productType: string): Promise<void> {
     request.onerror = () => reject(request.error)
   })
 }
+
