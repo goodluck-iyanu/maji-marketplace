@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Package, ShoppingCart, DollarSign } from 'lucide-react'
+import { OnboardingBanner } from '../components/onboarding-banner'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export default async function DashboardOverview() {
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name')
+    .select('id, name, slug')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -30,6 +31,12 @@ export default async function DashboardOverview() {
     .from('products')
     .select('*', { count: 'exact', head: true })
     .eq('store_id', store.id)
+
+  const { data: payoutAccount } = await supabase
+    .from('payout_accounts')
+    .select('id')
+    .eq('store_id', store.id)
+    .single()
 
   const { data: allOrders } = await supabase
     .from('orders')
@@ -49,6 +56,11 @@ export default async function DashboardOverview() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <OnboardingBanner 
+        hasBank={!!payoutAccount} 
+        hasProduct={(productCount || 0) > 0} 
+        storeSlug={store.slug} 
+      />
       <h1 className="text-2xl font-bold tracking-tight text-gray-900">
         Welcome back, {store!.name}
       </h1>
