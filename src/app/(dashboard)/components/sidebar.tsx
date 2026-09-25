@@ -24,14 +24,25 @@ export function Sidebar({ storeName, storeSlug, productType }: { storeName: stri
   return (
     <>
       {/* Mobile header (hamburger) */}
-      <div className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-30">
-        <div className="flex items-center">
-          <Store className="h-5 w-5 mr-2" />
-          <span className="font-semibold">{storeName}</span>
+      <div className="md:hidden flex flex-col bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center">
+            <Store className="h-5 w-5 mr-2 text-blue-600" />
+            <span className="font-bold text-lg">{storeName}</span>
+          </div>
+          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500 hover:text-black">
+            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
-        <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500 hover:text-black">
-          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="px-4 pb-3">
+          <Link 
+            href={`/store/${storeSlug}`} 
+            target="_blank"
+            className="inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
+          >
+            View Live Storefront
+          </Link>
+        </div>
       </div>
 
       {/* Overlay for mobile */}
@@ -48,9 +59,18 @@ export function Sidebar({ storeName, storeSlug, productType }: { storeName: stri
         md:relative md:translate-x-0
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 hidden md:flex items-center px-6 border-b border-gray-100">
-          <Store className="h-5 w-5 mr-2" />
-          <span className="font-semibold truncate">{storeName}</span>
+        <div className="flex flex-col px-6 py-5 border-b border-gray-100 hidden md:flex">
+          <div className="flex items-center mb-3">
+            <Store className="h-5 w-5 mr-2 text-blue-600" />
+            <span className="font-bold text-lg truncate">{storeName}</span>
+          </div>
+          <Link 
+            href={`/store/${storeSlug}`} 
+            target="_blank"
+            className="inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
+          >
+            View Live Storefront
+          </Link>
         </div>
         
         <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">

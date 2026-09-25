@@ -26,6 +26,11 @@ const getAIResponse = (message: string, context: {
     return `Hello there! I'm Maji AI. How can I help you grow ${context.storeName} today?`
   }
 
+  // Settings / Store Customization
+  if (m.includes('profile') || m.includes('picture') || m.includes('color') || m.includes('logo') || m.includes('banner') || m.includes('appearance') || m.includes('setting')) {
+    return "You can customize your storefront in the **Settings** tab. There you can upload a new logo (profile picture), change your store's primary and secondary colors, upload a banner, and update your social media links!"
+  }
+
   // Onboarding questions
   if (m.includes('what to do') || m.includes('start') || m.includes('next step') || m.includes('how to')) {
     if (!context.hasBank) {
@@ -61,7 +66,7 @@ const getAIResponse = (message: string, context: {
   }
 
   // Default fallback
-  return "I'm Maji AI! I can help you with setting up your store, adding bank accounts, adding products, and understanding your dashboard. What would you like to know?"
+  return "I'm Maji AI! I can help you with setting up your store, editing settings (like colors and logos), adding bank accounts, adding products, and understanding your dashboard. What would you like to know?"
 }
 
 
@@ -84,12 +89,16 @@ export function MajiAIAssistant({
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [showContact, setShowContact] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  
+  // Store-specific storage key
+  const storageKey = `maji_ai_messages_${storeSlug}`
 
   // Initialize welcome message from localStorage or create new
   useEffect(() => {
-    const saved = localStorage.getItem('maji_ai_messages')
+    const saved = localStorage.getItem(storageKey)
     if (saved) {
       try {
         const parsed = JSON.parse(saved).map((m: any) => ({ ...m, time: new Date(m.time) }))
@@ -112,15 +121,15 @@ export function MajiAIAssistant({
         time: new Date()
       }])
     }
-  }, [storeName, hasBank, hasProduct])
+  }, [storeName, hasBank, hasProduct, storageKey])
 
   // Save to localStorage when messages change
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem('maji_ai_messages', JSON.stringify(messages))
+      localStorage.setItem(storageKey, JSON.stringify(messages))
     }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, storageKey])
 
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault()
@@ -161,7 +170,7 @@ export function MajiAIAssistant({
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 h-14 w-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 z-50 group"
         >
-          <Sparkles className="h-6 w-6 group-hover:rotate-12 transition-transform" />
+          <Bot className="h-7 w-7 group-hover:scale-110 transition-transform" />
           
           {/* Subtle pulse animation for attention if not set up */}
           {(!hasBank || !hasProduct) && (
@@ -181,7 +190,7 @@ export function MajiAIAssistant({
           <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 bg-white/20 rounded-full flex items-center justify-center">
-                <Sparkles className="h-4 w-4" />
+                <Bot className="h-4 w-4" />
               </div>
               <div>
                 <h3 className="font-bold text-sm">Maji AI Assistant</h3>
@@ -192,6 +201,15 @@ export function MajiAIAssistant({
               <X className="h-5 w-5" />
             </button>
           </div>
+
+          {/* Contact Support Toggle */}
+          {showContact && (
+            <div className="bg-blue-50 border-b border-blue-100 p-3 text-sm text-blue-900 animate-in slide-in-from-top-2">
+              <p className="font-semibold mb-1">Customer Support:</p>
+              <p className="flex items-center gap-2"><span className="opacity-75">WhatsApp:</span> +2347077745253</p>
+              <p className="flex items-center gap-2"><span className="opacity-75">Email:</span> support.hoberg@gmail.com</p>
+            </div>
+          )}
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50 flex flex-col gap-4">
@@ -232,6 +250,16 @@ export function MajiAIAssistant({
               </div>
             )}
             <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Contact Button */}
+          <div className="px-4 py-2 bg-gray-50 border-t border-gray-100">
+            <button 
+              onClick={() => setShowContact(!showContact)}
+              className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+            >
+              {showContact ? 'Hide contact info' : 'Talk to someone (Customer Care)'}
+            </button>
           </div>
 
           {/* Input Area */}
