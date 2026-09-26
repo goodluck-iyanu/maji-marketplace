@@ -21,6 +21,12 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   const pickupPhone = formData.get('pickupPhone') as string
   const pickupState = formData.get('pickupState') as string
   const pickupCity = formData.get('pickupCity') as string
+  const pickupZip = formData.get('pickupZip') as string
+  const pickupLat = formData.get('pickupLat') ? parseFloat(formData.get('pickupLat') as string) : null
+  const pickupLng = formData.get('pickupLng') ? parseFloat(formData.get('pickupLng') as string) : null
+  const pickupContactName = `${formData.get('pickupFirstName') || ''} ${formData.get('pickupLastName') || ''}`.trim()
+  const pickupEmail = formData.get('pickupEmail') as string
+  const pickupIsResidential = formData.get('pickupIsResidentialVal') === 'true'
   
   const facebook = formData.get('facebook') as string
   const twitter = formData.get('twitter') as string
@@ -65,6 +71,12 @@ export async function createStoreAction(prevState: any, formData: FormData) {
       pickup_phone: productType === 'physical' ? pickupPhone : null,
       pickup_state: productType === 'physical' ? pickupState : null,
       pickup_city: productType === 'physical' ? pickupCity : null,
+      pickup_zip: productType === 'physical' ? pickupZip : null,
+      pickup_lat: productType === 'physical' ? pickupLat : null,
+      pickup_lng: productType === 'physical' ? pickupLng : null,
+      pickup_contact_name: productType === 'physical' ? pickupContactName : null,
+      pickup_email: productType === 'physical' ? pickupEmail : null,
+      pickup_is_residential: productType === 'physical' ? pickupIsResidential : false,
     })
     .select('id')
     .single()

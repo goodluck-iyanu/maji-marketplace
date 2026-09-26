@@ -2,14 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server'
 
-export async function getDeliveryQuotes(storeId: string, deliveryState: string, deliveryCity: string) {
+export async function getDeliveryQuotes(storeId: string, deliveryAddressInfo: any) {
   try {
     const supabase = await createClient()
     
-    // Fetch store structured pickup address (state + city)
+    // Fetch store structured pickup address
     const { data: store } = await supabase
       .from('stores')
-      .select('pickup_address, pickup_state, pickup_city, pickup_phone')
+      .select('pickup_address, pickup_state, pickup_city, pickup_zip, pickup_contact_name, pickup_email, pickup_phone')
       .eq('id', storeId)
       .single()
       
@@ -17,12 +17,11 @@ export async function getDeliveryQuotes(storeId: string, deliveryState: string, 
       return { error: 'Store not found.' }
     }
 
-    // Use structured state/city if available, fall back to parsing pickup_address
     let pickupState = store.pickup_state
     let pickupCity = store.pickup_city
 
     if (!pickupState) {
-      // Legacy sellers with free-text pickup_address only — parse state
+      // Legacy fallback
       const states = ["Abia","Abuja","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"];
       for (const st of states) {
         if ((store.pickup_address ?? '').toLowerCase().includes(st.toLowerCase())) {
@@ -31,7 +30,6 @@ export async function getDeliveryQuotes(storeId: string, deliveryState: string, 
         }
       }
       if (!pickupState) pickupState = 'Lagos';
-      // Use state name as city fallback (Terminal accepts state name as city)
       if (!pickupCity) pickupCity = pickupState;
     }
 
@@ -41,20 +39,26 @@ export async function getDeliveryQuotes(storeId: string, deliveryState: string, 
 
     const payload = {
       pickup_address: {
-        first_name: "Seller",
-        last_name: "Store",
+        first_name: store.pickup_contact_name ? store.pickup_contact_name.split(' ')[0] : "Seller",
+        last_name: store.pickup_contact_name ? store.pickup_contact_name.split(' ').slice(1).join(' ') : "Store",
         line1: (store.pickup_address ?? pickupCity).substring(0, 80),
         city: pickupCity,
         state: pickupState,
         country: "NG",
+        zip: store.pickup_zip || undefined,
+        email: store.pickup_email || "seller@maji.hoberg.com.ng",
+        phone: store.pickup_phone || "08000000000"
       },
       delivery_address: {
-        first_name: "Customer",
-        last_name: "Buyer",
-        line1: deliveryCity,
-        city: deliveryCity,
-        state: deliveryState,
+        first_name: deliveryAddressInfo.firstName || "Customer",
+        last_name: deliveryAddressInfo.lastName || "Buyer",
+        line1: (deliveryAddressInfo.line1 || deliveryAddressInfo.city).substring(0, 80),
+        city: deliveryAddressInfo.city,
+        state: deliveryAddressInfo.state,
         country: "NG",
+        zip: deliveryAddressInfo.zip || undefined,
+        email: deliveryAddressInfo.email || "buyer@maji.hoberg.com.ng",
+        phone: deliveryAddressInfo.phone || "08000000000"
       },
       parcel: {
         description: "General items",

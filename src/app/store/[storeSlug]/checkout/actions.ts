@@ -13,11 +13,18 @@ export async function processCheckout(formData: FormData) {
   const customerWhatsapp = formData.get('whatsapp') as string
   
   const deliveryMethod = formData.get('deliveryMethod') as string || 'digital'
-  const state = formData.get('state') as string
-  const area = formData.get('area') as string
-  const address = formData.get('address') as string
-  const landmark = formData.get('landmark') as string
-  const instructions = formData.get('instructions') as string
+  
+  const deliveryState = formData.get('deliveryState') as string
+  const deliveryCity = formData.get('deliveryCity') as string
+  const deliveryAddress = formData.get('deliveryAddress') as string
+  const deliveryLat = formData.get('deliveryLat') ? parseFloat(formData.get('deliveryLat') as string) : null
+  const deliveryLng = formData.get('deliveryLng') ? parseFloat(formData.get('deliveryLng') as string) : null
+  const deliveryZip = formData.get('deliveryZip') as string
+  const deliveryLandmark = formData.get('deliveryLandmark') as string
+  const deliveryFirstName = formData.get('deliveryFirstName') as string
+  const deliveryLastName = formData.get('deliveryLastName') as string
+  const deliveryPhone = formData.get('deliveryPhone') as string
+  const deliveryIsResidential = formData.get('deliveryIsResidentialVal') === 'true'
   
   if (!storeSlug || !cartJson || !customerEmail) {
     return { error: 'Missing required fields' }
@@ -110,7 +117,20 @@ export async function processCheckout(formData: FormData) {
     if (deliveryMethod === 'delivery') {
       deliveryFee = parseFloat(formData.get('deliveryFee') as string) || 0;
       const carrier = formData.get('carrierName') as string || 'Standard Delivery';
-      finalDeliveryAddress = { state, area, address, landmark, instructions, carrier }
+      finalDeliveryAddress = { 
+        state: deliveryState, 
+        city: deliveryCity, 
+        line1: deliveryAddress, 
+        lat: deliveryLat, 
+        lng: deliveryLng, 
+        zip: deliveryZip,
+        landmark: deliveryLandmark,
+        first_name: deliveryFirstName,
+        last_name: deliveryLastName,
+        phone: deliveryPhone,
+        is_residential: deliveryIsResidential,
+        carrier 
+      }
     }
   }
   
