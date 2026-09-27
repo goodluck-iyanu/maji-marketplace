@@ -128,6 +128,8 @@ export async function getDeliveryQuotes(
           weightKg: Math.round(totalWeightKg * 100) / 100,
           valueKobo: totalValueKobo,
           category: category,
+          description: productDescription || 'Maji Marketplace Order',
+          fragile: anyFragile,
         }
       ]
     }
@@ -150,7 +152,14 @@ export async function getDeliveryQuotes(
       body: JSON.stringify(payload)
     })
 
-    const data = await res.json()
+    const responseText = await res.text()
+    let data;
+    try {
+      data = JSON.parse(responseText)
+    } catch (e) {
+      console.error('Theyutes API returned non-JSON:', responseText)
+      return { error: 'Invalid response from delivery service.' }
+    }
 
     if (!res.ok) {
       console.error('Theyutes API Error:', data)
@@ -180,8 +189,8 @@ export async function getDeliveryQuotes(
       }))
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Delivery quote error:', error)
-    return { error: 'An error occurred calculating delivery fee.' }
+    return { error: 'Detailed Error: ' + String(error.message || error) }
   }
 }
