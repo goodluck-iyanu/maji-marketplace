@@ -44,9 +44,10 @@ interface TerminalAddressFormProps {
   type: 'pickup' | 'delivery';
   defaultValues?: Partial<TerminalAddressData>;
   onChange?: (data: TerminalAddressData) => void;
+  hideContactInfo?: boolean;
 }
 
-export default function TerminalAddressForm({ type, defaultValues, onChange }: TerminalAddressFormProps) {
+export default function TerminalAddressForm({ type, defaultValues, onChange, hideContactInfo = false }: TerminalAddressFormProps) {
   const [firstName, setFirstName] = useState(defaultValues?.firstName || '')
   const [lastName, setLastName] = useState(defaultValues?.lastName || '')
   const [phone, setPhone] = useState(defaultValues?.phone || '')
@@ -157,58 +158,62 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
         {isPickup ? 'Pickup Contact & Location' : 'Delivery Contact & Location'}
       </h3>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-          <input 
-            type="text" 
-            name={`${prefix}FirstName`} 
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required 
-            placeholder="e.g. John"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-          <input 
-            type="text" 
-            name={`${prefix}LastName`}
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)} 
-            required 
-            placeholder="e.g. Doe"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
-          />
-        </div>
-      </div>
+      {!hideContactInfo && (
+        <>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <input 
+                type="text" 
+                name={`${prefix}FirstName`} 
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required 
+                placeholder="e.g. John"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <input 
+                type="text" 
+                name={`${prefix}LastName`}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)} 
+                required 
+                placeholder="e.g. Doe"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+              />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-          <input 
-            type="tel" 
-            name={`${prefix}Phone`} 
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            required 
-            placeholder="08012345678"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input 
-            type="email" 
-            name={`${prefix}Email`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)} 
-            placeholder="john@example.com"
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
-          />
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input 
+                type="tel" 
+                name={`${prefix}Phone`} 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required 
+                placeholder="08012345678"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input 
+                type="email" 
+                name={`${prefix}Email`}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="john@example.com"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>

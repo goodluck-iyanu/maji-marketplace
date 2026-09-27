@@ -328,6 +328,7 @@ export default function CartPage() {
                   <div className="pt-4 border-t border-gray-100">
                     <TerminalAddressForm 
                       type="delivery" 
+                      hideContactInfo={true} 
                       onChange={setTerminalAddress}
                     />
                       
