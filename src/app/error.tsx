@@ -24,9 +24,12 @@ export default function GlobalError({
         </div>
         
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Oops, something went wrong!</h1>
-        <p className="text-gray-500 mb-8">
-          We encountered an unexpected error while trying to load this page. Our team has been notified.
+        <p className="text-gray-500 mb-2">
+          We encountered an unexpected error while trying to load this page.
         </p>
+        <div className="bg-red-50 text-red-600 p-4 rounded-md text-sm text-left font-mono break-all mb-6">
+          {error.message || 'Unknown error'}
+        </div>
 
         <div className="space-y-3">
           <button
