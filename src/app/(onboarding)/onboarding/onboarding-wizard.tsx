@@ -522,11 +522,22 @@ export function OnboardingWizard() {
               </ul>
             )}
 
+            {showSuggestions && !isSearching && pickupAddress.length >= 4 && addressSuggestions.length === 0 && (
+              <div className="absolute z-50 w-full bg-white border border-gray-200 shadow-xl rounded-lg mt-1 px-4 py-3 text-sm text-red-500 flex flex-col gap-1">
+                <span>No map results found.</span>
+                <span className="text-gray-500 text-xs">Tip: Only type the name of your street (e.g., "Awolowo Way") or a major landmark. Do not include your house number here.</span>
+              </div>
+            )}
+
             {showSuggestions && isSearching && pickupAddress.length >= 4 && addressSuggestions.length === 0 && (
               <div className="absolute z-50 w-full bg-white border border-gray-200 shadow-xl rounded-lg mt-1 px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" /> Searching map data...
               </div>
             )}
+            
+            <p className="text-xs text-gray-500 mt-2">
+              Tip: Only type the name of your street or a nearby major landmark. Do not include your house number in this box.
+            </p>
           </div>
 
           {/* Landmark */}
