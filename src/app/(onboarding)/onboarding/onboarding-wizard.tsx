@@ -3,6 +3,7 @@
 import { useState, useActionState, useEffect, useRef } from 'react'
 import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle, MapPin, Search } from 'lucide-react'
 import { createStoreAction } from './actions'
+import { NG_STATES_CITIES } from '@/lib/ng-cities'
 
 type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'pickup_details' | 'social_links' | 'creating'
 
@@ -42,13 +43,6 @@ const DIGITAL_CATEGORIES = [
   { id: 'other_digital', name: 'Other', icon: MoreHorizontal },
 ]
 
-const LAGOS_LGAS = [
-  'Agege', 'Ajeromi-Ifelodun', 'Alimosho', 'Amuwo-Odofin', 'Apapa',
-  'Badagry', 'Epe', 'Eti-Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye',
-  'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island', 'Lagos Mainland',
-  'Mushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'
-]
-
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('product_type')
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
@@ -66,6 +60,7 @@ export function OnboardingWizard() {
   const [pickupEmail, setPickupEmail] = useState('')
   const [pickupHouseNumber, setPickupHouseNumber] = useState('')
   const [pickupArea, setPickupArea] = useState('')
+  const [pickupState, setPickupState] = useState('')
   const [pickupLga, setPickupLga] = useState('')
   const [pickupAddress, setPickupAddress] = useState('')
   const [pickupLandmark, setPickupLandmark] = useState('')
@@ -421,11 +416,11 @@ export function OnboardingWizard() {
 
       <div className={step === 'pickup_details' ? 'block text-center' : 'hidden'}>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Set up your pickup address</h2>
-        <p className="text-gray-500 mb-6">This is where logistics riders will come to pick up orders. Lagos only for now.</p>
+        <p className="text-gray-500 mb-6">This is where logistics riders will come to pick up orders. Lagos and Ogun only for now.</p>
         
         {/* Hidden inputs for server action */}
-        <input type="hidden" name="pickupState" value="Lagos" />
-        <input type="hidden" name="pickupCity" value={pickupLga || 'Lagos'} />
+        <input type="hidden" name="pickupState" value={pickupState} />
+        <input type="hidden" name="pickupCity" value={pickupLga} />
         <input type="hidden" name="pickupCountry" value="NG" />
         <input type="hidden" name="pickupLat" value={pickupLat} />
         <input type="hidden" name="pickupLng" value={pickupLng} />
@@ -457,32 +452,9 @@ export function OnboardingWizard() {
             </div>
           </div>
 
-          {/* LGA + House/Building */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">LGA (Local Government) <span className="text-red-500">*</span></label>
-              <select name="pickupLga" value={pickupLga} onChange={(e) => setPickupLga(e.target.value)} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none bg-white">
-                <option value="">Select LGA</option>
-                {LAGOS_LGAS.map(lga => (
-                  <option key={lga} value={lga}>{lga}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">House / Building No. <span className="text-red-500">*</span></label>
-              <input type="text" name="pickupHouseNumber" value={pickupHouseNumber} onChange={(e) => setPickupHouseNumber(e.target.value)} required placeholder="e.g. 12A" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
-            </div>
-          </div>
-
-          {/* Area */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
-            <input type="text" name="pickupArea" value={pickupArea} onChange={(e) => setPickupArea(e.target.value)} required placeholder="e.g. Victoria Island, Lekki Phase 1" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
-          </div>
-
-          {/* Street Address with Autocomplete */}
-          <div className="relative" ref={wrapperRef}>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Street Address <span className="text-red-500">*</span></label>
+          {/* Map Search (First) */}
+          <div className="relative pt-2" ref={wrapperRef}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search Nearest Junction, Landmark or Street <span className="text-red-500">*</span></label>
             <div className="relative">
               <input
                 type="text"
@@ -540,6 +512,39 @@ export function OnboardingWizard() {
             </p>
           </div>
 
+          {/* State + LGA */}
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
+              <select name="pickupStateSelect" value={pickupState} onChange={(e) => { setPickupState(e.target.value); setPickupLga(''); }} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none bg-white">
+                <option value="">Select State</option>
+                <option value="Lagos">Lagos</option>
+                <option value="Ogun">Ogun</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">LGA / City <span className="text-red-500">*</span></label>
+              <select name="pickupLga" value={pickupLga} onChange={(e) => setPickupLga(e.target.value)} required disabled={!pickupState} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none bg-white">
+                <option value="">Select LGA</option>
+                {(NG_STATES_CITIES[pickupState] || []).map(lga => (
+                  <option key={lga} value={lga}>{lga}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* House/Building + Area */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">House / Building No. <span className="text-red-500">*</span></label>
+              <input type="text" name="pickupHouseNumber" value={pickupHouseNumber} onChange={(e) => setPickupHouseNumber(e.target.value)} required placeholder="e.g. 12A" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
+              <input type="text" name="pickupArea" value={pickupArea} onChange={(e) => setPickupArea(e.target.value)} required placeholder="e.g. Lekki Phase 1" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
+          </div>
+
           {/* Landmark */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Bus Stop / Landmark <span className="text-red-500">*</span></label>
@@ -564,11 +569,11 @@ export function OnboardingWizard() {
           <button
             type="button"
             onClick={() => {
-              if (pickupFirstName && pickupLastName && pickupPhone && pickupHouseNumber && pickupArea && pickupLga && pickupAddress && pickupLandmark && pickupLat && pickupLng) {
+              if (pickupFirstName && pickupLastName && pickupPhone && pickupHouseNumber && pickupArea && pickupState && pickupLga && pickupAddress && pickupLandmark && pickupLat && pickupLng) {
                 setStep('social_links')
               }
             }}
-            disabled={!pickupFirstName || !pickupLastName || !pickupPhone || !pickupHouseNumber || !pickupArea || !pickupLga || !pickupAddress || !pickupLandmark || !pickupLat || !pickupLng}
+            disabled={!pickupFirstName || !pickupLastName || !pickupPhone || !pickupHouseNumber || !pickupArea || !pickupState || !pickupLga || !pickupAddress || !pickupLandmark || !pickupLat || !pickupLng}
             className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
           >
             Continue

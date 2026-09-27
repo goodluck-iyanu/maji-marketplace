@@ -55,7 +55,7 @@ export async function createStoreAction(prevState: any, formData: FormData) {
     !pickupArea?.trim() ||
     !pickupLga?.trim() ||
     !pickupCity?.trim() ||
-    pickupState !== 'Lagos' ||
+    !['Lagos', 'Ogun'].includes(pickupState) ||
     pickupCountry !== 'NG' ||
     !pickupLandmark?.trim() ||
     !pickupContactName ||

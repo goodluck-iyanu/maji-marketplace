@@ -210,102 +210,9 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
-          <select 
-            required 
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-            value={selectedState}
-            onChange={(e) => { 
-              setSelectedState(e.target.value); 
-              setSelectedCity('');
-              setLat('');
-              setLng('');
-              setLocationConfirmed(false)
-              setAddressSuggestions([])
-            }}
-          >
-            <option value="">Select state</option>
-            {NG_STATES.map(state => (
-              <option key={state} value={state}>{state}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">City / Area <span className="text-red-500">*</span></label>
-          <select 
-            required
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-            value={selectedCity}
-            onChange={(e) => {
-              setSelectedCity(e.target.value);
-              setLat('');
-              setLng('');
-              setLocationConfirmed(false)
-              setAddressSuggestions([])
-            }}
-            disabled={!selectedState}
-          >
-            <option value="">{selectedState ? 'Select city' : 'Select state first'}</option>
-            {(NG_STATES_CITIES[selectedState] ?? []).map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">House / Building Number <span className="text-red-500">*</span></label>
-          <input
-            type="text"
-            name={`${prefix}HouseNumber`}
-            value={houseNumber}
-            onChange={(event) => setHouseNumber(event.target.value)}
-            required
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
-          <input
-            type="text"
-            name={`${prefix}Area`}
-            value={area}
-            onChange={(event) => setArea(event.target.value)}
-            required
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">LGA <span className="text-red-500">*</span></label>
-          <input
-            type="text"
-            name={`${prefix}Lga`}
-            value={lga}
-            onChange={(event) => setLga(event.target.value)}
-            required
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-          <input
-            type="text"
-            value="Nigeria (NG)"
-            readOnly
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-600"
-          />
-        </div>
-      </div>
-
-      <div className="relative" ref={wrapperRef}>
+      <div className="relative pt-2" ref={wrapperRef}>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Full Street Address <span className="text-red-500">*</span>
+          Search Nearest Junction, Landmark or Street <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <input 
@@ -393,6 +300,93 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
         <p className="text-xs text-gray-500 mt-2">
           Tip: Only type the name of your street or a nearby major landmark. Do not include your house number in this box.
         </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 pt-2">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
+          <select 
+            required 
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+            value={selectedState}
+            onChange={(e) => { 
+              setSelectedState(e.target.value); 
+              setSelectedCity('');
+              setAddressSuggestions([])
+            }}
+          >
+            <option value="">Select state</option>
+            {['Lagos', 'Ogun'].map(state => (
+              <option key={state} value={state}>{state}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">City / Area <span className="text-red-500">*</span></label>
+          <select 
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+            value={selectedCity}
+            onChange={(e) => {
+              setSelectedCity(e.target.value);
+              setAddressSuggestions([])
+            }}
+            disabled={!selectedState}
+          >
+            <option value="">{selectedState ? 'Select city' : 'Select state first'}</option>
+            {(NG_STATES_CITIES[selectedState] ?? []).map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">House / Building Number <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}HouseNumber`}
+            value={houseNumber}
+            onChange={(event) => setHouseNumber(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}Area`}
+            value={area}
+            onChange={(event) => setArea(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">LGA <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}Lga`}
+            value={lga}
+            onChange={(event) => setLga(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+          <input
+            type="text"
+            value="Nigeria (NG)"
+            readOnly
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-600"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
