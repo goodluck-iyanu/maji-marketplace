@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Droplet, Sparkles, Box, Briefcase, Home, Monitor, Archive, Tv, Sun, Zap, Layout, Layers, Coffee, TreePine, Gift, Package, MoreHorizontal, Gem, Star, Heart, Link as LinkIcon, Eye, Watch, ShoppingBag, User, Umbrella, Paperclip, Wrench, Scissors } from 'lucide-react'
 import Link from 'next/link'
 import { createJewelryProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Jewelry Category' },
@@ -577,8 +578,8 @@ export default function JewelryProductBuilder({ productType }: { productType: st
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

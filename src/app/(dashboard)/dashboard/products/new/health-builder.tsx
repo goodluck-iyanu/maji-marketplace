@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Droplet, Sparkles, Scissors, Bath, Smile, Star, Heart, Sun, Activity, Brush, Briefcase, Gift, MoreHorizontal, Dumbbell, Users, Baby, Leaf } from 'lucide-react'
 import Link from 'next/link'
 import { createHealthProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Health Category' },
@@ -643,8 +644,8 @@ export default function HealthProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

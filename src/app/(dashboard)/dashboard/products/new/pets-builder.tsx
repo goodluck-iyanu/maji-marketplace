@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Dog, Cat, Bird, Fish, Rabbit, Bone, Home, Link as LinkIcon, Gamepad2, Scissors, Package, Droplet, Activity, Car, Shirt, Shield, Leaf, Heart, Gift, Box, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createPetsProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Pets Category' },
@@ -594,8 +595,8 @@ export default function PetsProductBuilder({ productType }: { productType: strin
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

@@ -4,6 +4,7 @@ import { useState, useActionState, useRef } from 'react'
 import { ArrowLeft, ImagePlus, X, Loader2, Save } from 'lucide-react'
 import Link from 'next/link'
 import { createProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const compressImage = async (file: File): Promise<File> => {
   return new Promise((resolve, reject) => {
@@ -231,6 +232,8 @@ export default function NewProductForm({ productType }: { productType: string | 
             </div>
           </div>
         </div>
+
+        <LogisticsFields productType={productType} />
 
         <div className="flex justify-end">
           <button 

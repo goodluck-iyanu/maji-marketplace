@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Gamepad2, Joystick, Disc, Monitor, Cpu, Mouse, Keyboard, Headphones, Home, Camera, Car, Plug, Battery, Briefcase, Gift, Lightbulb, Wrench, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createGamingProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Gaming Category' },
@@ -594,8 +595,8 @@ export default function GamingProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

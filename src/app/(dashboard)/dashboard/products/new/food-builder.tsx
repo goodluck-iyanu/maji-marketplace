@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Wheat, Package, Drumstick, Snowflake, Apple, Milk, Coffee, Croissant, Flame, Droplet, Candy, Baby, Utensils, Gift, MoreHorizontal, Check, Upload, X, Loader2, Plus, PlusCircle, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { createFoodProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Food Category' },
@@ -572,6 +573,7 @@ export default function FoodProductBuilder({ productType }: { productType: strin
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )

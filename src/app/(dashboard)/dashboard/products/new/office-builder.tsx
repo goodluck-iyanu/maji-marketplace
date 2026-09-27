@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Pen, Book, Folder, Printer, Droplet, Monitor, Phone, Calculator, Archive, PieChart, Video, Home, Lock, CreditCard, Receipt, Package, Paperclip, Coffee, Shield, Tag, Gift, Store, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createOfficeProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Office Category' },
@@ -591,8 +592,8 @@ export default function OfficeProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

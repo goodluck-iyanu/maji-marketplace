@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, ArrowRight, Smartphone, Laptop, Headphones, Battery, Watch, Gamepad2, Camera, Tv, Home, Wifi, Mouse, Cpu, Check, Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { createGadgetProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Device Type' },
@@ -579,6 +580,7 @@ export default function GadgetsProductBuilder({ productType }: { productType: st
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )

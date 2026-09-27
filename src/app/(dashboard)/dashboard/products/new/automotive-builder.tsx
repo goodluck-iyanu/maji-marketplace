@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Wrench, Settings, Circle, StopCircle, Lightbulb, Battery, Thermometer, Car, Home, Smartphone, Shield, Droplet, AlertTriangle, Tent, Bike, Truck, Activity, Gift, Package, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createAutomotiveProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Automotive Category' },
@@ -578,8 +579,8 @@ export default function AutomotiveProductBuilder({ productType }: { productType:
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

@@ -1,15 +1,14 @@
 'use client'
 
 import { useCart } from '../cart-context'
-import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck, ChevronDown } from 'lucide-react'
-import { useState, useEffect, useRef } from 'react'
+import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { processCheckout } from '../checkout/actions'
 import { getDeliveryQuotes } from '../checkout/delivery-actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
-import { NG_STATES_CITIES, NG_STATES } from '@/lib/ng-cities'
-import TerminalAddressForm from '@/components/TerminalAddressForm'
+import TerminalAddressForm, { type TerminalAddressData } from '@/components/TerminalAddressForm'
 
 export default function CartPage() {
   const params = useParams()
@@ -24,13 +23,14 @@ export default function CartPage() {
   
   const [deliveryFee, setDeliveryFee] = useState(0)
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+  const [quoteError, setQuoteError] = useState<string | null>(null)
   const [storeId, setStoreId] = useState<string | null>(null)
-  const [selectedState, setSelectedState] = useState('')
-  const [selectedCity, setSelectedCity] = useState('')
-  const [carrierRates, setCarrierRates] = useState<{fee: number, carrier: string, eta: string}[]>([])
+  const [carrierRates, setCarrierRates] = useState<{fee: number, carrier: string, carrierId: string, eta: string, quoteId: string}[]>([])
   const [selectedCarrierIndex, setSelectedCarrierIndex] = useState(0)
   
-  const [terminalAddress, setTerminalAddress] = useState<any>(null)
+  const [terminalAddress, setTerminalAddress] = useState<TerminalAddressData | null>(null)
+  const quoteCartKey = JSON.stringify(items.map(item => ({ id: item.id, qty: item.qty })))
+  const quoteAddressKey = JSON.stringify(terminalAddress)
 
   useEffect(() => {
     async function fetchStore() {
@@ -45,29 +45,59 @@ export default function CartPage() {
   }, [storeSlug])
 
   useEffect(() => {
+    let cancelled = false
     async function calculateFee() {
-      if (storeId && terminalAddress?.state && terminalAddress?.city && productType === 'physical' && deliveryMethod === 'delivery') {
+      const dropoff: TerminalAddressData | null = JSON.parse(quoteAddressKey)
+      const addressReady = dropoff?.locationConfirmed &&
+        dropoff.firstName && dropoff.lastName && dropoff.phone &&
+        dropoff.line1 && dropoff.houseNumber && dropoff.area &&
+        dropoff.lga && dropoff.city && dropoff.state &&
+        dropoff.lat && dropoff.lng && dropoff.landmark
+      if (storeId && addressReady && productType === 'physical' && deliveryMethod === 'delivery') {
         setIsCalculatingFee(true)
+        setQuoteError(null)
+        setDeliveryFee(0)
         setCarrierRates([])
-        const res = await getDeliveryQuotes(storeId, terminalAddress)
-        if (res.allRates && res.allRates.length > 0) {
-          setCarrierRates(res.allRates)
-          setSelectedCarrierIndex(0)
-          setDeliveryFee(res.allRates[0].fee)
-        } else {
+        try {
+          const quoteItems: { id: string; qty: number }[] = JSON.parse(quoteCartKey)
+          const res = await getDeliveryQuotes(storeId, dropoff, quoteItems)
+          if (cancelled) return
+          if (res.rates && res.rates.length > 0) {
+            setCarrierRates(res.rates)
+            setSelectedCarrierIndex(0)
+            setDeliveryFee(res.rates[0].fee)
+          } else {
+            setCarrierRates([])
+            setDeliveryFee(0)
+            setQuoteError(res.error || 'No delivery options are available for this route.')
+          }
+        } catch (error) {
+          if (cancelled) return
           setCarrierRates([])
           setDeliveryFee(0)
+          setQuoteError(error instanceof Error ? error.message : 'Unable to request a live delivery quote.')
+        } finally {
+          if (!cancelled) setIsCalculatingFee(false)
         }
-        setIsCalculatingFee(false)
       } else {
         setCarrierRates([])
         setDeliveryFee(0)
+        setQuoteError(null)
+        setIsCalculatingFee(false)
       }
     }
     calculateFee()
-  }, [storeId, terminalAddress?.state, terminalAddress?.city, productType, deliveryMethod])
+    return () => { cancelled = true }
+  }, [
+    storeId, productType, deliveryMethod, quoteCartKey,
+    quoteAddressKey,
+  ])
 
   const finalTotal = totalAmount + deliveryFee
+  const selectedRate = carrierRates[selectedCarrierIndex]
+  const hasCompleteDeliveryQuote = productType !== 'physical' ||
+    deliveryMethod !== 'delivery' ||
+    Boolean(selectedRate)
 
   const handleCheckout = async (formData: FormData) => {
     setLoading(true)
@@ -77,9 +107,10 @@ export default function CartPage() {
     formData.append('cart', JSON.stringify(cartData))
     formData.append('storeSlug', storeSlug)
     formData.append('deliveryMethod', deliveryMethod)
-    formData.append('deliveryFee', deliveryFee.toString())
-    if (carrierRates[selectedCarrierIndex]) {
-      formData.append('carrierName', carrierRates[selectedCarrierIndex].carrier)
+    if (carrierRates[selectedCarrierIndex] && deliveryMethod === 'delivery') {
+      const selectedQuote = carrierRates[selectedCarrierIndex]
+      formData.append('deliveryQuoteId', selectedQuote.quoteId)
+      formData.append('deliveryQuote', JSON.stringify(selectedQuote))
     }
     
     try {
@@ -93,8 +124,8 @@ export default function CartPage() {
         setError("An unexpected error occurred. Please try again.")
         setLoading(false)
       }
-    } catch (err: any) {
-      setError(err.message || 'Checkout failed')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Checkout failed')
       setLoading(false)
     }
   }
@@ -175,7 +206,15 @@ export default function CartPage() {
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery</span>
                     {deliveryMethod === 'delivery' ? (
-                      <span>₦{deliveryFee.toLocaleString()}</span>
+                      <span>
+                        {selectedRate
+                          ? `₦${deliveryFee.toLocaleString()}`
+                          : isCalculatingFee
+                            ? 'Getting live quote…'
+                            : quoteError
+                              ? 'Unavailable'
+                              : 'Confirm delivery location'}
+                      </span>
                     ) : (
                       <span className="text-gray-400">— Not selected</span>
                     )}
@@ -184,7 +223,9 @@ export default function CartPage() {
                 
                 <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-100 text-lg">
                   <span className="text-gray-900 font-semibold">Total Amount</span>
-                  <span className="font-bold text-2xl text-gray-900">₦{finalTotal.toLocaleString()}</span>
+                  <span className="font-bold text-2xl text-gray-900">
+                    {hasCompleteDeliveryQuote ? `₦${finalTotal.toLocaleString()}` : '—'}
+                  </span>
                 </div>
               </div>
               
@@ -291,7 +332,7 @@ export default function CartPage() {
                     />
                       
                       {/* CARRIER SELECTION */}
-                      {terminalAddress?.state && terminalAddress?.city && (
+                      {terminalAddress?.locationConfirmed && terminalAddress?.state && terminalAddress?.city && (
                         <div className="mt-4 border-t border-gray-100 pt-4">
                           <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
                             Choose Delivery Option
@@ -331,11 +372,11 @@ export default function CartPage() {
                                 </label>
                               ))}
                             </div>
-                          ) : (
+                          ) : quoteError ? (
                             <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-xl text-sm text-yellow-800">
-                              No delivery options found for this route. Try selecting a different city or contact the seller directly.
+                              {quoteError}
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       )}
                   </div>
@@ -359,7 +400,24 @@ export default function CartPage() {
                 
                 <button 
                   type="submit" 
-                  disabled={loading || (productType === 'physical' && deliveryMethod === 'delivery' && (!terminalAddress?.firstName || !terminalAddress?.phone || !terminalAddress?.state || !terminalAddress?.city || !terminalAddress?.lat))}
+                  disabled={loading || (productType === 'physical' && deliveryMethod === 'delivery' && (
+                    !terminalAddress?.locationConfirmed ||
+                    !terminalAddress?.firstName ||
+                    !terminalAddress?.lastName ||
+                    !terminalAddress?.phone ||
+                    !terminalAddress?.state ||
+                    terminalAddress?.state !== 'Lagos' ||
+                    !terminalAddress?.city ||
+                    !terminalAddress?.line1 ||
+                    !terminalAddress?.houseNumber ||
+                    !terminalAddress?.area ||
+                    !terminalAddress?.lga ||
+                    !terminalAddress?.landmark ||
+                    !terminalAddress?.lat ||
+                    !terminalAddress?.lng ||
+                    !carrierRates[selectedCarrierIndex] ||
+                    isCalculatingFee
+                  ))}
                   className="w-full py-4 bg-black text-white rounded-lg font-bold text-lg hover:bg-gray-800 transition-colors flex justify-center items-center disabled:opacity-70 mt-4 shadow-md"
                 >
                   {loading ? <Loader2 className="animate-spin h-6 w-6" /> : `Pay ₦${finalTotal.toLocaleString()}`}

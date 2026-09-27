@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Dumbbell, Activity, Heart, Target, Droplet, Bike, Map, Shirt, Flag, Trophy, Briefcase, Gift, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createSportsProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Sports Category' },
@@ -579,8 +580,8 @@ export default function SportsProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

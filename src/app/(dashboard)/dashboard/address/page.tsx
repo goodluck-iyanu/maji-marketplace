@@ -15,7 +15,7 @@ export default async function AddressPage() {
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, pickup_address, pickup_phone, product_type')
+    .select('id, pickup_address, pickup_house_number, pickup_area, pickup_lga, pickup_city, pickup_state, pickup_country, pickup_landmark, pickup_lat, pickup_lng, pickup_phone, pickup_contact_name, pickup_email, pickup_is_residential, product_type')
     .eq('user_id', user.id)
     .single()
 
@@ -29,17 +29,24 @@ export default async function AddressPage() {
       
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm mb-8">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Current Address</h2>
-        <p className="text-gray-900 font-medium text-lg mb-1">{store.pickup_address || 'No pickup address set'}</p>
+        <p className="text-gray-900 font-medium text-lg mb-1">
+          {[store.pickup_house_number, store.pickup_address, store.pickup_area, store.pickup_lga, store.pickup_city, store.pickup_state].filter(Boolean).join(', ') || 'No pickup address set'}
+        </p>
         {store.pickup_phone && (
           <p className="text-sm text-gray-500 mt-2">Contact Phone: {store.pickup_phone}</p>
+        )}
+        {store.pickup_landmark && (
+          <p className="text-sm text-gray-500 mt-1">Nearby landmark: {store.pickup_landmark}</p>
+        )}
+        {store.pickup_lat != null && store.pickup_lng != null && (
+          <p className="text-xs text-gray-400 mt-2">Confirmed coordinates: {store.pickup_lat}, {store.pickup_lng}</p>
         )}
       </div>
 
       <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
         <h2 className="text-lg font-bold text-gray-900 mb-4">Change Pickup Address</h2>
-        <AddressForm />
+        <AddressForm store={store} />
       </div>
     </div>
   )
 }
-

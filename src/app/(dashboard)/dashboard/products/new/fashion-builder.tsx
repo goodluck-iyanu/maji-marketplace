@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, ArrowRight, Shirt, Briefcase, Sparkles, Check, Upload, X, Plus, Trash2, Loader2, Image as ImageIcon } from 'lucide-react'
 import Link from 'next/link'
 import { createFashionProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Product Type' },
@@ -574,8 +575,8 @@ export default function FashionProductBuilder({ productType }: { productType: st
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

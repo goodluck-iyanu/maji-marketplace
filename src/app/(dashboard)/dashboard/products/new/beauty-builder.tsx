@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Droplet, Sparkles, Scissors, Bath, Smile, Star, Heart, Sun, Activity, Brush, Briefcase, Gift, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createBeautyProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Beauty Category' },
@@ -663,8 +664,8 @@ export default function BeautyProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

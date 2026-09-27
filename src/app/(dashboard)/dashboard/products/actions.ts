@@ -5,6 +5,35 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { v4 as uuidv4 } from 'uuid'
 
+function readProductLogisticsFields(formData: FormData) {
+  const numeric = (name: string) => {
+    const value = String(formData.get(name) ?? '').trim()
+    if (!value) return null
+    const parsed = Number(value)
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null
+  }
+  const weight = numeric('weight_kg')
+  const length = numeric('length_cm')
+  const width = numeric('width_cm')
+  const height = numeric('height_cm')
+  const fragileValue = String(formData.get('fragile') ?? '')
+  const serviceLevel = String(formData.get('service_level') ?? '').trim()
+  const dimensions = [length, width, height]
+
+  if (!weight || !['true', 'false'].includes(fragileValue) || !serviceLevel) return null
+  if (dimensions.some(Boolean) && dimensions.some(value => value === null)) return null
+
+  return {
+    weight_kg: weight,
+    length_cm: length,
+    width_cm: width,
+    height_cm: height,
+    fragile: fragileValue === 'true',
+    delivery_category: String(formData.get('delivery_category') ?? '').trim() || null,
+    service_level: serviceLevel,
+  }
+}
+
 export async function createProductAction(prevState: any, formData: FormData) {
   const supabase = await createClient()
 
@@ -39,6 +68,10 @@ export async function createProductAction(prevState: any, formData: FormData) {
   if (isNaN(price) || price < 0) {
     return { error: 'Please enter a valid price' }
   }
+  const logisticsFields = isDigital ? null : readProductLogisticsFields(formData)
+  if (!isDigital && !logisticsFields) {
+    return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
+  }
 
   // 1. Get images
   const imageFiles = formData.getAll('images') as File[]
@@ -61,6 +94,7 @@ export async function createProductAction(prevState: any, formData: FormData) {
     price,
     discount_percent,
     is_digital: isDigital,
+    ...(logisticsFields ?? {}),
     stock: isDigital ? 0 : stock,
     is_published: isPublished,
   }).select('id').single()
@@ -176,9 +210,13 @@ export async function editProductAction(prevState: any, formData: FormData) {
   const isDigital = formData.get('is_digital') === 'true'
   const discountRaw = formData.get('discount_percent')
   const discount_percent = discountRaw ? parseInt(discountRaw as string) : 0
+  const logisticsFields = isDigital ? null : readProductLogisticsFields(formData)
 
   if (!productId || !name.trim() || isNaN(price) || price < 0) {
     return { error: 'Missing or invalid required fields' }
+  }
+  if (!isDigital && !logisticsFields) {
+    return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   }
 
   const { error } = await supabase
@@ -188,7 +226,8 @@ export async function editProductAction(prevState: any, formData: FormData) {
       description,
       price,
       discount_percent,
-      is_digital: isDigital
+      is_digital: isDigital,
+      ...(logisticsFields ?? {}),
     })
     .eq('id', productId)
 
@@ -209,6 +248,8 @@ export async function editProductAction(prevState: any, formData: FormData) {
 }
 
 export async function createFashionProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -246,6 +287,7 @@ export async function createFashionProductAction(prevState: any, formData: FormD
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     target_audience: targetAudience,
@@ -315,6 +357,8 @@ export async function createFashionProductAction(prevState: any, formData: FormD
   redirect('/dashboard/products')
 }
 export async function createGadgetProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -354,6 +398,7 @@ export async function createGadgetProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -424,6 +469,8 @@ export async function createGadgetProductAction(prevState: any, formData: FormDa
 }
 
 export async function createFoodProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -463,6 +510,7 @@ export async function createFoodProductAction(prevState: any, formData: FormData
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -526,6 +574,8 @@ export async function createFoodProductAction(prevState: any, formData: FormData
 }
 
 export async function createBeautyProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -565,6 +615,7 @@ export async function createBeautyProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -632,6 +683,8 @@ export async function createBeautyProductAction(prevState: any, formData: FormDa
 
 
 export async function createHealthProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -671,6 +724,7 @@ export async function createHealthProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -734,6 +788,8 @@ export async function createHealthProductAction(prevState: any, formData: FormDa
 }
 
 export async function createHomeProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -773,6 +829,7 @@ export async function createHomeProductAction(prevState: any, formData: FormData
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -836,6 +893,8 @@ export async function createHomeProductAction(prevState: any, formData: FormData
 }
 
 export async function createJewelryProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -875,6 +934,7 @@ export async function createJewelryProductAction(prevState: any, formData: FormD
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -938,6 +998,8 @@ export async function createJewelryProductAction(prevState: any, formData: FormD
 }
 
 export async function createBooksProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -977,6 +1039,7 @@ export async function createBooksProductAction(prevState: any, formData: FormDat
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1040,6 +1103,8 @@ export async function createBooksProductAction(prevState: any, formData: FormDat
 }
 
 export async function createKidsProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1079,6 +1144,7 @@ export async function createKidsProductAction(prevState: any, formData: FormData
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1142,6 +1208,8 @@ export async function createKidsProductAction(prevState: any, formData: FormData
 }
 
 export async function createPetsProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1181,6 +1249,7 @@ export async function createPetsProductAction(prevState: any, formData: FormData
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1244,6 +1313,8 @@ export async function createPetsProductAction(prevState: any, formData: FormData
 }
 
 export async function createToolsProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1283,6 +1354,7 @@ export async function createToolsProductAction(prevState: any, formData: FormDat
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1346,6 +1418,8 @@ export async function createToolsProductAction(prevState: any, formData: FormDat
 }
 
 export async function createAgricultureProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1385,6 +1459,7 @@ export async function createAgricultureProductAction(prevState: any, formData: F
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1448,6 +1523,8 @@ export async function createAgricultureProductAction(prevState: any, formData: F
 }
 
 export async function createGamingProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1487,6 +1564,7 @@ export async function createGamingProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1550,6 +1628,8 @@ export async function createGamingProductAction(prevState: any, formData: FormDa
 }
 
 export async function createOfficeProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1589,6 +1669,7 @@ export async function createOfficeProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1652,6 +1733,8 @@ export async function createOfficeProductAction(prevState: any, formData: FormDa
 }
 
 export async function createOtherProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1691,6 +1774,7 @@ export async function createOtherProductAction(prevState: any, formData: FormDat
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1754,6 +1838,8 @@ export async function createOtherProductAction(prevState: any, formData: FormDat
 }
 
 export async function createSportsProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1793,6 +1879,7 @@ export async function createSportsProductAction(prevState: any, formData: FormDa
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1856,6 +1943,8 @@ export async function createSportsProductAction(prevState: any, formData: FormDa
 }
 
 export async function createAutomotiveProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1895,6 +1984,7 @@ export async function createAutomotiveProductAction(prevState: any, formData: Fo
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -1958,6 +2048,8 @@ export async function createAutomotiveProductAction(prevState: any, formData: Fo
 }
 
 export async function createArtsProductAction(prevState: any, formData: FormData) {
+  const logisticsFields = readProductLogisticsFields(formData)
+  if (!logisticsFields) return { error: 'Enter a measured package weight, confirm fragile status and select a service level.' }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
@@ -1997,6 +2089,7 @@ export async function createArtsProductAction(prevState: any, formData: FormData
     price: basePrice,
     stock: baseStock,
     is_digital: false,
+    ...logisticsFields,
     is_published: true,
     sub_category: subCategory,
     brand: brand || null,
@@ -2375,4 +2468,3 @@ export async function createDigitalProductAction(prevState: any, formData: FormD
   revalidatePath('/dashboard/products')
   redirect('/dashboard/products')
 }
-

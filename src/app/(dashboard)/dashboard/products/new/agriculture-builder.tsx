@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Leaf, TreePine, Box, Wrench, Droplet, Cloud, Activity, Bug, Home, Tent, Car, Bird, Hexagon, Sun, Shield, Package, Gift, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createAgricultureProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Agriculture Category' },
@@ -581,8 +582,8 @@ export default function AgricultureProductBuilder({ productType }: { productType
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-

@@ -12,11 +12,32 @@ export interface TerminalAddressData {
   state: string;
   city: string;
   line1: string;
+  houseNumber: string;
+  area: string;
+  lga: string;
+  country: 'NG';
   zip: string;
   lat: string;
   lng: string;
+  locationConfirmed: boolean;
   isResidential: boolean;
   landmark: string;
+}
+
+interface NominatimSuggestion {
+  display_name: string
+  lat: string
+  lon: string
+}
+
+function isNominatimSuggestion(value: unknown): value is NominatimSuggestion {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Record<string, unknown>
+  return typeof candidate.display_name === 'string' &&
+    typeof candidate.lat === 'string' &&
+    Number.isFinite(Number(candidate.lat)) &&
+    typeof candidate.lon === 'string' &&
+    Number.isFinite(Number(candidate.lon))
 }
 
 interface TerminalAddressFormProps {
@@ -33,6 +54,9 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
   
   const [selectedState, setSelectedState] = useState(defaultValues?.state || '')
   const [selectedCity, setSelectedCity] = useState(defaultValues?.city || '')
+  const [houseNumber, setHouseNumber] = useState(defaultValues?.houseNumber || '')
+  const [area, setArea] = useState(defaultValues?.area || '')
+  const [lga, setLga] = useState(defaultValues?.lga || '')
   const [zip, setZip] = useState(defaultValues?.zip || '')
   const [isResidential, setIsResidential] = useState(defaultValues?.isResidential ?? true)
   const [landmark, setLandmark] = useState(defaultValues?.landmark || '')
@@ -41,7 +65,8 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
   const [addressQuery, setAddressQuery] = useState(defaultValues?.line1 || '')
   const [lat, setLat] = useState<string>(defaultValues?.lat || '')
   const [lng, setLng] = useState<string>(defaultValues?.lng || '')
-  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([])
+  const [locationConfirmed, setLocationConfirmed] = useState(false)
+  const [addressSuggestions, setAddressSuggestions] = useState<NominatimSuggestion[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   
@@ -52,10 +77,11 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
     if (onChange) {
       onChange({
         firstName, lastName, phone, email, state: selectedState, city: selectedCity,
-        line1: addressQuery, zip, lat, lng, isResidential, landmark
+        line1: addressQuery, houseNumber, area, lga, country: 'NG', zip, lat, lng,
+        locationConfirmed, isResidential, landmark
       })
     }
-  }, [firstName, lastName, phone, email, selectedState, selectedCity, addressQuery, zip, lat, lng, isResidential, landmark, onChange])
+  }, [firstName, lastName, phone, email, selectedState, selectedCity, addressQuery, houseNumber, area, lga, zip, lat, lng, locationConfirmed, isResidential, landmark, onChange])
 
   // Click outside to close suggestions
   useEffect(() => {
@@ -71,7 +97,6 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
   // OpenStreetMap Autocomplete
   useEffect(() => {
     if (addressQuery.length < 4 || !showSuggestions) {
-      setAddressSuggestions([])
       return
     }
 
@@ -90,8 +115,9 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
         const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=ng&limit=5`, {
           headers: { 'Accept-Language': 'en' }
         })
-        const data = await response.json()
-        setAddressSuggestions(data)
+        if (!response.ok) throw new Error(`Location search failed (${response.status}).`)
+        const data: unknown = await response.json()
+        setAddressSuggestions(Array.isArray(data) ? data.filter(isNominatimSuggestion) : [])
       } catch (error) {
         console.error('Error fetching addresses:', error)
       } finally {
@@ -102,15 +128,20 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
     return () => clearTimeout(delayDebounceFn)
   }, [addressQuery, showSuggestions, selectedState, selectedCity])
 
-  const handleSelectSuggestion = (suggestion: any) => {
+  const handleSelectSuggestion = (suggestion: NominatimSuggestion) => {
     setAddressQuery(suggestion.display_name)
     setLat(suggestion.lat)
     setLng(suggestion.lon)
+    setLocationConfirmed(false)
+    setAddressSuggestions([])
     setShowSuggestions(false)
   }
 
   const isPickup = type === 'pickup'
   const prefix = isPickup ? 'pickup' : 'delivery'
+  const mapBounds = lat && lng
+    ? `${Number(lng) - 0.004},${Number(lat) - 0.004},${Number(lng) + 0.004},${Number(lat) + 0.004}`
+    : ''
 
   return (
     <div className="space-y-4">
@@ -119,6 +150,8 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
       <input type="hidden" name={`${prefix}City`} value={selectedCity} />
       <input type="hidden" name={`${prefix}Lat`} value={lat} />
       <input type="hidden" name={`${prefix}Lng`} value={lng} />
+      <input type="hidden" name={`${prefix}Country`} value="NG" />
+      <input type="hidden" name={`${prefix}LocationConfirmed`} value={locationConfirmed ? 'true' : 'false'} />
       
       <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 border-b pb-2">
         {isPickup ? 'Pickup Contact & Location' : 'Delivery Contact & Location'}
@@ -171,7 +204,6 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
             name={`${prefix}Email`}
             value={email}
             onChange={(e) => setEmail(e.target.value)} 
-            required 
             placeholder="john@example.com"
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
           />
@@ -190,6 +222,8 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
               setSelectedCity('');
               setLat('');
               setLng('');
+              setLocationConfirmed(false)
+              setAddressSuggestions([])
             }}
           >
             <option value="">Select state</option>
@@ -208,6 +242,8 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
               setSelectedCity(e.target.value);
               setLat('');
               setLng('');
+              setLocationConfirmed(false)
+              setAddressSuggestions([])
             }}
             disabled={!selectedState}
           >
@@ -216,6 +252,54 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
               <option key={city} value={city}>{city}</option>
             ))}
           </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">House / Building Number <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}HouseNumber`}
+            value={houseNumber}
+            onChange={(event) => setHouseNumber(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}Area`}
+            value={area}
+            onChange={(event) => setArea(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">LGA <span className="text-red-500">*</span></label>
+          <input
+            type="text"
+            name={`${prefix}Lga`}
+            value={lga}
+            onChange={(event) => setLga(event.target.value)}
+            required
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+          <input
+            type="text"
+            value="Nigeria (NG)"
+            readOnly
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-100 text-gray-600"
+          />
         </div>
       </div>
 
@@ -230,12 +314,13 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
             value={addressQuery}
             onChange={(e) => {
               setAddressQuery(e.target.value)
+              setAddressSuggestions([])
               setShowSuggestions(true)
-              // Reset precise lat/lng if they type something new to force a re-selection
               if (lat || lng) {
                 setLat('')
                 setLng('')
               }
+              setLocationConfirmed(false)
             }}
             onFocus={() => setShowSuggestions(true)}
             placeholder="Search for your street or building..." 
@@ -247,9 +332,29 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
         </div>
         
         {lat && lng && (
-          <p className="text-xs text-green-600 mt-1 flex items-center gap-1 font-medium">
-            <MapPin className="w-3 h-3" /> Exact map location captured
-          </p>
+          <div className="mt-3 space-y-3">
+            <iframe
+              title="Selected delivery location map"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds}&layer=mapnik&marker=${lat},${lng}`}
+              className="w-full h-48 rounded-lg border border-gray-200"
+              loading="lazy"
+            />
+            <label className="flex items-start gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={locationConfirmed}
+                onChange={(event) => setLocationConfirmed(event.target.checked)}
+                required
+                className="mt-1"
+              />
+              <span>I confirm the map pin marks the actual {isPickup ? 'pickup' : 'delivery'} location.</span>
+            </label>
+            {locationConfirmed && (
+              <p className="text-xs text-green-700 flex items-center gap-1 font-medium">
+                <MapPin className="w-3 h-3" /> Confirmed map coordinates: {lat}, {lng}
+              </p>
+            )}
+          </div>
         )}
         {!lat && !lng && addressQuery.length > 3 && !showSuggestions && (
           <p className="text-xs text-yellow-600 mt-1 flex items-center gap-1">
@@ -281,12 +386,13 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Landmark (Optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Bus Stop / Nearby Landmark <span className="text-red-500">*</span></label>
           <input 
             type="text" 
             name={`${prefix}Landmark`} 
             value={landmark}
             onChange={(e) => setLandmark(e.target.value)}
+            required
             placeholder="e.g. Beside GTBank" 
             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
           />
@@ -322,4 +428,3 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
     </div>
   )
 }
-

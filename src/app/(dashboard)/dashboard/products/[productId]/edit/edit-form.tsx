@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { editProductAction } from '../../actions'
 import { SubmitButton } from '../../new/submit-button'
+import { LogisticsFields } from '../../logistics-fields'
 
 export function EditProductForm({ product, productType }: { product: any, productType: string | null }) {
   const [state, formAction] = useActionState(editProductAction, null)
@@ -144,6 +145,8 @@ export function EditProductForm({ product, productType }: { product: any, produc
           </div>
         </div>
       </div>
+
+      <LogisticsFields productType={productType} product={product} />
 
       <div className="flex justify-end gap-3">
         <Link 

@@ -28,8 +28,15 @@ export function useDraftAutoSave(
     // disabled auto-restore because it prevents users from starting a fresh product
     // we also aggressively clear any lingering drafts to fix the bug where old drafts appear
     try {
+      const raw = localStorage.getItem(storageKey)
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        onRestore(parsed)
+      }
       localStorage.removeItem(storageKey)
     } catch (e) {
+      // Corrupted data — clear it
+      localStorage.removeItem(storageKey)
       // ignore
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -37,6 +44,28 @@ export function useDraftAutoSave(
 
   // ── Auto-save on every change (debounced 1s) ──
   useEffect(() => {
+    // Skip the very first render (the initial default state)
+    if (isFirstSave.current) {
+      isFirstSave.current = false
+      return
+    }
+
+    const timer = setTimeout(() => {
+      try {
+        // Strip out File objects — they can't be serialised
+        const clean: Record<string, any> = {}
+        for (const [key, val] of Object.entries(currentState)) {
+          if (val instanceof File) continue
+          if (Array.isArray(val) && val.length > 0 && val[0] instanceof File) continue
+          clean[key] = val
+        }
+        localStorage.setItem(storageKey, JSON.stringify(clean))
+      } catch (e) {
+        // Storage full or private browsing — silently ignore
+      }
+    }, 1000)
+
+    return () => clearTimeout(timer)
     // Disabled auto-save completely to prevent conflicts when creating new products
     //
     // if (isFirstSave.current) {

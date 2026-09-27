@@ -1,10 +1,8 @@
 'use client'
 
-import { useState, useActionState, useEffect } from 'react'
-import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle } from 'lucide-react'
+import { useState, useActionState, useEffect, useRef } from 'react'
+import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle, MapPin, Search } from 'lucide-react'
 import { createStoreAction } from './actions'
-import { NG_STATES_CITIES, NG_STATES } from '@/lib/ng-cities'
-import TerminalAddressForm from '@/components/TerminalAddressForm'
 
 type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'pickup_details' | 'social_links' | 'creating'
 
@@ -44,19 +42,84 @@ const DIGITAL_CATEGORIES = [
   { id: 'other_digital', name: 'Other', icon: MoreHorizontal },
 ]
 
+const LAGOS_LGAS = [
+  'Agege', 'Ajeromi-Ifelodun', 'Alimosho', 'Amuwo-Odofin', 'Apapa',
+  'Badagry', 'Epe', 'Eti-Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye',
+  'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island', 'Lagos Mainland',
+  'Mushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'
+]
+
 export function OnboardingWizard() {
   const [step, setStep] = useState<Step>('product_type')
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   
   // Form State
   const [storeName, setStoreName] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [storeCategory, setStoreCategory] = useState('')
-  const [pickupAddress, setPickupAddress] = useState('')
+  
+  // Pickup address state
+  const [pickupFirstName, setPickupFirstName] = useState('')
+  const [pickupLastName, setPickupLastName] = useState('')
   const [pickupPhone, setPickupPhone] = useState('')
-  const [pickupState, setPickupState] = useState('')
-  const [pickupCity, setPickupCity] = useState('')
-  const [terminalAddress, setTerminalAddress] = useState<any>(null)
+  const [pickupEmail, setPickupEmail] = useState('')
+  const [pickupHouseNumber, setPickupHouseNumber] = useState('')
+  const [pickupArea, setPickupArea] = useState('')
+  const [pickupLga, setPickupLga] = useState('')
+  const [pickupAddress, setPickupAddress] = useState('')
+  const [pickupLandmark, setPickupLandmark] = useState('')
+  const [pickupLat, setPickupLat] = useState('')
+  const [pickupLng, setPickupLng] = useState('')
+  const [pickupIsResidential, setPickupIsResidential] = useState(true)
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Click outside to close address suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // OSM address autocomplete
+  useEffect(() => {
+    if (pickupAddress.length < 4 || !showSuggestions) {
+      setAddressSuggestions([])
+      return
+    }
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        let query = pickupAddress
+        if (pickupLga && !query.toLowerCase().includes(pickupLga.toLowerCase())) query += `, ${pickupLga}`
+        if (!query.toLowerCase().includes('lagos')) query += ', Lagos'
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=ng&limit=5`, {
+          headers: { 'Accept-Language': 'en' }
+        })
+        const data = await response.json()
+        setAddressSuggestions(data)
+      } catch (error) {
+        console.error('Error fetching addresses:', error)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 600)
+    return () => clearTimeout(delayDebounceFn)
+  }, [pickupAddress, showSuggestions, pickupLga])
+
+  const handleSelectSuggestion = (suggestion: any) => {
+    setPickupAddress(suggestion.display_name)
+    setPickupLat(suggestion.lat)
+    setPickupLng(suggestion.lon)
+    setShowSuggestions(false)
+  }
+
   const [socials, setSocials] = useState({
     instagram: '',
     tiktok: '',
@@ -358,53 +421,125 @@ export function OnboardingWizard() {
 
       <div className={step === 'pickup_details' ? 'block text-center' : 'hidden'}>
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Set up your pickup address</h2>
-        <p className="text-gray-500 mb-8">This is where your physical products will be picked up for delivery. You can update this later in your dashboard.</p>
+        <p className="text-gray-500 mb-6">This is where logistics riders will come to pick up orders. Lagos only for now.</p>
         
-        <div className="text-left mb-8 max-w-xl mx-auto space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-            <input 
-              type="text" 
-              name="pickupState"
-              value={pickupState}
-              onChange={(e) => setPickupState(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
-              placeholder="e.g. Lagos" 
-            />
+        {/* Hidden inputs for server action */}
+        <input type="hidden" name="pickupState" value="Lagos" />
+        <input type="hidden" name="pickupCity" value={pickupLga || 'Lagos'} />
+        <input type="hidden" name="pickupCountry" value="NG" />
+        <input type="hidden" name="pickupLat" value={pickupLat} />
+        <input type="hidden" name="pickupLng" value={pickupLng} />
+        <input type="hidden" name="pickupIsResidentialVal" value={pickupIsResidential ? 'true' : 'false'} />
+        <input type="hidden" name="pickupLocationConfirmed" value={pickupLat && pickupLng ? 'true' : 'false'} />
+
+        <div className="text-left max-w-xl mx-auto space-y-4 mb-8">
+          {/* Contact Name */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name <span className="text-red-500">*</span></label>
+              <input type="text" name="pickupFirstName" value={pickupFirstName} onChange={(e) => setPickupFirstName(e.target.value)} required placeholder="e.g. John" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name <span className="text-red-500">*</span></label>
+              <input type="text" name="pickupLastName" value={pickupLastName} onChange={(e) => setPickupLastName(e.target.value)} required placeholder="e.g. Doe" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-            <input 
-              type="text" 
-              name="pickupCity"
-              value={pickupCity}
-              onChange={(e) => setPickupCity(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
-              placeholder="e.g. Ikeja" 
-            />
+
+          {/* Phone + Email */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+              <input type="tel" name="pickupPhone" value={pickupPhone} onChange={(e) => setPickupPhone(e.target.value)} required placeholder="08012345678" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" name="pickupEmail" value={pickupEmail} onChange={(e) => setPickupEmail(e.target.value)} placeholder="you@email.com" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Street Address</label>
-            <input 
-              type="text" 
-              name="pickupAddress"
-              value={pickupAddress}
-              onChange={(e) => setPickupAddress(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
-              placeholder="e.g. 123 Main Street" 
-            />
+
+          {/* LGA + House/Building */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">LGA (Local Government) <span className="text-red-500">*</span></label>
+              <select name="pickupLga" value={pickupLga} onChange={(e) => setPickupLga(e.target.value)} required className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none bg-white">
+                <option value="">Select LGA</option>
+                {LAGOS_LGAS.map(lga => (
+                  <option key={lga} value={lga}>{lga}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">House / Building No. <span className="text-red-500">*</span></label>
+              <input type="text" name="pickupHouseNumber" value={pickupHouseNumber} onChange={(e) => setPickupHouseNumber(e.target.value)} required placeholder="e.g. 12A" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+            </div>
           </div>
+
+          {/* Area */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-            <input 
-              type="tel" 
-              name="pickupPhone"
-              value={pickupPhone}
-              onChange={(e) => setPickupPhone(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
-              placeholder="e.g. 08012345678" 
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-1">Area / Neighbourhood <span className="text-red-500">*</span></label>
+            <input type="text" name="pickupArea" value={pickupArea} onChange={(e) => setPickupArea(e.target.value)} required placeholder="e.g. Victoria Island, Lekki Phase 1" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
           </div>
+
+          {/* Street Address with Autocomplete */}
+          <div className="relative" ref={wrapperRef}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Street Address <span className="text-red-500">*</span></label>
+            <div className="relative">
+              <input
+                type="text"
+                name="pickupAddress"
+                value={pickupAddress}
+                onChange={(e) => {
+                  setPickupAddress(e.target.value)
+                  setShowSuggestions(true)
+                  if (pickupLat || pickupLng) { setPickupLat(''); setPickupLng('') }
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Search for your street or building..."
+                required
+                autoComplete="off"
+                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${pickupLat && pickupLng ? 'border-green-500 focus:ring-green-500 bg-green-50' : 'border-gray-300 focus:ring-black'}`}
+              />
+              <Search className="w-5 h-5 absolute left-3 top-3.5 text-gray-400" />
+            </div>
+
+            {pickupLat && pickupLng && (
+              <p className="text-xs text-green-600 mt-1 flex items-center gap-1 font-medium">
+                <MapPin className="w-3 h-3" /> Exact map location captured ✓
+              </p>
+            )}
+            {!pickupLat && !pickupLng && pickupAddress.length > 3 && !showSuggestions && (
+              <p className="text-xs text-yellow-600 mt-1">⚠ Please select from the dropdown to confirm your exact location.</p>
+            )}
+
+            {showSuggestions && addressSuggestions.length > 0 && (
+              <ul className="absolute z-50 w-full bg-white border border-gray-200 shadow-xl rounded-lg mt-1 max-h-60 overflow-auto">
+                {addressSuggestions.map((suggestion, index) => (
+                  <li key={index} className="px-4 py-3 hover:bg-gray-50 cursor-pointer text-sm text-gray-700 border-b border-gray-50 last:border-0 flex gap-2 items-start" onClick={() => handleSelectSuggestion(suggestion)}>
+                    <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <span>{suggestion.display_name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {showSuggestions && isSearching && pickupAddress.length >= 4 && addressSuggestions.length === 0 && (
+              <div className="absolute z-50 w-full bg-white border border-gray-200 shadow-xl rounded-lg mt-1 px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" /> Searching map data...
+              </div>
+            )}
+          </div>
+
+          {/* Landmark */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Nearest Bus Stop / Landmark <span className="text-red-500">*</span></label>
+            <input type="text" name="pickupLandmark" value={pickupLandmark} onChange={(e) => setPickupLandmark(e.target.value)} required placeholder="e.g. Beside GTBank, Opp. Chicken Republic" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" />
+          </div>
+
+          {/* Residential checkbox */}
+          <label className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+            <input type="checkbox" checked={pickupIsResidential} onChange={(e) => setPickupIsResidential(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-black focus:ring-black" />
+            <span className="text-sm font-medium text-gray-900">This is a residential address</span>
+          </label>
         </div>
 
         <div className="flex gap-3">
@@ -418,11 +553,11 @@ export function OnboardingWizard() {
           <button
             type="button"
             onClick={() => {
-              if (pickupState.trim() && pickupCity.trim() && pickupAddress.trim() && pickupPhone.trim()) {
+              if (pickupFirstName && pickupLastName && pickupPhone && pickupHouseNumber && pickupArea && pickupLga && pickupAddress && pickupLandmark && pickupLat && pickupLng) {
                 setStep('social_links')
               }
             }}
-            disabled={!pickupState.trim() || !pickupCity.trim() || !pickupAddress.trim() || !pickupPhone.trim()}
+            disabled={!pickupFirstName || !pickupLastName || !pickupPhone || !pickupHouseNumber || !pickupArea || !pickupLga || !pickupAddress || !pickupLandmark || !pickupLat || !pickupLng}
             className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
           >
             Continue

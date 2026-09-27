@@ -5,6 +5,7 @@ import { useDraftAutoSave } from '../hooks/useDraftAutoSave'
 import { ArrowLeft, Check, Upload, X, Loader2, PlusCircle, Trash2, Image, PenTool, Box, Scissors, Feather, Paperclip, Gem, Flame, TreePine, Droplet, Smile, Gift, Globe, Circle, CreditCard, User, Archive, Trophy, Film, Book, Layout, Brush, Palette, MoreHorizontal } from 'lucide-react'
 import Link from 'next/link'
 import { createArtsProductAction } from '../actions'
+import { LogisticsFields } from '../logistics-fields'
 
 const STEPS = [
   { id: 'type', label: 'Arts Category' },
@@ -578,8 +579,8 @@ export default function ArtsProductBuilder({ productType }: { productType: strin
           </div>
         </div>
 
+        <LogisticsFields productType={productType} />
       </form>
     </div>
   )
 }
-
