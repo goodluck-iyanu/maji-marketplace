@@ -54,12 +54,13 @@ export function NotificationBell({ storeId }: { storeId: string }) {
     return () => { cancelled = true }
   }, [storeId])
 
-  // Real-time subscription — use a simple channel name (NOT the old v1 topic format)
-  // and set up .on() BEFORE .subscribe() to avoid the "cannot add callbacks after subscribe" error
+  // Real-time subscription
   useEffect(() => {
     if (!ready) return // Don't subscribe until initial fetch completes
 
-    const channelName = `notif-${storeId}`
+    // Append a random string so React 18 Strict Mode double-mounting 
+    // doesn't reuse an already-subscribed channel and crash.
+    const channelName = `notif-${storeId}-${Math.random().toString(36).substring(7)}`
     const channel = supabase.channel(channelName)
 
     channel.on(
