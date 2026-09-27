@@ -93,7 +93,6 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
           <img 
             src={product.product_images[0].image_url} 
             alt={product.name} 
-            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
           />
         ) : (

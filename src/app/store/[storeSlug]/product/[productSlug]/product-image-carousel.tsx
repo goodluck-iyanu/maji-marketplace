@@ -40,8 +40,6 @@ export function ProductImageCarousel({ images, productName }: { images: { image_
             key={idx}
             src={img.image_url} 
             alt={`${productName} - Image ${idx + 1}`} 
-            loading={idx === 0 ? "eager" : "lazy"}
-            fetchPriority={idx === 0 ? "high" : "auto"}
             className="w-full h-full object-cover flex-shrink-0"
           />
         ))}
