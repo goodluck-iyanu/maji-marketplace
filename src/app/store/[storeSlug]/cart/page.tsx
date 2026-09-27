@@ -49,10 +49,7 @@ export default function CartPage() {
     async function calculateFee() {
       const dropoff: TerminalAddressData | null = JSON.parse(quoteAddressKey)
       const addressReady = dropoff?.locationConfirmed &&
-        dropoff.firstName && dropoff.lastName && dropoff.phone &&
-        dropoff.line1 && dropoff.houseNumber && dropoff.area &&
-        dropoff.lga && dropoff.city && dropoff.state &&
-        dropoff.lat && dropoff.lng && dropoff.landmark
+        dropoff.city && dropoff.state && dropoff.lat && dropoff.lng
       if (storeId && addressReady && productType === 'physical' && deliveryMethod === 'delivery') {
         setIsCalculatingFee(true)
         setQuoteError(null)
