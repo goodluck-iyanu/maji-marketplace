@@ -146,18 +146,6 @@ export function OnboardingWizard() {
     }
   }
 
-  const handleNextFromPickup = () => {
-    if (
-      terminalAddress?.firstName && 
-      terminalAddress?.phone && 
-      terminalAddress?.state && 
-      terminalAddress?.city && 
-      terminalAddress?.lat && 
-      terminalAddress?.lng
-    ) {
-      setStep('social_links')
-    }
-  }
 
   const renderProgress = () => {
     if (step === 'product_type' || step === 'creating') return null
@@ -372,11 +360,51 @@ export function OnboardingWizard() {
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Set up your pickup address</h2>
         <p className="text-gray-500 mb-8">This is where your physical products will be picked up for delivery. You can update this later in your dashboard.</p>
         
-        <div className="text-left mb-8 max-w-xl mx-auto">
-          <TerminalAddressForm 
-            type="pickup"
-            onChange={setTerminalAddress}
-          />
+        <div className="text-left mb-8 max-w-xl mx-auto space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+            <input 
+              type="text" 
+              name="pickupState"
+              value={pickupState}
+              onChange={(e) => setPickupState(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
+              placeholder="e.g. Lagos" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+            <input 
+              type="text" 
+              name="pickupCity"
+              value={pickupCity}
+              onChange={(e) => setPickupCity(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
+              placeholder="e.g. Ikeja" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Full Street Address</label>
+            <input 
+              type="text" 
+              name="pickupAddress"
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
+              placeholder="e.g. 123 Main Street" 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input 
+              type="tel" 
+              name="pickupPhone"
+              value={pickupPhone}
+              onChange={(e) => setPickupPhone(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none" 
+              placeholder="e.g. 08012345678" 
+            />
+          </div>
         </div>
 
         <div className="flex gap-3">
@@ -389,8 +417,12 @@ export function OnboardingWizard() {
           </button>
           <button
             type="button"
-            onClick={handleNextFromPickup}
-            disabled={!terminalAddress?.firstName || !terminalAddress?.phone || !terminalAddress?.state || !terminalAddress?.city || !terminalAddress?.lat}
+            onClick={() => {
+              if (pickupState.trim() && pickupCity.trim() && pickupAddress.trim() && pickupPhone.trim()) {
+                setStep('social_links')
+              }
+            }}
+            disabled={!pickupState.trim() || !pickupCity.trim() || !pickupAddress.trim() || !pickupPhone.trim()}
             className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
           >
             Continue
