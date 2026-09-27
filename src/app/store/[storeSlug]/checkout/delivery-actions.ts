@@ -135,7 +135,7 @@ export async function getDeliveryQuotes(
     }
 
     // 6. Call Theyutes Quote API
-    const apiKey = process.env.THEYUTES_API_KEY
+    const apiKey = (process.env.THEYUTES_API_KEY || '').trim()
     const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://api.theyutes.com'
 
     if (!apiKey) {
