@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Store, Package, Settings, CreditCard, LogOut, Home, Menu, X, MapPin } from 'lucide-react'
 import { NotificationBell } from './notification-bell'
+import { StorefrontLink } from './storefront-link'
 
 export function Sidebar({ storeId, storeName, storeSlug, productType }: { storeId: string; storeName: string; storeSlug: string; productType?: string }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -39,13 +40,7 @@ export function Sidebar({ storeId, storeName, storeSlug, productType }: { storeI
           </div>
         </div>
         <div className="px-4 pb-3">
-          <Link 
-            href={`/store/${storeSlug}`} 
-            target="_blank"
-            className="inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
-          >
-            View Live Storefront
-          </Link>
+          <StorefrontLink storeSlug={storeSlug} />
         </div>
       </div>
 
@@ -71,13 +66,7 @@ export function Sidebar({ storeId, storeName, storeSlug, productType }: { storeI
             </div>
             <NotificationBell storeId={storeId} />
           </div>
-          <Link 
-            href={`/store/${storeSlug}`} 
-            target="_blank"
-            className="inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors"
-          >
-            View Live Storefront
-          </Link>
+          <StorefrontLink storeSlug={storeSlug} />
         </div>
         
         <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
@@ -113,7 +102,7 @@ export function Sidebar({ storeId, storeName, storeSlug, productType }: { storeI
            </form>
            <div className="mt-4 px-3">
              <Link href={`/store/${storeSlug}`} target="_blank" className="text-xs text-blue-600 hover:underline">
-               View public store ↗
+               My Website ↗
              </Link>
            </div>
         </div>
