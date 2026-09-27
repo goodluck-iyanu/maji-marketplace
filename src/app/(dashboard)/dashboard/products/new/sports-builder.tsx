@@ -14,6 +14,7 @@ const STEPS = [
   { id: 'basic', label: 'Basic Info' },
   { id: 'options', label: 'Options' },
   { id: 'variants', label: 'Variants' },
+  { id: 'logistics', label: 'Shipping' },
   { id: 'review', label: 'Review' },
 ]
 
@@ -580,7 +581,23 @@ export default function SportsProductBuilder({ productType }: { productType: str
           </div>
         </div>
 
-        <LogisticsFields productType={productType} />
+        <div className={currentStep === 6 ? 'block' : 'hidden'}>
+          <div className="text-center mb-8">
+            <div className="mx-auto h-16 w-16 bg-black text-white rounded-full flex items-center justify-center mb-4">
+              <Check className="h-8 w-8" />
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Package Details</h2>
+            <p className="text-gray-500 mt-2">Set the physical dimensions and weight for logistics.</p>
+          </div>
+          <LogisticsFields productType={productType} />
+          
+          <div className="mt-12 flex justify-between gap-4">
+            <button type="button" onClick={handleBack} className="px-6 py-3 border rounded-lg font-medium text-gray-700 hover:bg-gray-50">Back</button>
+            <button type="button" onClick={handleNext} className="bg-black text-white px-6 py-3 rounded-lg font-medium">
+              Continue to Review
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   )

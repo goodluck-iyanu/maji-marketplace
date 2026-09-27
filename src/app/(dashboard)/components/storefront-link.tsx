@@ -1,13 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { Copy, Check, ExternalLink, Share2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { Copy, Check, Share2, ExternalLink } from 'lucide-react'
 
 export function StorefrontLink({ storeSlug }: { storeSlug: string }) {
   const [copied, setCopied] = useState(false)
-  const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/store/${storeSlug}` : ''
+  const [storeUrl, setStoreUrl] = useState('')
 
-  const copyToClipboard = async () => {
+  useEffect(() => {
+    // Get the actual origin so the link is correct whether on localhost or vercel
+    setStoreUrl(`${window.location.origin}/store/${storeSlug}`)
+  }, [storeSlug])
+
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault() // prevent navigating if it's a link click
+    if (!storeUrl) return
+    
     try {
       await navigator.clipboard.writeText(storeUrl)
       setCopied(true)
@@ -17,66 +26,61 @@ export function StorefrontLink({ storeSlug }: { storeSlug: string }) {
     }
   }
 
-  const shareLink = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!storeUrl) return
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'My Store',
-          url: storeUrl
+          text: 'Check out my store!',
+          url: storeUrl,
         })
       } catch (err) {
         console.error('Failed to share', err)
       }
     } else {
-      copyToClipboard()
+      // Fallback to copy if native share isn't available
+      handleCopy(e)
     }
   }
 
   return (
-    <div className="mt-8 pt-6 border-t border-gray-800">
-      <div className="mb-3">
-        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your Store Link</h3>
-      </div>
-      <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700">
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <a 
-            href={`/store/${storeSlug}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm text-gray-300 hover:text-white truncate transition-colors flex items-center"
-          >
-            {storeSlug}
-            <ExternalLink className="ml-1.5 h-3 w-3" />
-          </a>
-        </div>
-        
-        <div className="flex gap-2">
-          <button
-            onClick={copyToClipboard}
-            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium rounded transition-colors"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3.5 w-3.5 text-green-400" />
-                <span className="text-green-400">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" />
-                <span>Copy</span>
-              </>
-            )}
-          </button>
-          
-          <button
-            onClick={shareLink}
-            className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-gray-700 hover:bg-gray-600 text-white text-xs font-medium rounded transition-colors"
-          >
-            <Share2 className="h-3.5 w-3.5" />
-            <span>Share</span>
-          </button>
-        </div>
-      </div>
+    <div className="flex items-center w-full gap-1 p-1 bg-gray-50 border border-gray-200 rounded-lg mt-8">
+      <Link 
+        href={`/store/${storeSlug}`} 
+        target="_blank"
+        className="flex-1 flex items-center justify-center px-2 py-1.5 text-xs font-medium text-gray-700 hover:text-black hover:bg-gray-100 rounded-md transition-colors"
+        title="Open store"
+      >
+        <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+        My Website
+      </Link>
+      
+      <div className="w-px h-4 bg-gray-200" />
+      
+      <button
+        onClick={handleCopy}
+        className="flex items-center justify-center p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-md transition-all relative group"
+        title="Copy Link"
+      >
+        {copied ? (
+          <Check className="h-4 w-4 text-green-600 animate-in zoom-in duration-200" />
+        ) : (
+          <Copy className="h-4 w-4 group-hover:scale-110 transition-transform" />
+        )}
+      </button>
+
+      <div className="w-px h-4 bg-gray-200" />
+
+      <button
+        onClick={handleShare}
+        className="flex items-center justify-center p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded-md transition-all group"
+        title="Share Store"
+      >
+        <Share2 className="h-4 w-4 group-hover:scale-110 transition-transform" />
+      </button>
     </div>
   )
 }
