@@ -72,17 +72,6 @@ export async function POST(req: Request) {
         })
         .eq('id', order.id)
 
-      // 4. Create Notification for the Seller
-      await supabaseAdmin
-        .from('notifications')
-        .insert({
-          store_id: order.store_id,
-          title: 'New Order Paid! 🎉',
-          message: `Customer ${order.customer_name} paid ₦${Number(order.total_amount).toLocaleString()}. Your payout will automatically settle to your bank account by tomorrow morning (T+1).`,
-          type: 'order',
-          link: '/dashboard'
-        })
-
       // 4. (Optional) For digital products, we would generate a download token here.
       // But we can also just verify `payment_status = 'paid'` when they request the file.
 
