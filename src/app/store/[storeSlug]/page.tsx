@@ -104,14 +104,14 @@ export default async function StorePage({
 
       {settings.banner_url && (
         <div className="w-full h-48 sm:h-64 bg-gray-200">
-          <img src={settings.banner_url} alt={`${store.name} Banner`} className="w-full h-full object-cover" />
+          <img src={settings.banner_url} alt={`${store.name} Banner`} fetchPriority="high" className="w-full h-full object-cover" />
         </div>
       )}
 
       {/* Hero / Profile Section */}
       <div className={`max-w-3xl mx-auto px-4 text-center flex flex-col items-center ${settings.banner_url ? '-mt-12 sm:-mt-16 relative z-10' : 'pt-10'}`}>
         {settings.logo_url ? (
-          <img src={settings.logo_url} alt={`${store.name} Logo`} className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full shadow-lg border-4 border-white mb-4 bg-white" />
+          <img src={settings.logo_url} alt={`${store.name} Logo`} fetchPriority="high" className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-full shadow-lg border-4 border-white mb-4 bg-white" />
         ) : (
           <div className="h-24 w-24 sm:h-32 sm:w-32 rounded-full shadow-lg border-4 border-white mb-4 bg-gray-100 flex items-center justify-center">
             <span className="text-3xl text-gray-400 font-bold">{store.name.charAt(0)}</span>
