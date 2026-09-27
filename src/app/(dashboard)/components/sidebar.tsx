@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Store, Package, Settings, CreditCard, LogOut, Home, Menu, X, MapPin } from 'lucide-react'
+import { NotificationBell } from './notification-bell'
 
-export function Sidebar({ storeName, storeSlug, productType }: { storeName: string; storeSlug: string; productType?: string }) {
+export function Sidebar({ storeId, storeName, storeSlug, productType }: { storeId: string; storeName: string; storeSlug: string; productType?: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
@@ -30,9 +31,12 @@ export function Sidebar({ storeName, storeSlug, productType }: { storeName: stri
             <Store className="h-5 w-5 mr-2 text-blue-600" />
             <span className="font-bold text-lg">{storeName}</span>
           </div>
-          <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500 hover:text-black">
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <NotificationBell storeId={storeId} />
+            <button onClick={() => setIsOpen(!isOpen)} className="text-gray-500 hover:text-black">
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
         <div className="px-4 pb-3">
           <Link 
@@ -60,9 +64,12 @@ export function Sidebar({ storeName, storeSlug, productType }: { storeName: stri
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col px-6 py-5 border-b border-gray-100 hidden md:flex">
-          <div className="flex items-center mb-3">
-            <Store className="h-5 w-5 mr-2 text-blue-600" />
-            <span className="font-bold text-lg truncate">{storeName}</span>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center truncate">
+              <Store className="h-5 w-5 mr-2 text-blue-600 flex-shrink-0" />
+              <span className="font-bold text-lg truncate pr-2">{storeName}</span>
+            </div>
+            <NotificationBell storeId={storeId} />
           </div>
           <Link 
             href={`/store/${storeSlug}`} 

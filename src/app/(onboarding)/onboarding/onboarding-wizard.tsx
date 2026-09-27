@@ -52,6 +52,10 @@ export function OnboardingWizard() {
   const [storeName, setStoreName] = useState('')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [storeCategory, setStoreCategory] = useState('')
+  const [pickupAddress, setPickupAddress] = useState('')
+  const [pickupPhone, setPickupPhone] = useState('')
+  const [pickupState, setPickupState] = useState('')
+  const [pickupCity, setPickupCity] = useState('')
   const [terminalAddress, setTerminalAddress] = useState<any>(null)
   const [socials, setSocials] = useState({
     instagram: '',
@@ -143,6 +147,7 @@ export function OnboardingWizard() {
   }
 
   const handleNextFromPickup = () => {
+    if (pickupAddress.trim() && pickupPhone.trim() && pickupState && pickupCity) {
     if (
       terminalAddress?.firstName && 
       terminalAddress?.lastName && 
@@ -370,12 +375,76 @@ export function OnboardingWizard() {
         <h2 className="text-2xl font-bold tracking-tight text-gray-900 mb-2">Set up your pickup address</h2>
         <p className="text-gray-500 mb-8">This is where your physical products will be picked up for delivery. You can update this later in your dashboard.</p>
         
+        <div className="space-y-4 text-left mb-8 max-w-md mx-auto">
+          {/* State Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+            <select
+              value={pickupState}
+              onChange={(e) => { setPickupState(e.target.value); setPickupCity('') }}
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+            >
+              <option value="">Select your state</option>
+              {NG_STATES.map(state => (
+                <option key={state} value={state}>{state}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* City Dropdown — only shows after state is selected */}
+          {pickupState && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">City / Area</label>
+              <select
+                value={pickupCity}
+                onChange={(e) => setPickupCity(e.target.value)}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-white"
+              >
+                <option value="">Select your city</option>
+                {(NG_STATES_CITIES[pickupState] ?? []).map(city => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Street Address */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+            <input 
+              type="text" 
+              name="pickupAddress"
+              value={pickupAddress}
+              onChange={(e) => setPickupAddress(e.target.value)}
+              placeholder="E.g. 123 Store Ave, Lekki"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent" 
+            />
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone Number</label>
+            <input 
+              type="tel" 
+              name="pickupPhone"
+              value={pickupPhone}
+              onChange={(e) => setPickupPhone(e.target.value)}
+              placeholder="+234 800 000 0000"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent" 
+            />
+          </div>
         <div className="text-left mb-8 max-w-md mx-auto">
           <TerminalAddressForm 
             type="pickup"
             onChange={setTerminalAddress}
           />
         </div>
+
+        {/* Hidden inputs to pass to form */}
+        <input type="hidden" name="pickupState" value={pickupState} />
+        <input type="hidden" name="pickupCity" value={pickupCity} />
 
         <div className="flex gap-3">
           <button
@@ -388,6 +457,7 @@ export function OnboardingWizard() {
           <button
             type="button"
             onClick={handleNextFromPickup}
+            disabled={!pickupAddress.trim() || !pickupPhone.trim() || !pickupState || !pickupCity}
             disabled={!terminalAddress?.firstName || !terminalAddress?.phone || !terminalAddress?.state || !terminalAddress?.city || !terminalAddress?.lat}
             className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex items-center justify-center"
           >

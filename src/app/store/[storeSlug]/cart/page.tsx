@@ -351,6 +351,12 @@ export default function CartPage() {
                      </div>
                   </div>
                 )}
+                <div className="mt-6 mb-2">
+                  <p className="text-[11px] text-gray-500 text-center leading-relaxed">
+                    By clicking "Pay", you agree to Maji's <Link href="#" className="underline hover:text-gray-800">Terms & Conditions</Link>. 
+                    Payments are securely processed by Paystack and settled in accordance with their T+1 payout schedule.
+                  </p>
+                </div>
                 
                 <button 
                   type="submit" 

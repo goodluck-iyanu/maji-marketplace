@@ -5,3 +5,4 @@ ADD COLUMN IF NOT EXISTS pickup_lng NUMERIC,
 ADD COLUMN IF NOT EXISTS pickup_contact_name TEXT,
 ADD COLUMN IF NOT EXISTS pickup_email TEXT,
 ADD COLUMN IF NOT EXISTS pickup_is_residential BOOLEAN DEFAULT false;
+

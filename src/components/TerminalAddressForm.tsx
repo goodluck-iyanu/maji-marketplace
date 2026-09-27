@@ -322,3 +322,4 @@ export default function TerminalAddressForm({ type, defaultValues, onChange }: T
     </div>
   )
 }
+
