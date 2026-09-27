@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Bell, Check, Trash2, ExternalLink, Inbox } from 'lucide-react'
 import { createClient } from '@/lib/supabase/browser'
 import Link from 'next/link'
@@ -20,52 +20,74 @@ export function NotificationBell({ storeId }: { storeId: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [hasNew, setHasNew] = useState(false)
+  const [ready, setReady] = useState(false)
   const supabase = createClient()
   const router = useRouter()
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Fetch initial notifications
+  // Fetch initial notifications (with graceful error handling)
   useEffect(() => {
+    let cancelled = false
     async function fetchNotifications() {
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('store_id', storeId)
-        .order('created_at', { ascending: false })
-        .limit(20)
-      
-      if (data) {
-        setNotifications(data)
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('store_id', storeId)
+          .order('created_at', { ascending: false })
+          .limit(20)
+        
+        if (!cancelled && data) {
+          setNotifications(data)
+        }
+        // If error (e.g. table doesn't exist), just silently ignore
+        if (error) {
+          console.warn('Notifications table may not exist yet:', error.message)
+        }
+      } catch (err) {
+        // Gracefully handle - notifications just won't show
+        console.warn('Could not fetch notifications:', err)
       }
+      if (!cancelled) setReady(true)
     }
     fetchNotifications()
+    return () => { cancelled = true }
   }, [storeId])
 
-  // Real-time subscription
+  // Real-time subscription — use a simple channel name (NOT the old v1 topic format)
+  // and set up .on() BEFORE .subscribe() to avoid the "cannot add callbacks after subscribe" error
   useEffect(() => {
-    const channel = supabase
-      .channel(`public:notifications:store_id=eq.${storeId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `store_id=eq.${storeId}`
-        },
-        (payload) => {
-          const newNotif = payload.new as Notification
-          setNotifications(prev => [newNotif, ...prev])
-          setHasNew(true) // Trigger animation
-          setTimeout(() => setHasNew(false), 3000) // Stop animation after 3s
-        }
-      )
-      .subscribe()
+    if (!ready) return // Don't subscribe until initial fetch completes
+
+    const channelName = `notif-${storeId}`
+    const channel = supabase.channel(channelName)
+
+    channel.on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notifications',
+        filter: `store_id=eq.${storeId}`
+      },
+      (payload) => {
+        const newNotif = payload.new as Notification
+        setNotifications(prev => [newNotif, ...prev])
+        setHasNew(true)
+        setTimeout(() => setHasNew(false), 3000)
+      }
+    )
+
+    channel.subscribe((status) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.warn('Realtime channel error for notifications — table may not exist or replication not enabled.')
+      }
+    })
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [storeId])
+  }, [storeId, ready])
 
   // Close dropdown when clicking outside
   useEffect(() => {

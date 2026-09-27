@@ -74,10 +74,10 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ o
           <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm ${
             order.payment_status === 'paid' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
           }`}>
-            {order.payment_status.toUpperCase()}
+            {(order.payment_status || 'pending').toUpperCase()}
           </span>
           <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm border border-blue-200">
-            {order.fulfillment_status.toUpperCase()}
+            {(order.fulfillment_status || 'pending').toUpperCase()}
           </span>
         </div>
       </div>

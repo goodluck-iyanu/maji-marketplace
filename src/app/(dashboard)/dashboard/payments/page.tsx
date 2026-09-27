@@ -64,7 +64,7 @@ export default async function PaymentsPage() {
                  <div>
                     <div className="font-medium text-gray-900">{payoutAccount.account_name}</div>
                     <div className="text-sm text-gray-500">
-                      {payoutAccount.bank_code} ••••{payoutAccount.account_number.slice(-4)}
+                      {payoutAccount.bank_code} ••••{payoutAccount.account_number?.slice(-4) || '****'}
                     </div>
                  </div>
               </div>

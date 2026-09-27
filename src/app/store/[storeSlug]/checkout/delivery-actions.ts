@@ -82,7 +82,7 @@ export async function getDeliveryQuotes(storeId: string, deliveryAddressInfo: an
     const res = await fetch('https://sandbox.terminal.africa/v1/rates/shipment/quotes', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer sk_test_auSbs3NBCSxZ7Fhhpq5wVfffIcRsZOR8',
+        'Authorization': `Bearer ${process.env.TERMINAL_SECRET_KEY || 'sk_test_auSbs3NBCSxZ7Fhhpq5wVfffIcRsZOR8'}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
