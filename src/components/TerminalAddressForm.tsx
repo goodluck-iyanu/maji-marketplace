@@ -24,20 +24,19 @@ export interface TerminalAddressData {
   landmark: string;
 }
 
-interface NominatimSuggestion {
-  display_name: string
-  lat: string
-  lon: string
+interface MapboxFeature {
+  place_name: string
+  center: [number, number] // [lng, lat]
 }
 
-function isNominatimSuggestion(value: unknown): value is NominatimSuggestion {
+function isMapboxFeature(value: unknown): value is MapboxFeature {
   if (!value || typeof value !== 'object') return false
   const candidate = value as Record<string, unknown>
-  return typeof candidate.display_name === 'string' &&
-    typeof candidate.lat === 'string' &&
-    Number.isFinite(Number(candidate.lat)) &&
-    typeof candidate.lon === 'string' &&
-    Number.isFinite(Number(candidate.lon))
+  return typeof candidate.place_name === 'string' &&
+    Array.isArray(candidate.center) &&
+    candidate.center.length === 2 &&
+    typeof candidate.center[0] === 'number' &&
+    typeof candidate.center[1] === 'number'
 }
 
 interface TerminalAddressFormProps {
@@ -67,7 +66,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
   const [lat, setLat] = useState<string>(defaultValues?.lat || '')
   const [lng, setLng] = useState<string>(defaultValues?.lng || '')
   const [locationConfirmed, setLocationConfirmed] = useState(false)
-  const [addressSuggestions, setAddressSuggestions] = useState<NominatimSuggestion[]>([])
+  const [addressSuggestions, setAddressSuggestions] = useState<MapboxFeature[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   
@@ -95,7 +94,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // OpenStreetMap Autocomplete
+  // Mapbox Autocomplete
   useEffect(() => {
     if (addressQuery.length < 4 || !showSuggestions) {
       return
@@ -104,7 +103,13 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
     const delayDebounceFn = setTimeout(async () => {
       setIsSearching(true)
       try {
-        // We append the selected state/city to narrow down the OSM search
+        const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+        if (!token) {
+          console.warn('NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN is missing')
+          setAddressSuggestions([])
+          return
+        }
+
         let query = addressQuery
         if (selectedCity && !query.toLowerCase().includes(selectedCity.toLowerCase())) {
            query += `, ${selectedCity}`
@@ -113,12 +118,15 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
            query += `, ${selectedState}`
         }
         
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&countrycodes=ng&limit=5`, {
-          headers: { 'Accept-Language': 'en' }
-        })
+        // Use Mapbox Geocoding API
+        // bbox roughly for Nigeria/Lagos (Lagos: 3.0,6.3,3.5,6.7) - we can just rely on proximity to Lagos and country=ng
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}&country=ng&proximity=3.3792,6.5244&autocomplete=true&limit=5`
+        
+        const response = await fetch(url)
         if (!response.ok) throw new Error(`Location search failed (${response.status}).`)
-        const data: unknown = await response.json()
-        setAddressSuggestions(Array.isArray(data) ? data.filter(isNominatimSuggestion) : [])
+        const data: any = await response.json()
+        
+        setAddressSuggestions(Array.isArray(data.features) ? data.features.filter(isMapboxFeature) : [])
       } catch (error) {
         console.error('Error fetching addresses:', error)
       } finally {
@@ -129,10 +137,10 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
     return () => clearTimeout(delayDebounceFn)
   }, [addressQuery, showSuggestions, selectedState, selectedCity])
 
-  const handleSelectSuggestion = (suggestion: NominatimSuggestion) => {
-    setAddressQuery(suggestion.display_name)
-    setLat(suggestion.lat)
-    setLng(suggestion.lon)
+  const handleSelectSuggestion = (suggestion: MapboxFeature) => {
+    setAddressQuery(suggestion.place_name)
+    setLat(String(suggestion.center[1]))
+    setLng(String(suggestion.center[0]))
     setLocationConfirmed(true)
     setAddressSuggestions([])
     setShowSuggestions(false)
@@ -140,9 +148,6 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
 
   const isPickup = type === 'pickup'
   const prefix = isPickup ? 'pickup' : 'delivery'
-  const mapBounds = lat && lng
-    ? `${Number(lng) - 0.004},${Number(lat) - 0.004},${Number(lng) + 0.004},${Number(lat) + 0.004}`
-    : ''
 
   return (
     <div className="space-y-4">
@@ -339,12 +344,18 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
         {lat && lng && (
           <div className="mt-3 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="relative">
-              <iframe
-                title="Selected delivery location map"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds}&layer=mapnik&marker=${lat},${lng}`}
-                className="w-full h-48 rounded-lg border border-green-200 shadow-sm"
-                loading="lazy"
-              />
+              {process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? (
+                <img
+                  alt="Selected delivery location map"
+                  src={`https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/pin-s+22c55e(${lng},${lat})/${lng},${lat},15/600x200@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}`}
+                  className="w-full h-48 rounded-lg border border-green-200 shadow-sm object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-48 rounded-lg border border-green-200 shadow-sm bg-gray-50 flex items-center justify-center text-gray-500 text-sm">
+                  Map preview unavailable
+                </div>
+              )}
               <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-green-200 shadow-sm flex items-center gap-1.5 animate-pulse">
                 <MapPin className="w-4 h-4 text-green-600" />
                 <span className="text-xs font-semibold text-green-700">Location Pinned</span>
@@ -372,7 +383,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
                 onClick={() => handleSelectSuggestion(suggestion)}
               >
                 <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                <span>{suggestion.display_name}</span>
+                <span>{suggestion.place_name}</span>
               </li>
             ))}
           </ul>
