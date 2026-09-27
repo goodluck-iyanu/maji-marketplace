@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { NG_STATES, NG_STATES_CITIES } from '@/lib/ng-cities'
-import { MapPin, Loader2, Search } from 'lucide-react'
+import { MapPin, Loader2, Search, Check } from 'lucide-react'
 
 export interface TerminalAddressData {
   firstName: string;
@@ -133,7 +133,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
     setAddressQuery(suggestion.display_name)
     setLat(suggestion.lat)
     setLng(suggestion.lon)
-    setLocationConfirmed(false)
+    setLocationConfirmed(true)
     setAddressSuggestions([])
     setShowSuggestions(false)
   }
@@ -232,7 +232,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
             }}
           >
             <option value="">Select state</option>
-            {NG_STATES.map(state => (
+            {['Lagos', 'Ogun'].map(state => (
               <option key={state} value={state}>{state}</option>
             ))}
           </select>
@@ -337,26 +337,22 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
         </div>
         
         {lat && lng && (
-          <div className="mt-3 space-y-3">
-            <iframe
-              title="Selected delivery location map"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds}&layer=mapnik&marker=${lat},${lng}`}
-              className="w-full h-48 rounded-lg border border-gray-200"
-              loading="lazy"
-            />
-            <label className="flex items-start gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={locationConfirmed}
-                onChange={(event) => setLocationConfirmed(event.target.checked)}
-                required
-                className="mt-1"
+          <div className="mt-3 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <div className="relative">
+              <iframe
+                title="Selected delivery location map"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds}&layer=mapnik&marker=${lat},${lng}`}
+                className="w-full h-48 rounded-lg border border-green-200 shadow-sm"
+                loading="lazy"
               />
-              <span>I confirm the map pin marks the actual {isPickup ? 'pickup' : 'delivery'} location.</span>
-            </label>
+              <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full border border-green-200 shadow-sm flex items-center gap-1.5 animate-pulse">
+                <MapPin className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-semibold text-green-700">Location Pinned</span>
+              </div>
+            </div>
             {locationConfirmed && (
-              <p className="text-xs text-green-700 flex items-center gap-1 font-medium">
-                <MapPin className="w-3 h-3" /> Confirmed map coordinates: {lat}, {lng}
+              <p className="text-xs text-green-700 flex items-center gap-1 font-medium bg-green-50 p-2 rounded border border-green-100">
+                <Check className="w-4 h-4" /> Coordinates mapped successfully: {lat}, {lng}
               </p>
             )}
           </div>

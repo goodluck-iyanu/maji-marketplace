@@ -153,16 +153,11 @@ export async function processCheckout(formData: FormData) {
     
     deliveryFee = matchedRate.fee
     savedQuote = matchedRate
-    const fallbackFirstName = customerName.split(' ')[0] || ''
-    const fallbackLastName = customerName.split(' ').slice(1).join(' ') || ''
-    
     finalDeliveryAddress = {
-      first_name: dropoff.firstName || fallbackFirstName,
-      last_name: dropoff.lastName || fallbackLastName,
-      recipient_name: (dropoff.firstName || dropoff.lastName) 
-        ? `${dropoff.firstName} ${dropoff.lastName}`.trim() 
-        : customerName,
-      recipient_phone: dropoff.phone || customerPhone,
+      first_name: dropoff.firstName,
+      last_name: dropoff.lastName,
+      recipient_name: `${dropoff.firstName} ${dropoff.lastName}`.trim(),
+      recipient_phone: dropoff.phone,
       address: dropoff.line1,
       house_number: dropoff.houseNumber,
       area: dropoff.area,

@@ -203,17 +203,24 @@ export default function CartPage() {
                 </div>
                 
                 {productType === 'physical' && (
-                  <div className="flex justify-between text-gray-600">
+                  <div className="flex justify-between text-gray-600 items-center">
                     <span>Delivery</span>
                     {deliveryMethod === 'delivery' ? (
-                      <span>
-                        {selectedRate
-                          ? `₦${deliveryFee.toLocaleString()}`
-                          : isCalculatingFee
-                            ? 'Getting live quote…'
-                            : quoteError
-                              ? 'Unavailable'
-                              : 'Confirm delivery location'}
+                      <span className="flex items-center">
+                        {isCalculatingFee ? (
+                          <span className="flex items-center text-blue-600 font-medium animate-pulse">
+                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                            Getting live quote...
+                          </span>
+                        ) : selectedRate ? (
+                          <span className="font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-100">
+                            + ₦{deliveryFee.toLocaleString()}
+                          </span>
+                        ) : quoteError ? (
+                          <span className="text-red-500 text-sm">{quoteError}</span>
+                        ) : (
+                          <span className="text-sm italic text-gray-400">Select address on map</span>
+                        )}
                       </span>
                     ) : (
                       <span className="text-gray-400">— Not selected</span>
@@ -221,11 +228,20 @@ export default function CartPage() {
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-100 text-lg">
+                <div className="flex justify-between items-center pt-4 mt-4 border-t border-gray-100 text-lg transition-all">
                   <span className="text-gray-900 font-semibold">Total Amount</span>
-                  <span className="font-bold text-2xl text-gray-900">
-                    {hasCompleteDeliveryQuote ? `₦${finalTotal.toLocaleString()}` : '—'}
-                  </span>
+                  <div className="text-right">
+                    {isCalculatingFee ? (
+                      <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md ml-auto"></div>
+                    ) : (
+                      <span className={`font-bold text-2xl transition-colors ${hasCompleteDeliveryQuote ? 'text-black' : 'text-gray-400'}`}>
+                        {hasCompleteDeliveryQuote ? `₦${finalTotal.toLocaleString()}` : `₦${totalAmount.toLocaleString()}`}
+                      </span>
+                    )}
+                    {!hasCompleteDeliveryQuote && !isCalculatingFee && deliveryMethod === 'delivery' && (
+                      <p className="text-xs text-orange-500 font-medium mt-1">Pending delivery calculation</p>
+                    )}
+                  </div>
                 </div>
               </div>
               
@@ -403,11 +419,7 @@ export default function CartPage() {
                   type="submit" 
                   disabled={loading || (productType === 'physical' && deliveryMethod === 'delivery' && (
                     !terminalAddress?.locationConfirmed ||
-                    !terminalAddress?.firstName ||
-                    !terminalAddress?.lastName ||
-                    !terminalAddress?.phone ||
                     !terminalAddress?.state ||
-                    terminalAddress?.state !== 'Lagos' ||
                     !terminalAddress?.city ||
                     !terminalAddress?.line1 ||
                     !terminalAddress?.houseNumber ||
