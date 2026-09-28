@@ -200,7 +200,7 @@ export default function FashionProductBuilder({ productType }: { productType: st
         </div>
       )}
 
-      <form action={async (formData) => {
+      <form noValidate action={async (formData) => {
         setIsCompressing(true)
         try {
           const compressedFormData = new FormData()

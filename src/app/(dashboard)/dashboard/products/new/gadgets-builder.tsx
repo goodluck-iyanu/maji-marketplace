@@ -249,7 +249,7 @@ export default function GadgetsProductBuilder({ productType }: { productType: st
         </div>
       )}
 
-      <form action={async (formData) => {
+      <form noValidate action={async (formData) => {
         setIsCompressing(true)
         try {
           const compressedFormData = new FormData()

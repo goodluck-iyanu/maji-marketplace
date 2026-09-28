@@ -296,7 +296,11 @@ export default function CartPage() {
                 </div>
               )}
 
-              <form action={handleCheckout} className="space-y-6">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                await handleCheckout(formData);
+              }} className="space-y-6">
                 
                 {/* CUSTOMER INFORMATION */}
                 <div>

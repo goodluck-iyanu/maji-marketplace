@@ -285,7 +285,7 @@ export default function HomeProductBuilder({ productType }: { productType: strin
 
       {state?.error && <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 font-medium">{state.error}</div>}
 
-      <form action={async (formData) => {
+      <form noValidate action={async (formData) => {
         setIsCompressing(true)
         try {
           const compressedFormData = new FormData()
