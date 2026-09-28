@@ -25,6 +25,7 @@ export default function CartPage() {
   const [isCalculatingFee, setIsCalculatingFee] = useState(false)
   const [quoteError, setQuoteError] = useState<string | null>(null)
   const [storeId, setStoreId] = useState<string | null>(null)
+  const [platformSettings, setPlatformSettings] = useState<{ percentage: number, fixed: number }>({ percentage: 4, fixed: 50 })
   const [carrierRates, setCarrierRates] = useState<{fee: number, carrier: string, carrierId: string, eta: string, quoteId: string}[]>([])
   const [selectedCarrierIndex, setSelectedCarrierIndex] = useState(0)
   
@@ -39,6 +40,13 @@ export default function CartPage() {
       if (data) {
         setProductType(data.product_type as 'physical' | 'digital')
         setStoreId(data.id)
+      }
+      const { data: ps } = await supabase.from('platform_settings').select('*').single()
+      if (ps) {
+        setPlatformSettings({ 
+          percentage: Number(ps.commission_percentage || 4), 
+          fixed: Number(ps.commission_fixed_fee || 50) 
+        })
       }
     }
     fetchStore()
@@ -90,11 +98,38 @@ export default function CartPage() {
     quoteAddressKey,
   ])
 
-  const finalTotal = totalAmount + deliveryFee
+  const productSubtotal = totalAmount
+  const platformFee = Math.round((productSubtotal * (platformSettings.percentage / 100)) + platformSettings.fixed)
+  const totalBeforeFee = productSubtotal + platformFee + deliveryFee
   const selectedRate = carrierRates[selectedCarrierIndex]
   const hasCompleteDeliveryQuote = productType !== 'physical' ||
     deliveryMethod !== 'delivery' ||
     Boolean(selectedRate)
+
+  let finalTotal = totalBeforeFee
+  let processingFee = 0
+
+  if (hasCompleteDeliveryQuote || deliveryMethod !== 'delivery') {
+    if (totalBeforeFee >= 2500) {
+      const calculatedTotal = Math.ceil((totalBeforeFee + 100) / 0.985)
+      processingFee = calculatedTotal - totalBeforeFee
+      if (processingFee > 2000) {
+        processingFee = 2000
+        finalTotal = totalBeforeFee + 2000
+      } else {
+        finalTotal = calculatedTotal
+      }
+    } else {
+      const calculatedTotal = Math.ceil(totalBeforeFee / 0.985)
+      processingFee = calculatedTotal - totalBeforeFee
+      if (processingFee > 2000) {
+        processingFee = 2000
+        finalTotal = totalBeforeFee + 2000
+      } else {
+        finalTotal = calculatedTotal
+      }
+    }
+  }
 
   const handleCheckout = async (formData: FormData) => {
     setLoading(true)
@@ -196,7 +231,12 @@ export default function CartPage() {
               <div className="space-y-3 mb-6 pb-6 border-b border-gray-100">
                 <div className="flex justify-between text-gray-600">
                   <span>Product subtotal</span>
-                  <span>₦{totalAmount.toLocaleString()}</span>
+                  <span>₦{productSubtotal.toLocaleString()}</span>
+                </div>
+                
+                <div className="flex justify-between text-gray-600 items-center">
+                  <span>Maji platform fee</span>
+                  <span>₦{platformFee.toLocaleString()}</span>
                 </div>
                 
                 {productType === 'physical' && (
@@ -225,6 +265,13 @@ export default function CartPage() {
                   </div>
                 )}
                 
+                {processingFee > 0 && hasCompleteDeliveryQuote && (
+                  <div className="flex justify-between text-gray-600 items-center">
+                    <span>Payment processing fee</span>
+                    <span>₦{processingFee.toLocaleString()}</span>
+                  </div>
+                )}
+                
                 <div className="flex justify-between items-center pt-4 mt-4 border-t border-gray-100 text-lg transition-all">
                   <span className="text-gray-900 font-semibold">Total Amount</span>
                   <div className="text-right">
@@ -232,7 +279,7 @@ export default function CartPage() {
                       <div className="h-8 w-24 bg-gray-100 animate-pulse rounded-md ml-auto"></div>
                     ) : (
                       <span className={`font-bold text-2xl transition-colors ${hasCompleteDeliveryQuote ? 'text-black' : 'text-gray-400'}`}>
-                        {hasCompleteDeliveryQuote ? `₦${finalTotal.toLocaleString()}` : `₦${totalAmount.toLocaleString()}`}
+                        {hasCompleteDeliveryQuote ? `₦${finalTotal.toLocaleString()}` : `₦${(totalBeforeFee).toLocaleString()}`}
                       </span>
                     )}
                     {!hasCompleteDeliveryQuote && !isCalculatingFee && deliveryMethod === 'delivery' && (
@@ -430,7 +477,7 @@ export default function CartPage() {
                   ))}
                   className="w-full py-4 bg-black text-white rounded-lg font-bold text-lg hover:bg-gray-800 transition-colors flex justify-center items-center disabled:opacity-70 mt-4 shadow-md"
                 >
-                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : `Pay ₦${finalTotal.toLocaleString()}`}
+                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : `Pay ₦${(hasCompleteDeliveryQuote ? finalTotal : totalBeforeFee).toLocaleString()}`}
                 </button>
               </form>
               

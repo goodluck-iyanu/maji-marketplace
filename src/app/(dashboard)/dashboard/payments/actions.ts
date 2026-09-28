@@ -69,7 +69,7 @@ export async function connectBankAccount(formData: FormData) {
       business_name: store.name,
       settlement_bank: bankCode,
       account_number: accountNumber,
-      percentage_charge: 5, // Maji takes a 5% fee (configurable)
+      percentage_charge: 0.01, // Minimum allowed. Overridden by transaction_charge dynamically.
     })
     subaccountCode = subaccount.subaccount_code
   } catch (err) {

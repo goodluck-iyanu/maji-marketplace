@@ -3,6 +3,8 @@ export async function initializeTransaction(params: {
   email: string;
   reference: string;
   subaccount?: string; // Optional: for split payments to the seller
+  transaction_charge?: number; // Optional: flat amount (in kobo) for the main account to keep
+  bearer?: string; // Optional: 'account' or 'subaccount'
   metadata?: any;
 }) {
   const response = await fetch('https://api.paystack.co/transaction/initialize', {
@@ -16,6 +18,8 @@ export async function initializeTransaction(params: {
       email: params.email,
       reference: params.reference,
       subaccount: params.subaccount,
+      transaction_charge: params.transaction_charge,
+      bearer: params.bearer,
       metadata: params.metadata,
       callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/verify`, // Fallback redirect
     }),

@@ -178,7 +178,42 @@ export async function processCheckout(formData: FormData) {
     return { error: 'Choose a valid delivery method.' }
   }
 
-  const totalAmount = itemTotal + deliveryFee
+  const productSubtotal = itemTotal
+  const { data: platformSettingsRow } = await supabase
+    .from('platform_settings')
+    .select('*')
+    .single()
+    
+  const platformPercentage = Number(platformSettingsRow?.commission_percentage || 4) / 100
+  const platformFixed = Number(platformSettingsRow?.commission_fixed_fee || 50)
+  
+  const platformFee = Math.round((productSubtotal * platformPercentage) + platformFixed)
+  const totalBeforeFee = productSubtotal + platformFee + deliveryFee
+  
+  let customerTotal = totalBeforeFee
+  let processingFee = 0
+  
+  // Inverse Paystack Formula to recover processing cost from customer
+  if (totalBeforeFee >= 2500) {
+    const calculatedTotal = Math.ceil((totalBeforeFee + 100) / 0.985)
+    processingFee = calculatedTotal - totalBeforeFee
+    if (processingFee > 2000) {
+      processingFee = 2000
+      customerTotal = totalBeforeFee + 2000
+    } else {
+      customerTotal = calculatedTotal
+    }
+  } else {
+    const calculatedTotal = Math.ceil(totalBeforeFee / 0.985)
+    processingFee = calculatedTotal - totalBeforeFee
+    if (processingFee > 2000) {
+      processingFee = 2000
+      customerTotal = totalBeforeFee + 2000
+    } else {
+      customerTotal = calculatedTotal
+    }
+  }
+
   const { data: payoutAccount } = await supabase
     .from('payout_accounts')
     .select('subaccount_code')
@@ -204,7 +239,11 @@ export async function processCheckout(formData: FormData) {
       delivery_fee: deliveryFee,
       delivery_address: finalDeliveryAddress,
       delivery_quote: savedQuote,
-      total_amount: totalAmount,
+      product_subtotal: productSubtotal,
+      platform_fee: platformFee,
+      seller_amount: productSubtotal,
+      processing_fee: processingFee,
+      total_amount: customerTotal,
       payment_reference: reference,
       payment_status: 'pending',
     })
@@ -222,12 +261,19 @@ export async function processCheckout(formData: FormData) {
   }
 
   try {
-    const isFakeSubaccount = payoutAccount?.subaccount_code?.startsWith('SUB_')
+    const validSubaccount = (payoutAccount?.subaccount_code && !payoutAccount.subaccount_code.startsWith('SUB_')) 
+      ? payoutAccount.subaccount_code 
+      : undefined;
+      
+    const transactionChargeKobo = (platformFee + deliveryFee + processingFee) * 100
+
     const paystackData = await initializeTransaction({
-      amount: totalAmount,
+      amount: customerTotal,
       email: customerEmail,
       reference,
-      subaccount: isFakeSubaccount ? undefined : payoutAccount?.subaccount_code,
+      subaccount: validSubaccount,
+      transaction_charge: validSubaccount ? transactionChargeKobo : undefined,
+      bearer: validSubaccount ? 'account' : undefined,
       metadata: { storeId, cart: cartItems },
     })
 
