@@ -135,13 +135,18 @@ export async function getDeliveryQuotes(
     }
 
     // 6. Call Theyutes Quote API
-    const apiKey = (process.env.THEYUTES_API_KEY || '').trim()
-    const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://api.theyutes.com'
+    const rawKey = process.env.THEYUTES_API_KEY || ''
+    // Sanitize: trim whitespace, remove any accidental duplicate pastes
+    const apiKey = rawKey.trim().split(/\s+/)[0]
+    const baseUrl = (process.env.THEYUTES_API_BASE_URL || 'https://theyutes.com').replace(/\/+$/, '')
 
     if (!apiKey) {
       console.error('THEYUTES_API_KEY is not set')
       return { error: 'Delivery service is not configured. Please contact support.' }
     }
+
+    console.log(`[Theyutes] Requesting quote: ${baseUrl}/api/v1/logistics/quote`)
+    console.log(`[Theyutes] Payload:`, JSON.stringify(payload, null, 2))
 
     const res = await fetch(`${baseUrl}/api/v1/logistics/quote`, {
       method: 'POST',
@@ -153,12 +158,15 @@ export async function getDeliveryQuotes(
     })
 
     const responseText = await res.text()
+    console.log(`[Theyutes] Response status: ${res.status}`)
+    console.log(`[Theyutes] Response body: ${responseText.substring(0, 500)}`)
+
     let data;
     try {
       data = JSON.parse(responseText)
     } catch (e) {
-      console.error('Theyutes API returned non-JSON:', responseText)
-      return { error: 'Invalid response from delivery service.' }
+      console.error('Theyutes API returned non-JSON:', responseText.substring(0, 200))
+      return { error: 'Delivery service returned an invalid response. Please try again.' }
     }
 
     if (!res.ok) {
@@ -167,30 +175,43 @@ export async function getDeliveryQuotes(
     }
 
     // 7. Parse Theyutes response
-    const quotes = data?.data?.quotes
+    // Support multiple response shapes: data.quotes, data.data.quotes, or data directly as array
+    const quotes = data?.data?.quotes || data?.quotes || (Array.isArray(data?.data) ? data.data : null)
     if (!quotes || quotes.length === 0) {
       return { error: 'No delivery carriers available for this route.' }
     }
 
-    // Sort by price ascending
-    const sorted = [...quotes].sort((a: any, b: any) => a.priceKobo - b.priceKobo)
+    // Sort by price ascending — support both priceKobo and price_kobo field names
+    const sorted = [...quotes].sort((a: any, b: any) => {
+      const priceA = a.priceKobo ?? a.price_kobo ?? a.price ?? 0
+      const priceB = b.priceKobo ?? b.price_kobo ?? b.price ?? 0
+      return priceA - priceB
+    })
 
     return {
-      fee: Math.round(sorted[0].priceKobo / 100), // Convert kobo to Naira
-      carrier: sorted[0].carrierName,
-      eta: `${sorted[0].etaMinutes} min`,
-      quoteId: sorted[0].quoteId,
+      fee: Math.round((sorted[0].priceKobo ?? sorted[0].price_kobo ?? sorted[0].price ?? 0) / 100),
+      carrier: sorted[0].carrierName ?? sorted[0].carrier_name ?? sorted[0].carrier ?? 'Theyutes',
+      eta: sorted[0].etaMinutes ? `${sorted[0].etaMinutes} min` : sorted[0].eta ?? 'N/A',
+      quoteId: sorted[0].quoteId ?? sorted[0].quote_id ?? sorted[0].id ?? '',
       rates: sorted.map((q: any) => ({
-        fee: Math.round(q.priceKobo / 100),
-        carrier: q.carrierName,
-        carrierId: q.carrier,
-        eta: `${q.etaMinutes} min`,
-        quoteId: q.quoteId,
+        fee: Math.round((q.priceKobo ?? q.price_kobo ?? q.price ?? 0) / 100),
+        carrier: q.carrierName ?? q.carrier_name ?? q.carrier ?? 'Theyutes',
+        carrierId: q.carrier ?? q.carrierId ?? q.carrier_id ?? '',
+        eta: q.etaMinutes ? `${q.etaMinutes} min` : q.eta ?? 'N/A',
+        quoteId: q.quoteId ?? q.quote_id ?? q.id ?? '',
       }))
     }
 
   } catch (error: any) {
     console.error('Delivery quote error:', error)
-    return { error: 'Detailed Error: ' + String(error.message || error) }
+    const msg = error?.message || String(error)
+    // Give user-friendly messages for common network errors
+    if (msg.includes('fetch failed') || msg.includes('ECONNREFUSED') || msg.includes('ETIMEDOUT')) {
+      return { error: 'Could not reach the delivery service. Please try again in a moment.' }
+    }
+    if (msg.includes('invalid header')) {
+      return { error: 'Delivery service configuration error. Please contact support.' }
+    }
+    return { error: msg }
   }
 }
