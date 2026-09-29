@@ -2,7 +2,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import NewProductForm from './new-product-form'
 
-export default async function NewProductPage() {
+export default async function NewProductPage(props: any) {
+  const searchParams = await props.searchParams
+  if (!searchParams?.sid) {
+    const crypto = require('crypto')
+    const sid = crypto.randomUUID()
+    redirect(`/dashboard/products/new?sid=${sid}`)
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
