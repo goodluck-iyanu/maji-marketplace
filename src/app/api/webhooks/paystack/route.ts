@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { createClient } from '@supabase/supabase-js'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 
 // We use the admin client (service_role) because webhooks come from outside 
 // and need to bypass RLS to update orders.
@@ -148,9 +149,70 @@ export async function POST(req: Request) {
           link: '/dashboard'
         })
 
-      // 4. (Optional) For digital products, we would generate a download token here.
-      // But we can also just verify `payment_status = 'paid'` when they request the file.
+      // 6. Send Maji Order Confirmation Email (idempotent)
+      if (!order.confirmation_email_sent) {
+        try {
+          // Fetch store name
+          const { data: store } = await supabaseAdmin
+            .from('stores')
+            .select('name')
+            .eq('id', order.store_id)
+            .single()
 
+          // Fetch order items with product details
+          const { data: orderItems } = await supabaseAdmin
+            .from('order_items')
+            .select('*, products(name, description, is_digital, product_images(image_url, display_order))')
+            .eq('order_id', order.id)
+            .order('created_at', { ascending: true })
+
+          const items = (orderItems || []).map((item: any) => {
+            const product = item.products
+            const images = product?.product_images || []
+            const sortedImages = [...images].sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+            return {
+              name: product?.name || 'Product',
+              description: product?.description || '',
+              quantity: item.quantity,
+              priceAtPurchase: Number(item.price_at_purchase),
+              imageUrl: sortedImages[0]?.image_url || undefined,
+              isDigital: product?.is_digital || false,
+            }
+          })
+
+          const emailResult = await sendOrderConfirmationEmail({
+            orderId: order.id,
+            paymentReference: order.payment_reference,
+            customerName: order.customer_name || 'Customer',
+            customerEmail: order.customer_email,
+            storeName: store?.name || 'Maji Store',
+            deliveryMethod: order.delivery_method || 'digital',
+            deliveryAddress: order.delivery_address,
+            deliveryFee: Number(order.delivery_fee || 0),
+            platformFee: Number(order.platform_fee || 0),
+            processingFee: Number(order.processing_fee || 0),
+            productSubtotal: Number(order.product_subtotal || 0),
+            totalAmount: Number(order.total_amount),
+            orderDate: order.created_at,
+            items,
+          })
+
+          if (emailResult.success) {
+            // Mark email as sent (idempotency flag)
+            await supabaseAdmin
+              .from('orders')
+              .update({ confirmation_email_sent: true })
+              .eq('id', order.id)
+            console.log(`[Maji] Order confirmation email sent for ${order.payment_reference}`)
+          } else {
+            // Email failed but order/payment is still valid
+            console.error(`[Maji] Email failed for ${order.payment_reference}:`, emailResult.error)
+          }
+        } catch (emailErr) {
+          // Email failure must NOT affect order status
+          console.error('[Maji] Email send exception:', emailErr)
+        }
+      }
     }
 
     return NextResponse.json({ status: 'success' })
