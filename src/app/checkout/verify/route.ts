@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyTransaction } from '@/lib/paystack'
+import { processOrderFulfillment } from '@/lib/order-fulfillment'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -15,7 +16,7 @@ export async function GET(request: Request) {
   // Find the order
   const { data: order } = await supabase
     .from('orders')
-    .select('*, stores(slug)')
+    .select('id, payment_status, stores(slug)')
     .eq('payment_reference', reference)
     .single()
 
@@ -23,27 +24,21 @@ export async function GET(request: Request) {
     return NextResponse.redirect(origin + '/')
   }
 
-  // Optional: We can manually verify if the webhook was delayed.
-  if (order.payment_status === 'pending') {
-    try {
-       const tx = await verifyTransaction(reference)
-       if (tx.data.status === 'success') {
-          // Use Admin client to bypass RLS and securely update the order status
-          const supabaseAdmin = require('@supabase/supabase-js').createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          )
-          
-          await supabaseAdmin
-            .from('orders')
-            .update({ payment_status: 'paid' })
-            .eq('payment_reference', reference)
-       }
-    } catch (e) {
-       console.error(e)
+  // Verify and complete order fulfillment synchronously so the buyer gets their email immediately!
+  try {
+    const tx = await verifyTransaction(reference)
+    if (tx?.data?.status === 'success') {
+      const fees = (tx.data.fees || 0) / 100
+      await processOrderFulfillment({
+        reference,
+        actualPaystackFee: fees,
+      })
     }
+  } catch (e) {
+    console.error('[Checkout Verify] Verification error:', e)
   }
 
-  // Redirect to order confirmation page
-  return NextResponse.redirect(origin + '/store/' + order.stores.slug + '/order/' + order.id)
+  // Redirect to original store order confirmation page
+  const slug = (order.stores as any)?.slug || 'store'
+  return NextResponse.redirect(origin + '/store/' + slug + '/order/' + order.id)
 }

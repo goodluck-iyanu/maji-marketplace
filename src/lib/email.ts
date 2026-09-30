@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_to_prevent_build_crash')
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 const FROM_EMAIL = 'Maji <receipt-maji@hoberg.com.ng>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng'
