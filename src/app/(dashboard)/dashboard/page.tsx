@@ -50,7 +50,7 @@ export default async function DashboardOverview() {
   
   // Calculate revenue from paid orders only (using product_subtotal to exclude delivery/platform fees, falling back to total_amount for old orders)
   const totalRevenue = orders
-    .reduce((sum, order) => sum + Number(order.product_subtotal || order.total_amount), 0)
+    .reduce((sum, order) => sum + (order.product_subtotal !== null && order.product_subtotal > 0) ? Number(order.product_subtotal) : Number(order.total_amount), 0)
 
   // Get total unique paid orders for count
   const paidOrderCount = orders.length
@@ -139,7 +139,7 @@ export default async function DashboardOverview() {
                        </ul>
                      </td>
                      <td className="px-6 py-4 font-bold text-gray-900">
-                       ₦{Number(order.product_subtotal || order.total_amount).toLocaleString()}
+                       ₦{((order.product_subtotal !== null && order.product_subtotal > 0) ? Number(order.product_subtotal) : Number(order.total_amount)).toLocaleString()}
                      </td>
                      <td className="px-6 py-4 text-gray-600">
                        <p>{new Date(order.created_at).toLocaleDateString()}</p>
