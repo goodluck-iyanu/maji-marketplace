@@ -113,7 +113,7 @@ export default function OtherProductBuilder({ productType }: { productType: stri
 
 
   const handleNext = () => setCurrentStep(c => Math.min(c + 1, STEPS.length - 1))
-  const handleBack = () => setCurrentStep(c => Math.max(c - 1, 0))
+  const handleBack = () => setCurrentStep(c => { if (c === 6 && !hasOptions) return 4; return Math.max(c - 1, 0) })
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -457,7 +457,7 @@ export default function OtherProductBuilder({ productType }: { productType: stri
 
             <div className="flex justify-between">
               <button type="button" onClick={handleBack} className="px-8 py-3 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Back</button>
-              <button type="button" disabled={hasOptions === null} onClick={() => { if (hasOptions) { generateVariants(); handleNext() } else { setCurrentStep(STEPS.length - 1) } }} className="bg-black text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Next Step</button>
+              <button type="button" disabled={hasOptions === null} onClick={() => { if (hasOptions) { generateVariants(); handleNext() } else { setCurrentStep(6) } }} className="bg-black text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Next Step</button>
             </div>
           </div>
         </div>
@@ -502,7 +502,7 @@ export default function OtherProductBuilder({ productType }: { productType: stri
 
               <div className="flex justify-between">
                 <button type="button" onClick={handleBack} className="px-8 py-3 border rounded-xl font-medium text-gray-700 hover:bg-gray-50">Back</button>
-                <button type="button" disabled={variants.some(v => !v.price || !v.stock)} onClick={handleNext} className="bg-black text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Review Product</button>
+                <button type="button" disabled={variants.some(v => !v.price || !v.stock)} onClick={handleNext} className="bg-black text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Next Step</button>
               </div>
             </div>
           </div>
