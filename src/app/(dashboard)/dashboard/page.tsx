@@ -43,17 +43,17 @@ export default async function DashboardOverview() {
     .from('orders')
     .select('*, order_items(*, products(name))')
     .eq('store_id', store!.id)
+    .eq('payment_status', 'paid')
     .order('created_at', { ascending: false })
 
   const orders = allOrders || []
   
   // Calculate revenue from paid orders only (using product_subtotal to exclude delivery/platform fees, falling back to total_amount for old orders)
   const totalRevenue = orders
-    .filter(order => order.payment_status === 'paid')
     .reduce((sum, order) => sum + Number(order.product_subtotal || order.total_amount), 0)
 
-  // Get total unique paid orders for count (optional, but requested orders stat)
-  const paidOrderCount = orders.filter(order => order.payment_status === 'paid').length
+  // Get total unique paid orders for count
+  const paidOrderCount = orders.length
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
