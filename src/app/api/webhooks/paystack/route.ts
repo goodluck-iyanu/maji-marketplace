@@ -47,9 +47,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ status: 'ignored', message: 'Order not found' })
       }
 
-      // Idempotency check
-      if (order.payment_status === 'paid') {
-        return NextResponse.json({ status: 'success', message: 'Order already paid' })
+      // Idempotency check: Abort ONLY if the email is already sent 
+      // (which proves the ENTIRE webhook successfully completed previously)
+      if (order.confirmation_email_sent === true) {
+        return NextResponse.json({ status: 'success', message: 'Order already fully processed' })
       }
 
       // 2. Validate amount. Paystack amount is in kobo.

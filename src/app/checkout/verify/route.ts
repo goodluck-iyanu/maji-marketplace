@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { verifyTransaction } from '@/lib/paystack'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -11,9 +12,10 @@ export async function GET(request: Request) {
 
   const supabase = await createClient()
 
+  // Find the order
   const { data: order } = await supabase
     .from('orders')
-    .select('id, payment_reference')
+    .select('*, stores(slug)')
     .eq('payment_reference', reference)
     .single()
 
@@ -21,7 +23,27 @@ export async function GET(request: Request) {
     return NextResponse.redirect(origin + '/')
   }
 
-  // Let the Paystack webhook handle the actual database updates, email, and ledger entries.
-  // The webhook is the single source of truth. We just redirect the user to the tracking page.
-  return NextResponse.redirect(origin + '/track/' + reference)
+  // Optional: We can manually verify if the webhook was delayed.
+  if (order.payment_status === 'pending') {
+    try {
+       const tx = await verifyTransaction(reference)
+       if (tx.data.status === 'success') {
+          // Use Admin client to bypass RLS and securely update the order status
+          const supabaseAdmin = require('@supabase/supabase-js').createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+          )
+          
+          await supabaseAdmin
+            .from('orders')
+            .update({ payment_status: 'paid' })
+            .eq('payment_reference', reference)
+       }
+    } catch (e) {
+       console.error(e)
+    }
+  }
+
+  // Redirect to order confirmation page
+  return NextResponse.redirect(origin + '/store/' + order.stores.slug + '/order/' + order.id)
 }
