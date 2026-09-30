@@ -139,7 +139,7 @@ export default async function DashboardOverview() {
                        </ul>
                      </td>
                      <td className="px-6 py-4 font-bold text-gray-900">
-                       ₦{Number(order.total_amount).toLocaleString()}
+                       ₦{Number(order.product_subtotal || order.total_amount).toLocaleString()}
                      </td>
                      <td className="px-6 py-4 text-gray-600">
                        <p>{new Date(order.created_at).toLocaleDateString()}</p>
