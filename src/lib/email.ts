@@ -156,11 +156,6 @@ function buildOrderEmailHtml(data: OrderEmailData): string {
   <tr><td style="background:#fff;padding:0 32px 24px;">
     <h3 style="margin:0 0 16px;color:#111;font-size:16px;font-weight:700;border-top:1px solid #f3f4f6;padding-top:24px;">Payment Summary</h3>
     <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;">
-      <tr><td style="color:#6b7280;padding:6px 0;">Product Subtotal</td><td style="color:#111;text-align:right;padding:6px 0;">${formatNaira(data.productSubtotal)}</td></tr>
-      <tr><td style="color:#6b7280;padding:6px 0;">Maji Platform Fee</td><td style="color:#111;text-align:right;padding:6px 0;">${formatNaira(data.platformFee)}</td></tr>
-      ${data.deliveryFee > 0 ? `<tr><td style="color:#6b7280;padding:6px 0;">Delivery Fee</td><td style="color:#111;text-align:right;padding:6px 0;">${formatNaira(data.deliveryFee)}</td></tr>` : ''}
-      ${data.processingFee > 0 ? `<tr><td style="color:#6b7280;padding:6px 0;">Payment Processing Fee</td><td style="color:#111;text-align:right;padding:6px 0;">${formatNaira(data.processingFee)}</td></tr>` : ''}
-      <tr><td colspan="2" style="border-top:2px solid #111;padding-top:12px;"></td></tr>
       <tr><td style="color:#111;font-weight:700;font-size:18px;padding:4px 0;">Total Paid</td><td style="color:#111;font-weight:700;font-size:18px;text-align:right;padding:4px 0;">${formatNaira(data.totalAmount)}</td></tr>
     </table>
   </td></tr>
