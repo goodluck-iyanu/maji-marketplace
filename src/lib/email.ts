@@ -142,7 +142,7 @@ function buildOrderEmailHtml(data: OrderEmailData): string {
   
   <!-- DYNAMIC STORE HEADER -->
   <tr>
-    <td style="background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%); padding:48px 32px; text-align:center; border-radius:16px 16px 0 0;">
+    <td style="background: #ea580c; padding:48px 32px; text-align:center; border-radius:16px 16px 0 0;">
       ${data.storeLogo ? `<img src="${data.storeLogo}" width="72" height="72" style="border-radius:50%;object-fit:cover;display:inline-block;border:3px solid rgba(255,255,255,0.4);margin-bottom:16px;box-shadow:0 4px 6px rgba(0,0,0,0.1);" alt="${data.storeName} logo" /><br>` : ''}
       <h1 style="margin:0;color:#ffffff;font-size:32px;font-weight:800;letter-spacing:-0.5px;text-shadow:0 2px 4px rgba(0,0,0,0.15);">${data.storeName}</h1>
       <p style="margin:8px 0 0;color:#fdf2f8;font-size:16px;font-weight:500;">Thank you for your order! 🎉</p>
