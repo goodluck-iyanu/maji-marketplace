@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { sendOrderConfirmationEmail } from './email'
+import { sendOrderConfirmationEmail, sendSellerNewOrderEmail } from './email'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -116,22 +116,27 @@ export async function processOrderFulfillment({
           title: 'New Order Paid! 🎉',
           message: `Customer ${order.customer_name} paid for an order. ₦${Number(order.product_subtotal || 0).toLocaleString()} will automatically settle to your bank account by tomorrow morning (T+1).`,
           type: 'order',
-          link: '/dashboard',
+          link: '/dashboard/orders',
         })
       } catch (notifErr) {
         console.error('[Order Fulfillment] Notif insert error:', notifErr)
       }
     }
 
-    // 5. Send Buyer Order Confirmation Email (idempotent check)
+    // 5. Send Buyer and Seller Order Confirmation Emails (idempotent check)
     if (!order.confirmation_email_sent) {
       try {
-        // Fetch store name
+        // Fetch store name, contact details and logo
         const { data: store } = await supabaseAdmin
           .from('stores')
-          .select('name')
+          .select('name, pickup_phone, pickup_email, profiles(email, phone), store_settings(logo_url)')
           .eq('id', order.store_id)
           .single()
+
+        const storeName = store?.name || 'Maji Store'
+        const storePhone = store?.pickup_phone || (store?.profiles as any)?.phone
+        const storeEmail = store?.pickup_email || (store?.profiles as any)?.email
+        const storeLogo = (store?.store_settings as any)?.[0]?.logo_url || (store?.store_settings as any)?.logo_url
 
         // Fetch order items with product details
         const { data: orderItems } = await supabaseAdmin
@@ -155,13 +160,19 @@ export async function processOrderFulfillment({
             isDigital: product?.is_digital || false,
           }
         })
+        
+        const customerPhone = order.customer_phone || order.delivery_address?.recipient_phone || undefined
 
-        const emailResult = await sendOrderConfirmationEmail({
+        // Send Email to Buyer
+        const buyerEmailResult = await sendOrderConfirmationEmail({
           orderId: order.id,
           paymentReference: order.payment_reference,
           customerName: order.customer_name || 'Customer',
           customerEmail: order.customer_email,
-          storeName: store?.name || 'Maji Store',
+          storeName,
+          storeEmail,
+          storePhone,
+          storeLogo,
           deliveryMethod: order.delivery_method || 'digital',
           deliveryAddress: order.delivery_address,
           deliveryFee: Number(order.delivery_fee || 0),
@@ -173,15 +184,39 @@ export async function processOrderFulfillment({
           items,
         })
 
-        if (emailResult.success) {
+        if (buyerEmailResult.success) {
           await supabaseAdmin
             .from('orders')
             .update({ confirmation_email_sent: true })
             .eq('id', order.id)
-          console.log(`[Order Fulfillment] Order confirmation email sent for ${order.payment_reference}`)
+          console.log(`[Order Fulfillment] Buyer confirmation email sent for ${order.payment_reference}`)
         } else {
-          console.error(`[Order Fulfillment] Email failed for ${order.payment_reference}:`, emailResult.error)
+          console.error(`[Order Fulfillment] Buyer email failed for ${order.payment_reference}:`, buyerEmailResult.error)
         }
+        
+        // Send Email to Seller (if they have an email)
+        if (storeEmail) {
+          const sellerEmailResult = await sendSellerNewOrderEmail({
+            orderId: order.id,
+            paymentReference: order.payment_reference,
+            customerName: order.customer_name || 'Customer',
+            customerEmail: order.customer_email,
+            customerPhone,
+            storeName,
+            storeEmail,
+            deliveryMethod: order.delivery_method || 'digital',
+            deliveryAddress: order.delivery_address,
+            productSubtotal: Number(order.product_subtotal || 0),
+            orderDate: order.created_at,
+            items,
+          })
+          if (sellerEmailResult.success) {
+             console.log(`[Order Fulfillment] Seller notification email sent for ${order.payment_reference}`)
+          } else {
+             console.error(`[Order Fulfillment] Seller email failed for ${order.payment_reference}:`, sellerEmailResult.error)
+          }
+        }
+
       } catch (emailErr) {
         console.error('[Order Fulfillment] Email exception:', emailErr)
       }
