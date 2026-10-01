@@ -23,7 +23,7 @@ const getAIResponse = (message: string, context: {
   const m = message.toLowerCase()
 
   if (m.includes('hello') || m.includes('hi ') || m.match(/^hi$/) || m.includes('hey')) {
-    return `Hello there! I'm Maji AI. How can I help you grow ${context.storeName} today?`
+    return `Hello there! I'm Hoberg AI. How can I help you grow ${context.storeName} today?`
   }
 
   // Settings / Store Customization
@@ -66,7 +66,7 @@ const getAIResponse = (message: string, context: {
   }
 
   // Default fallback
-  return "I'm Maji AI! I can help you with setting up your store, editing settings (like colors and logos), adding bank accounts, adding products, and understanding your dashboard. What would you like to know?"
+  return "I'm Hoberg AI! I can help you with setting up your store, editing settings (like colors and logos), adding bank accounts, adding products, and understanding your Maji dashboard. What would you like to know?"
 }
 
 
@@ -86,6 +86,7 @@ export function MajiAIAssistant({
   totalSales: number
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -94,7 +95,7 @@ export function MajiAIAssistant({
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   // Store-specific storage key
-  const storageKey = `maji_ai_messages_${storeSlug}`
+  const storageKey = `hoberg_ai_messages_${storeSlug}`
 
   // Initialize welcome message from localStorage or create new
   useEffect(() => {
@@ -108,7 +109,7 @@ export function MajiAIAssistant({
       }
     } else {
       // First time greeting
-      const greeting = `Hello! I'm Maji AI, here to assist you with ${storeName}. ${
+      const greeting = `Hello! I'm Hoberg AI, here to assist you with ${storeName}. ${
         !hasBank ? 'I noticed you still need to add a bank account. Let me know if you need help!' :
         !hasProduct ? 'Great job adding your bank! Ready to add your first product?' :
         'Your store is fully set up! How can I help you today?'
@@ -162,13 +163,21 @@ export function MajiAIAssistant({
     }, 1000 + Math.random() * 1000)
   }
 
+  const closeChat = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsOpen(false)
+      setIsClosing(false)
+    }, 300) // matches duration-300
+  }
+
   return (
     <>
       {/* Floating Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 z-50 group"
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-14 w-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 z-50 group"
         >
           <Bot className="h-7 w-7 group-hover:scale-110 transition-transform" />
           
@@ -184,7 +193,7 @@ export function MajiAIAssistant({
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-[350px] h-[500px] max-h-[80vh] bg-white rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden border border-gray-200 animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className={`fixed bottom-0 right-0 left-0 md:bottom-6 md:right-6 md:left-auto md:w-[350px] h-[75vh] md:h-[500px] md:max-h-[80vh] bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden md:border md:border-gray-200 animate-in ${isClosing ? 'slide-out-to-bottom-10 fade-out' : 'slide-in-from-bottom-10 fade-in'} duration-300`}>
           
           {/* Header */}
           <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
@@ -193,12 +202,12 @@ export function MajiAIAssistant({
                 <Bot className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Maji AI Assistant</h3>
+                <h3 className="font-bold text-sm">Hoberg AI Assistant</h3>
                 <p className="text-blue-100 text-xs">Online & ready to help</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-blue-100 hover:text-white transition-colors">
-              <X className="h-5 w-5" />
+            <button onClick={closeChat} className="text-blue-100 hover:text-white transition-colors p-1">
+              <X className="h-6 w-6" />
             </button>
           </div>
 
@@ -221,7 +230,7 @@ export function MajiAIAssistant({
                   </div>
                 )}
                 
-                <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
+                <div className={`max-w-[80%] md:max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
                   msg.sender === 'user' 
                     ? 'bg-blue-600 text-white rounded-br-sm' 
                     : 'bg-white border border-gray-200 text-gray-800 rounded-bl-sm shadow-sm'
@@ -263,19 +272,19 @@ export function MajiAIAssistant({
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-white border-t border-gray-100">
+          <div className="p-3 bg-white border-t border-gray-100 pb-safe">
             <form onSubmit={handleSend} className="flex items-center gap-2 relative">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full pl-4 pr-10 py-2 text-sm outline-none transition-all"
+                className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full pl-4 pr-10 py-3 md:py-2 text-sm outline-none transition-all"
               />
               <button 
                 type="submit" 
                 disabled={!input.trim() || isTyping}
-                className="absolute right-1 h-8 w-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
+                className="absolute right-1 h-10 w-10 md:h-8 md:w-8 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
               >
                 <Send className="h-4 w-4 ml-0.5" />
               </button>
