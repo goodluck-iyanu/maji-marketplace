@@ -24,7 +24,7 @@ export default function DashboardCharts({ data }: { data: any[] }) {
           <Tooltip 
             cursor={{ fill: '#f1f5f9' }}
             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-            formatter={(value: number) => [`₦${value.toLocaleString()}`, 'Sales']}
+            formatter={(value: any) => [`₦${Number(value || 0).toLocaleString()}`, 'Sales']}
           />
           <Bar dataKey="sales" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={50} />
         </BarChart>
