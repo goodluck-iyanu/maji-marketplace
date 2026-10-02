@@ -49,7 +49,7 @@ export default async function AdminProductDetailPage({
     .limit(10)
 
   // Calculate total units sold
-  const totalUnitsSold = recentSales?.filter(s => s.orders?.payment_status === 'paid').reduce((sum, item) => sum + item.quantity, 0) || 0
+  const totalUnitsSold = recentSales?.filter(s => (s.orders as any)?.payment_status === 'paid').reduce((sum, item) => sum + item.quantity, 0) || 0
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -199,3 +199,4 @@ export default async function AdminProductDetailPage({
     </div>
   )
 }
+

@@ -175,7 +175,7 @@ export default async function AdminUserDetailPage({
                             {order.payment_reference}
                           </Link>
                         </td>
-                        <td className="px-6 py-3">{order.stores?.name}</td>
+                        <td className="px-6 py-3">{(order.stores as any)?.name}</td>
                         <td className="px-6 py-3 font-medium text-gray-900">
                           ₦{Number(order.total_amount).toLocaleString()}
                         </td>
@@ -209,3 +209,4 @@ export default async function AdminUserDetailPage({
     </div>
   )
 }
+
