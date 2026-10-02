@@ -1,4 +1,4 @@
-﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { Shield, User, Store, Eye, Search, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { SearchInput } from '../components/search-input'
@@ -197,7 +197,7 @@ export default async function AdminUsersPage({
 
       {totalPages > 1 && (
         <div className="mt-6">
-          <Pagination totalPages={totalPages} />
+          <Pagination totalPages={totalPages} currentPage={page} />
         </div>
       )}
     </div>
