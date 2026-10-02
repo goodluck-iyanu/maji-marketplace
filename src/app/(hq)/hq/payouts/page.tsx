@@ -1,4 +1,4 @@
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { ShieldCheck, ArrowUpRight, Check, X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -30,8 +30,7 @@ export default async function AdminPayoutsPage() {
       if (!storeId || !t.stores) return
       
       if (!storeBalances[storeId]) {
-        storeBalances[storeId] = { id: storeId, name: t.stores.name, earned: 0, paid: 0, pending: 0 }
-        const storeData = t.stores as any
+                const storeData = t.stores as any
         storeBalances[storeId] = { id: storeId, name: storeData?.name || 'Unknown', earned: 0, paid: 0, pending: 0 }
       }
 
@@ -142,9 +141,9 @@ export default async function AdminPayoutsPage() {
                         {store.name}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-right text-gray-500">₦{store.earned.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right text-green-600">₦{store.paid.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-900">₦{store.pending.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right text-gray-500">â‚¦{store.earned.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right text-green-600">â‚¦{store.paid.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right font-bold text-gray-900">â‚¦{store.pending.toLocaleString()}</td>
                     <td className="px-6 py-4 text-center">
                       <button className="bg-black text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-gray-800 transition-colors">
                         Mark Paid
@@ -161,3 +160,4 @@ export default async function AdminPayoutsPage() {
     </div>
   )
 }
+
