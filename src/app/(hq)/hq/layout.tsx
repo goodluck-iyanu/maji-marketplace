@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation'
+﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell, ShieldCheck, Zap } from 'lucide-react'
 
 export const metadata = {
   title: 'HQ',
@@ -51,7 +51,7 @@ export default async function AdminLayout({
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col border-r border-slate-800 hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
           <Link href="/hq" className="font-bold text-xl tracking-tight text-white flex items-center gap-2">
-            <span className="text-2xl">âš¡</span> HQ
+            <Zap className="w-6 h-6 text-yellow-400" fill="currentColor" /> HQ
           </Link>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
@@ -83,8 +83,8 @@ export default async function AdminLayout({
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Mobile Header */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:hidden">
-          <Link href="/hq" className="font-bold text-xl tracking-tight text-slate-900">
-            âš¡ HQ
+          <Link href="/hq" className="font-bold text-xl tracking-tight text-slate-900 flex items-center gap-2">
+            <Zap className="w-5 h-5 text-yellow-500" fill="currentColor" /> HQ
           </Link>
         </header>
 
@@ -95,4 +95,3 @@ export default async function AdminLayout({
     </div>
   )
 }
-

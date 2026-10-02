@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { sendBroadcast } from './actions'
 import { Send, AlertCircle, CheckCircle2 } from 'lucide-react'
 
-export function BroadcastForm({ stores }: { stores: any[] }) {
+export function BroadcastForm({ stores, categories }: { stores: any[], categories: string[] }) {
   const [audience, setAudience] = useState('all')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<{success: boolean, message: string} | null>(null)
@@ -48,10 +48,27 @@ export function BroadcastForm({ stores }: { stores: any[] }) {
           className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Everybody (All Active Sellers)</option>
+          <option value="category">By Store Category (e.g. Fashion, Electronics)</option>
           <option value="inactive_7">Inactive (No Orders in last 7 days)</option>
           <option value="specific">Specific Sellers</option>
         </select>
       </div>
+
+      {audience === 'category' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Select Store Category</label>
+          <select 
+            name="storeCategory" 
+            required
+            className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">-- Choose Category --</option>
+            {categories.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {audience === 'specific' && (
         <div>
@@ -59,6 +76,7 @@ export function BroadcastForm({ stores }: { stores: any[] }) {
           <select 
             name="specificStores" 
             multiple 
+            required
             className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 h-32"
           >
             {stores.map(s => (

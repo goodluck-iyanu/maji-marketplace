@@ -10,9 +10,13 @@ export default async function AdminNotificationsPage() {
   // Fetch all stores for the specific select dropdown
   const { data: stores } = await supabase
     .from('stores')
-    .select('id, name, profiles(email)')
+    .select('id, name, store_category, profiles(email)')
     .eq('is_active', true)
     .order('name')
+
+  // Extract unique store categories
+  const categoriesRaw = stores?.map(s => s.store_category).filter(Boolean) as string[]
+  const uniqueCategories = Array.from(new Set(categoriesRaw)).sort()
 
   // Fetch recent broadcasts (notifications created by admin)
   const { data: recentBroadcasts } = await supabase
@@ -65,7 +69,7 @@ export default async function AdminNotificationsPage() {
             </div>
           </div>
           
-          <BroadcastForm stores={stores || []} />
+          <BroadcastForm stores={stores || []} categories={uniqueCategories} />
         </div>
 
         {/* History */}
