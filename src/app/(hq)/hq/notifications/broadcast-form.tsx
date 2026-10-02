@@ -48,25 +48,37 @@ export function BroadcastForm({ stores, categories }: { stores: any[], categorie
           className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Everybody (All Active Sellers)</option>
-          <option value="category">By Store Category (e.g. Fashion, Electronics)</option>
+          <option value="filtered">Target by Store Attributes (Type & Category)</option>
           <option value="inactive_7">Inactive (No Orders in last 7 days)</option>
           <option value="specific">Specific Sellers</option>
         </select>
       </div>
 
-      {audience === 'category' && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Select Store Category</label>
-          <select 
-            name="storeCategory" 
-            required
-            className="w-full p-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Choose Category --</option>
-            {categories.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
+      {audience === 'filtered' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Product Type</label>
+            <select 
+              name="productType" 
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Product Types</option>
+              <option value="physical">Physical Products Only</option>
+              <option value="digital">Digital Products Only</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-2">Store Category</label>
+            <select 
+              name="storeCategory" 
+              className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Categories</option>
+              {categories.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
         </div>
       )}
 
