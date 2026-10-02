@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
@@ -109,7 +109,7 @@ export async function initiatePayout(storeId: string, amount: number, descriptio
   // Prevent over-payout by calculating current pending balance
   const { data: transactions } = await supabaseAdmin
     .from('financial_transactions')
-    .select('amount, transaction_type')
+    .select('amount, transaction_type, status')
     .eq('store_id', storeId)
     
   let earned = 0
