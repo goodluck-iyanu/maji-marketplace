@@ -1,6 +1,7 @@
 ﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { ShieldCheck, ArrowUpRight, Check, X } from 'lucide-react'
+import { ShieldCheck, Banknote, History, Wallet, AlertCircle, ArrowUpRight, Check, X, Building2, UserRoundCheck } from 'lucide-react'
 import Link from 'next/link'
+import { PayoutsClient } from './payouts-client'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,151 +14,150 @@ export default async function AdminPayoutsPage() {
   // 1. Fetch pending account change requests
   const { data: changeRequests } = await supabaseAdmin
     .from('payout_change_requests')
-    .select('*, stores(name)')
-    .eq('status', 'pending')
-    .order('requested_at', { ascending: true })
+    .select('*, stores(name, slug)')
+    .order('requested_at', { ascending: false })
 
-  // 2. Fetch aggregate balances for all active stores
+  // 2. Fetch all financial transactions for ledger accounting
   const { data: transactions } = await supabaseAdmin
     .from('financial_transactions')
-    .select('store_id, amount, transaction_type, stores(name, id)')
+    .select('id, amount, transaction_type, status, created_at, description, order_id, store_id, stores(name, slug)')
+    .order('created_at', { ascending: false })
 
-  const storeBalances: Record<string, { id: string, name: string, earned: number, paid: number, pending: number }> = {}
+  // 3. Process Financials
+  const storeBalances: Record<string, { id: string, name: string, slug: string, earned: number, paid: number, pendingBalance: number, lastPayoutDate: string | null }> = {}
+  
+  let totalBalanceOwed = 0
+  let totalPendingPayoutsAmount = 0
+  let totalPaidOut = 0
+  let payoutsThisMonth = 0
+  let failedPayoutsCount = 0
+
+  const now = new Date()
+  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+
+  const payoutHistory: any[] = []
 
   if (transactions) {
     transactions.forEach(t => {
       const storeId = t.store_id
       if (!storeId || !t.stores) return
       
+      const storeData = t.stores as any
       if (!storeBalances[storeId]) {
-                const storeData = t.stores as any
-        storeBalances[storeId] = { id: storeId, name: storeData?.name || 'Unknown', earned: 0, paid: 0, pending: 0 }
+        storeBalances[storeId] = { 
+          id: storeId, 
+          name: storeData.name, 
+          slug: storeData.slug, 
+          earned: 0, 
+          paid: 0, 
+          pendingBalance: 0, 
+          lastPayoutDate: null 
+        }
       }
 
       if (t.transaction_type === 'product_sale') {
         storeBalances[storeId].earned += Number(t.amount)
-      } else if (t.transaction_type === 'payout') {
-        storeBalances[storeId].paid += Math.abs(Number(t.amount))
+      } 
+      else if (t.transaction_type === 'payout') {
+        payoutHistory.push(t)
+        
+        const payoutAmount = Math.abs(Number(t.amount))
+        
+        if (t.status === 'completed') {
+          storeBalances[storeId].paid += payoutAmount
+          totalPaidOut += payoutAmount
+          
+          if (new Date(t.created_at).getTime() >= thisMonthStart) {
+            payoutsThisMonth += payoutAmount
+          }
+          
+          if (!storeBalances[storeId].lastPayoutDate || new Date(t.created_at) > new Date(storeBalances[storeId].lastPayoutDate!)) {
+            storeBalances[storeId].lastPayoutDate = t.created_at
+          }
+        } 
+        else if (t.status === 'pending') {
+          totalPendingPayoutsAmount += payoutAmount
+        }
+        else if (t.status === 'failed') {
+          failedPayoutsCount++
+        }
       }
     })
   }
 
-  // Calculate pending balances
+  // Calculate pending balances per store
+  let sellersAwaitingPayout = 0
   Object.values(storeBalances).forEach(b => {
-    b.pending = b.earned - b.paid
+    b.pendingBalance = b.earned - b.paid
+    if (b.pendingBalance > 0) {
+      totalBalanceOwed += b.pendingBalance
+      sellersAwaitingPayout++
+    }
   })
 
-  // Filter to stores that actually have a pending balance > 0
-  const storesNeedingPayout = Object.values(storeBalances).filter(b => b.pending > 0).sort((a, b) => b.pending - a.pending)
+  // Format array for client sorting
+  const sellerList = Object.values(storeBalances).sort((a, b) => b.pendingBalance - a.pendingBalance)
+  const pendingRequests = changeRequests?.filter(r => r.status === 'pending') || []
+  const resolvedRequests = changeRequests?.filter(r => r.status !== 'pending') || []
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Payouts Management</h1>
+    <div className="space-y-8 max-w-6xl mx-auto pb-12">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Wallet className="w-6 h-6 text-blue-600" />
+          Payouts Management
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">Financial control center for seller balances and distributions</p>
       </div>
 
-      {/* Account Change Requests */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-amber-50">
-          <h2 className="font-bold text-amber-900 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-amber-600" /> Pending Account Changes
-          </h2>
-          <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1 rounded-full">
-            {changeRequests?.length || 0} Requests
-          </span>
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Building2 className="w-4 h-4" /> Total Balance Owed</p>
+          <div className="mt-4">
+            <p className="text-2xl font-black text-gray-900">₦{totalBalanceOwed.toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mt-1">Across {sellersAwaitingPayout} sellers</p>
+          </div>
         </div>
         
-        {(!changeRequests || changeRequests.length === 0) ? (
-          <div className="p-8 text-center text-gray-500 text-sm">
-            No pending payout account change requests.
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Wallet className="w-4 h-4 text-orange-500" /> Processing Payouts</p>
+          <div className="mt-4">
+            <p className="text-2xl font-black text-gray-900">₦{totalPendingPayoutsAmount.toLocaleString()}</p>
+            <p className="text-xs text-gray-400 mt-1">Pending bank confirmation</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-white text-gray-500 font-medium border-b border-gray-100">
-                <tr>
-                  <th className="px-6 py-4">Store</th>
-                  <th className="px-6 py-4">New Bank</th>
-                  <th className="px-6 py-4">New Account</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
-                {changeRequests.map(req => (
-                  <tr key={req.id}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{req.stores?.name}</td>
-                    <td className="px-6 py-4 text-gray-600">{req.new_bank_code}</td>
-                    <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{req.new_account_name}</div>
-                      <div className="text-sm text-gray-500">{req.new_account_number}</div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end space-x-2">
-                        <button className="bg-green-50 hover:bg-green-100 text-green-600 p-2 rounded-md transition-colors border border-green-200" title="Approve">
-                            <Check className="h-4 w-4" />
-                        </button>
-                        <button className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-md transition-colors border border-red-200" title="Reject">
-                            <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* Pending Balances */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2">
-            <ArrowUpRight className="w-5 h-5 text-green-600" /> Seller Balances (Owed)
-          </h2>
         </div>
-        
-        {storesNeedingPayout.length === 0 ? (
-          <div className="p-8 text-center text-gray-500 text-sm">
-            All sellers have been paid. No pending balances.
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-green-500" /> Total Paid Out</p>
+          <div className="mt-4">
+            <p className="text-2xl font-black text-gray-900">₦{totalPaidOut.toLocaleString()}</p>
+            <p className="text-xs text-green-600 mt-1 font-medium">₦{payoutsThisMonth.toLocaleString()} this month</p>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-600">
-              <thead className="bg-gray-50 text-gray-900 font-medium">
-                <tr>
-                  <th className="px-6 py-4">Store</th>
-                  <th className="px-6 py-4 text-right">Total Earned</th>
-                  <th className="px-6 py-4 text-right">Total Paid Out</th>
-                  <th className="px-6 py-4 text-right">Pending Balance (Owed)</th>
-                  <th className="px-6 py-4 text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {storesNeedingPayout.map(store => (
-                  <tr key={store.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">
-                      <Link href={`/hq/sellers/${store.id}`} className="hover:text-blue-600 hover:underline">
-                        {store.name}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 text-right text-gray-500">â‚¦{store.earned.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right text-green-600">â‚¦{store.paid.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-900">â‚¦{store.pending.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="bg-black text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-gray-800 transition-colors">
-                        Mark Paid
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><AlertCircle className="w-4 h-4 text-red-500" /> Attention Needed</p>
+          <div className="mt-4 flex flex-col gap-1">
+            <p className="text-sm font-semibold text-gray-900">
+              <span className="inline-flex items-center justify-center bg-red-100 text-red-700 w-5 h-5 rounded-full text-xs mr-2">{pendingRequests.length}</span> 
+              Account changes
+            </p>
+            <p className="text-sm font-semibold text-gray-900">
+              <span className="inline-flex items-center justify-center bg-red-100 text-red-700 w-5 h-5 rounded-full text-xs mr-2">{failedPayoutsCount}</span> 
+              Failed payouts
+            </p>
           </div>
-        )}
+        </div>
       </div>
 
+      {/* CLIENT COMPONENT FOR TABS */}
+      <PayoutsClient 
+        sellers={sellerList} 
+        payoutHistory={payoutHistory} 
+        pendingRequests={pendingRequests}
+        resolvedRequests={resolvedRequests}
+      />
     </div>
   )
 }
-
