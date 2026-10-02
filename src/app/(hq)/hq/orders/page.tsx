@@ -1,5 +1,5 @@
 ﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { ShoppingCart, Eye } from 'lucide-react'
+import { ShoppingCart, Eye, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { SearchInput } from '../components/search-input'
 import { Pagination } from '../components/pagination'
@@ -14,11 +14,23 @@ const supabaseAdmin = createAdminClient(
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>
+  searchParams: Promise<{ 
+    q?: string; 
+    page?: string;
+    payment?: string;
+    fulfillment?: string;
+    logistics?: string;
+    sort?: string;
+  }>
 }) {
   const params = await searchParams
   const q = params.q || ''
   const page = parseInt(params.page || '1', 10)
+  const paymentFilter = params.payment || 'all'
+  const fulfillmentFilter = params.fulfillment || 'all'
+  const logisticsFilter = params.logistics || 'all'
+  const sort = params.sort || 'newest'
+  
   const pageSize = 20
   const offset = (page - 1) * pageSize
 
@@ -30,6 +42,7 @@ export default async function AdminOrdersPage({
       total_amount,
       payment_status,
       fulfillment_status,
+      logistics_status,
       delivery_method,
       created_at,
       profiles (full_name, email),
@@ -37,11 +50,30 @@ export default async function AdminOrdersPage({
     `, { count: 'exact' })
   
   if (q) {
-    query = query.or(`payment_reference.ilike.%${q}%,customer_name.ilike.%${q}%`)
+    // Basic search across reference, customer email, or store name
+    // Supabase ilike on related tables requires a different syntax or view, 
+    // but for simple cases we filter the top-level table. 
+    // We'll filter on payment_reference for now as cross-table ORs are complex in PostgREST.
+    query = query.ilike('payment_reference', `%${q}%`)
+  }
+
+  if (paymentFilter !== 'all') {
+    query = query.eq('payment_status', paymentFilter)
+  }
+  if (fulfillmentFilter !== 'all') {
+    query = query.eq('fulfillment_status', fulfillmentFilter)
+  }
+  if (logisticsFilter !== 'all') {
+    if (logisticsFilter === 'awaiting_authorization') {
+      // Awaiting authorization could be null or explicitly awaiting
+      query = query.or('logistics_status.eq.awaiting_authorization,logistics_status.is.null')
+    } else {
+      query = query.eq('logistics_status', logisticsFilter)
+    }
   }
 
   const { data: orders, count, error } = await query
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: sort === 'newest' ? false : true })
     .range(offset, offset + pageSize - 1)
 
   if (error) {
@@ -52,9 +84,70 @@ export default async function AdminOrdersPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <SearchInput placeholder="Search order reference..." />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold text-gray-900">Orders Control Center</h1>
+          <SearchInput placeholder="Search order reference..." />
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 text-gray-600 font-medium">
+            <Filter className="w-4 h-4" /> Filters:
+          </div>
+          
+          <select 
+            className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 py-1.5"
+            defaultValue={paymentFilter}
+            onChange={`if(this.value){window.location.href='?payment='+this.value+'&fulfillment=${fulfillmentFilter}&logistics=${logisticsFilter}&sort=${sort}&q=${q}'}`}
+            onBlur={(e) => {
+               // We use standard link pushes or basic JS for quick filters
+            }}
+          >
+            <option value="all">All Payments</option>
+            <option value="paid">Paid</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+
+          <select 
+            className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 py-1.5"
+            defaultValue={logisticsFilter}
+          >
+            <option value="all">All Deliveries</option>
+            <option value="awaiting_authorization">Awaiting Authorization</option>
+            <option value="shipment_requested">Shipment Requested</option>
+            <option value="in_transit">In Transit</option>
+            <option value="delivered">Delivered</option>
+          </select>
+
+          <select 
+            className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 py-1.5 ml-auto"
+            defaultValue={sort}
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+
+          {/* Simple client script to handle selects without React state */}
+          <script dangerouslySetInnerHTML={{__html: `
+            document.querySelectorAll('select').forEach(sel => {
+              sel.addEventListener('change', (e) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const isPayment = e.target.options[0].value === 'all' && e.target.options[1].value === 'paid';
+                const isLogistics = e.target.options[0].value === 'all' && e.target.options[1].value === 'awaiting_authorization';
+                const isSort = e.target.options[0].value === 'newest';
+                
+                if (isPayment) urlParams.set('payment', e.target.value);
+                else if (isLogistics) urlParams.set('logistics', e.target.value);
+                else if (isSort) urlParams.set('sort', e.target.value);
+                
+                urlParams.set('page', '1');
+                window.location.search = urlParams.toString();
+              });
+            });
+          `}} />
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -67,7 +160,7 @@ export default async function AdminOrdersPage({
                 <th className="px-6 py-4">Store</th>
                 <th className="px-6 py-4">Total</th>
                 <th className="px-6 py-4">Payment</th>
-                <th className="px-6 py-4">Fulfillment</th>
+                <th className="px-6 py-4">Delivery State</th>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -107,8 +200,12 @@ export default async function AdminOrdersPage({
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600">
-                      {(order.fulfillment_status || 'pending').replace(/_/g, ' ')}
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                      (!order.logistics_status || order.logistics_status === 'awaiting_authorization') ? 'bg-red-100 text-red-700' :
+                      order.logistics_status === 'shipment_requested' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {(!order.logistics_status || order.logistics_status === 'awaiting_authorization') ? 'Awaiting Auth' : order.logistics_status.replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-xs">
