@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import crypto from 'crypto'
 
 interface DeliveryAddressInfo {
   firstName: string
@@ -23,7 +24,7 @@ interface DeliveryAddressInfo {
 export async function getDeliveryQuotes(
   storeId: string,
   deliveryAddressInfo: DeliveryAddressInfo,
-  cartItems: { id: string; qty: number }[]
+  cartItems: any[]
 ) {
   try {
     const supabase = await createClient()
@@ -39,13 +40,13 @@ export async function getDeliveryQuotes(
       return { error: 'Store not found.' }
     }
 
-    if (!store.pickup_lat || !store.pickup_lng) {
-      return { error: 'Seller has not set up a confirmed pickup location yet.' }
+    if (!store.pickup_state) {
+      return { error: 'Seller has not set up a pickup state yet. Delivery cannot be calculated.' }
     }
 
-    // 2. Validate buyer has lat/lng
-    if (!deliveryAddressInfo.lat || !deliveryAddressInfo.lng) {
-      return { error: 'Please select your exact delivery location from the map.' }
+    // 2. Validate buyer has state
+    if (!deliveryAddressInfo.state) {
+      return { error: 'Please select a destination state.' }
     }
 
     // 3. Fetch actual product weights and values from cart items
@@ -65,22 +66,12 @@ export async function getDeliveryQuotes(
       .in('id', productIds)
 
     // 4. Build parcels array with real data
-    let totalValueKobo = 0
     let totalWeightKg = 0
-    let anyFragile = false
-    let productDescription = ''
-    let category = 'general'
 
     for (const item of cartItems) {
       const product = products?.find(p => p.id === item.id)
       if (product) {
-        const discount = product.discount_percent || 0
-        const finalPrice = discount > 0 ? product.price * (1 - discount / 100) : product.price
-        totalValueKobo += Math.round(finalPrice * 100) * item.qty
-        totalWeightKg += (product.weight_kg || 0.5) * item.qty
-        if (product.fragile) anyFragile = true
-        if (product.delivery_category) category = product.delivery_category
-        productDescription += (productDescription ? ', ' : '') + (product.name || 'Product')
+        totalWeightKg += (product.weight_kg || 0) * item.qty
         continue
       }
 
@@ -88,130 +79,126 @@ export async function getDeliveryQuotes(
       if (variant) {
         const parentProduct: any = Array.isArray(variant.products) ? variant.products[0] : variant.products
         if (parentProduct && parentProduct.is_published) {
-          const discount = parentProduct.discount_percent || 0
-          const finalPrice = discount > 0 ? variant.price * (1 - discount / 100) : variant.price
-          totalValueKobo += Math.round(finalPrice * 100) * item.qty
-          totalWeightKg += (parentProduct.weight_kg || 0.5) * item.qty
-          if (parentProduct.fragile) anyFragile = true
-          if (parentProduct.delivery_category) category = parentProduct.delivery_category
-          productDescription += (productDescription ? ', ' : '') + (parentProduct.name || 'Product')
+          totalWeightKg += (parentProduct.weight_kg || 0) * item.qty
         }
       }
     }
 
-    // Ensure minimum weight
-    if (totalWeightKg <= 0) totalWeightKg = 0.5
-    if (totalValueKobo <= 0) totalValueKobo = 100000 // fallback ₦1,000
-
-    // 5. Build Theyutes quote request
-    const pickupAddress = [store.pickup_house_number, store.pickup_address, store.pickup_area, store.pickup_lga, store.pickup_city, store.pickup_state]
-      .filter(Boolean)
-      .join(', ')
-
+    // 5. Build FEZ quote request
     const dropoffAddress = [deliveryAddressInfo.houseNumber, deliveryAddressInfo.line1, deliveryAddressInfo.area, deliveryAddressInfo.lga, deliveryAddressInfo.city, deliveryAddressInfo.state]
       .filter(Boolean)
       .join(', ')
 
-    const payload = {
-      pickup: {
-        lat: parseFloat(String(store.pickup_lat)),
-        lng: parseFloat(String(store.pickup_lng)),
-        address: pickupAddress || store.pickup_address || 'Lagos, Nigeria',
-      },
-      dropoff: {
-        lat: parseFloat(deliveryAddressInfo.lat),
-        lng: parseFloat(deliveryAddressInfo.lng),
-        address: dropoffAddress || deliveryAddressInfo.line1 || 'Lagos, Nigeria',
-      },
-      parcels: [
-        {
-          weightKg: Math.round(totalWeightKg * 100) / 100,
-          valueKobo: totalValueKobo,
-          category: category,
-          description: productDescription || 'Maji Marketplace Order',
-          fragile: anyFragile,
-        }
-      ]
+    // Unique IDs for deterministic request tracing
+    const requestHash = crypto.createHash('sha256')
+      .update(`${storeId}-${deliveryAddressInfo.state}-${totalWeightKg}`)
+      .digest('hex')
+      .substring(0, 16)
+      
+    const uniqueID = `MAJI-QT-${Date.now()}-${requestHash}`
+    const BatchID = `MAJI-BATCH-${requestHash}`
+
+    const payload: any = {
+      state: deliveryAddressInfo.state,
+      pickupState: store.pickup_state,
+      locker: false,
+      recipientAddress: dropoffAddress || deliveryAddressInfo.line1 || 'Nigeria',
+      recipientState: deliveryAddressInfo.state,
+      recipientName: `${deliveryAddressInfo.firstName} ${deliveryAddressInfo.lastName}`.trim() || 'Customer',
+      recipientPhone: deliveryAddressInfo.phone || '00000000000',
+      recipientEmail: deliveryAddressInfo.email || 'customer@hoberg.com.ng',
+      uniqueID: uniqueID,
+      BatchID: BatchID
     }
 
-    // 6. Call Theyutes Quote API
-    const rawKey = process.env.THEYUTES_API_KEY || ''
-    // Sanitize: trim whitespace, remove any accidental duplicate pastes
-    const apiKey = rawKey.trim().split(/\s+/)[0]
-    const baseUrl = (process.env.THEYUTES_API_BASE_URL || 'https://theyutes.com').replace(/\/+$/, '')
+    // Add weight only if we have a real weight. FEZ defaults to 0-5kg if omitted.
+    if (totalWeightKg > 0) {
+      payload.weight = Math.ceil(totalWeightKg) // FEZ usually expects whole numbers, but send exact if it handles float. Let's send exact.
+    } else {
+      console.log(`[FEZ] No explicit product weight found. Omitting weight to use FEZ 0-5kg default tier.`)
+    }
 
-    if (!apiKey) {
-      console.error('THEYUTES_API_KEY is not set')
+    // 6. Call FEZ Quote API
+    const authHeader = process.env.FEZ_AUTHORIZATION
+    const secretKey = process.env.FEZ_SECRET_KEY
+    const baseUrl = (process.env.FEZ_API_BASE_URL || 'https://apisandbox.fezdelivery.co/v1').replace(/\/+$/, '')
+
+    if (!authHeader || !secretKey) {
+      console.error('FEZ API credentials are not set')
       return { error: 'Delivery service is not configured. Please contact support.' }
     }
 
-    console.log(`[Theyutes] Requesting quote: ${baseUrl}/api/v1/logistics/quote`)
-    console.log(`[Theyutes] Payload:`, JSON.stringify(payload, null, 2))
+    console.log(`[FEZ] Requesting quote: ${baseUrl}/order/cost`)
+    console.log(`[FEZ] Payload:`, JSON.stringify(payload, null, 2))
 
-    const res = await fetch(`${baseUrl}/api/v1/logistics/quote`, {
+    const res = await fetch(`${baseUrl}/order/cost`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': authHeader,
+        'secret-key': secretKey,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     })
 
     const responseText = await res.text()
-    console.log(`[Theyutes] Response status: ${res.status}`)
-    console.log(`[Theyutes] Response body: ${responseText.substring(0, 500)}`)
+    console.log(`[FEZ] Response status: ${res.status}`)
+    console.log(`[FEZ] Response body: ${responseText.substring(0, 500)}`)
 
     let data;
     try {
       data = JSON.parse(responseText)
     } catch (e) {
-      console.error('Theyutes API returned non-JSON:', responseText.substring(0, 200))
+      console.error('FEZ API returned non-JSON:', responseText.substring(0, 200))
       return { error: 'Delivery service returned an invalid response. Please try again.' }
     }
 
     if (!res.ok) {
-      console.error('Theyutes API Error:', data)
-      return { error: data.message || data.error || 'Failed to calculate delivery fee.' }
+      console.error('FEZ API Error:', data)
+      return { error: data.message || data.description || data.error || 'Delivery fee could not be calculated right now. Please try again.' }
     }
 
-    // 7. Parse Theyutes response
-    // Support multiple response shapes: data.quotes, data.data.quotes, or data directly as array
-    const quotes = data?.data?.quotes || data?.quotes || (Array.isArray(data?.data) ? data.data : null)
-    if (!quotes || quotes.length === 0) {
-      return { error: 'No delivery carriers available for this route.' }
+    // 7. Parse FEZ response
+    // FEZ returns cost information including: cost, vat, totalCost
+    // Depending on if it's nested under data or direct
+    const result = data?.data || data
+
+    if (!result || typeof result.totalCost === 'undefined') {
+      console.error('[FEZ] Missing totalCost in response:', data)
+      return { error: 'Delivery service returned an incomplete quote. Please try again.' }
     }
 
-    // Sort by price ascending — support both priceKobo and price_kobo field names
-    const sorted = [...quotes].sort((a: any, b: any) => {
-      const priceA = a.priceKobo ?? a.price_kobo ?? a.price ?? 0
-      const priceB = b.priceKobo ?? b.price_kobo ?? b.price ?? 0
-      return priceA - priceB
-    })
+    const totalCost = Number(result.totalCost)
+    const baseCost = Number(result.cost || totalCost)
+    const vat = result.vat?.vatAmount !== undefined ? Number(result.vat.vatAmount) : Number(result.vat || 0)
+
+    if (isNaN(totalCost) || totalCost <= 0) {
+      return { error: 'Delivery service returned an invalid amount. Please try again.' }
+    }
 
     return {
-      fee: Math.round((sorted[0].priceKobo ?? sorted[0].price_kobo ?? sorted[0].price ?? 0) / 100),
-      carrier: sorted[0].carrierName ?? sorted[0].carrier_name ?? sorted[0].carrier ?? 'Theyutes',
-      eta: sorted[0].etaMinutes ? `${sorted[0].etaMinutes} min` : sorted[0].eta ?? 'N/A',
-      quoteId: sorted[0].quoteId ?? sorted[0].quote_id ?? sorted[0].id ?? '',
-      rates: sorted.map((q: any) => ({
-        fee: Math.round((q.priceKobo ?? q.price_kobo ?? q.price ?? 0) / 100),
-        carrier: q.carrierName ?? q.carrier_name ?? q.carrier ?? 'Theyutes',
-        carrierId: q.carrier ?? q.carrierId ?? q.carrier_id ?? '',
-        eta: q.etaMinutes ? `${q.etaMinutes} min` : q.eta ?? 'N/A',
-        quoteId: q.quoteId ?? q.quote_id ?? q.id ?? '',
-      }))
+      fee: totalCost,
+      carrier: 'FEZ Delivery',
+      eta: 'N/A',
+      quoteId: uniqueID,
+      delivery_fee_base: baseCost,
+      delivery_fee_vat: vat,
+      delivery_fee_total: totalCost,
+      rates: [{
+        fee: totalCost,
+        carrier: 'FEZ Delivery',
+        carrierId: 'fez',
+        eta: 'N/A',
+        quoteId: uniqueID,
+      }]
     }
 
   } catch (error: any) {
     console.error('Delivery quote error:', error)
     const msg = error?.message || String(error)
-    // Give user-friendly messages for common network errors
     if (msg.includes('fetch failed') || msg.includes('ECONNREFUSED') || msg.includes('ETIMEDOUT')) {
       return { error: 'Could not reach the delivery service. Please try again in a moment.' }
     }
-    if (msg.includes('invalid header')) {
-      return { error: 'Delivery service configuration error. Please contact support.' }
-    }
-    return { error: msg }
+    return { error: 'Delivery fee could not be calculated right now. Please try again.' }
   }
 }
