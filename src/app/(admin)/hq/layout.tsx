@@ -1,7 +1,7 @@
-﻿import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText } from 'lucide-react'
+import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell } from 'lucide-react'
 
 export const metadata = {
   title: 'Maji Control Center',
@@ -40,6 +40,7 @@ export default async function AdminLayout({
     { name: 'Products', href: '/hq/products', icon: Package },
     { name: 'Orders', href: '/hq/orders', icon: ShoppingCart },
     { name: 'Ledger', href: '/hq/ledger', icon: FileText },
+    { name: 'Broadcasts', href: '/hq/notifications', icon: Bell },
     { name: 'Settings', href: '/hq/settings', icon: Settings },
   ]
 

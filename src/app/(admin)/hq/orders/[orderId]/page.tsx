@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Truck, CreditCard, Store, User, CheckCircle2 } from 'lucide-react'
@@ -103,7 +103,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Order Items</h2>
           <div className="space-y-4">
-            {(order.order_items as any[]).map((item) => (
+            {(order.order_items as any[] || []).map((item) => (
               <div key={item.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                 <div>
                   <p className="font-medium text-gray-900">{item.products?.name}</p>

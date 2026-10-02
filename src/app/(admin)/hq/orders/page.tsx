@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ShoppingCart, Eye } from 'lucide-react'
 
@@ -62,7 +62,7 @@ export default async function AdminOrdersPage() {
                     {order.customer_name || 'Unknown'}
                   </td>
                   <td className="px-6 py-4 text-gray-500">
-                    {order.stores?.name}
+                    {order.stores?.name || 'Deleted Store'}
                   </td>
                   <td className="px-6 py-4 text-right font-bold text-gray-900">
                     ₦{Number(order.total_amount).toLocaleString()}
