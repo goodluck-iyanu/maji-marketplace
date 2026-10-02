@@ -40,7 +40,7 @@ export default async function AdminLayout({
     { name: 'Sellers', href: '/hq/sellers', icon: Store },
     { name: 'Products', href: '/hq/products', icon: Package },
     { name: 'Orders', href: '/hq/orders', icon: ShoppingCart },
-    { name: 'Payouts', href: '/hq/payout-changes', icon: ShieldCheck },
+    { name: 'Payouts', href: '/hq/payouts', icon: ShieldCheck },
     { name: 'Ledger', href: '/hq/ledger', icon: FileText },
     { name: 'Broadcasts', href: '/hq/notifications', icon: Bell },
     { name: 'Settings', href: '/hq/settings', icon: Settings },

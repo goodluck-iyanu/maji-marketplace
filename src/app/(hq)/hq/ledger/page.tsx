@@ -1,32 +1,63 @@
-﻿import { createClient } from '@/lib/supabase/server'
-import { FileText, ArrowUpRight, ArrowDownRight, CreditCard } from 'lucide-react'
+﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { FileText, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import Link from 'next/link'
+import { Pagination } from '../components/pagination'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminLedgerPage() {
-  const supabase = await createClient()
+const supabaseAdmin = createAdminClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-  const { data: transactions, error } = await supabase
+export default async function AdminLedgerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; page?: string }>
+}) {
+  const params = await searchParams
+  const typeFilter = params.type || 'all'
+  const page = parseInt(params.page || '1', 10)
+  const pageSize = 50
+  const offset = (page - 1) * pageSize
+
+  let query = supabaseAdmin
     .from('financial_transactions')
     .select(`
       id,
-      transaction_type,
       amount,
-      status,
-      description,
+      transaction_type,
       created_at,
-      orders (payment_reference),
-      stores (name)
-    `)
-    .order('created_at', { ascending: false })
-    .limit(100)
+      stores (id, name),
+      orders (id, payment_reference)
+    `, { count: 'exact' })
+  
+  if (typeFilter !== 'all') {
+    query = query.eq('transaction_type', typeFilter)
+  }
 
-  if (error) console.error('Error fetching ledger:', error)
+  const { data: transactions, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range(offset, offset + pageSize - 1)
+
+  if (error) {
+    console.error('Error fetching ledger:', error)
+  }
+
+  const totalPages = count ? Math.ceil(count / pageSize) : 0
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Financial Ledger</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 className="text-2xl font-bold text-gray-900">General Ledger</h1>
+        
+        {/* Type Filter */}
+        <div className="flex bg-white rounded-lg border border-gray-200 p-1">
+          <Link href="?type=all" className={`px-3 py-1.5 text-xs font-semibold rounded-md ${typeFilter === 'all' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>All</Link>
+          <Link href="?type=platform_fee" className={`px-3 py-1.5 text-xs font-semibold rounded-md ${typeFilter === 'platform_fee' ? 'bg-green-50 text-green-700' : 'text-gray-500 hover:text-gray-900'}`}>Platform Fees</Link>
+          <Link href="?type=product_sale" className={`px-3 py-1.5 text-xs font-semibold rounded-md ${typeFilter === 'product_sale' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-900'}`}>Seller Sales</Link>
+          <Link href="?type=payout" className={`px-3 py-1.5 text-xs font-semibold rounded-md ${typeFilter === 'payout' ? 'bg-amber-50 text-amber-700' : 'text-gray-500 hover:text-gray-900'}`}>Payouts</Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -34,48 +65,64 @@ export default async function AdminLedgerPage() {
           <table className="w-full text-left text-sm text-gray-600">
             <thead className="bg-gray-50 text-gray-900 font-medium">
               <tr>
-                <th className="px-6 py-4">Transaction</th>
+                <th className="px-6 py-4">Transaction ID</th>
+                <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Type</th>
-                <th className="px-6 py-4">Store</th>
-                <th className="px-6 py-4">Reference</th>
+                <th className="px-6 py-4">Related Store</th>
+                <th className="px-6 py-4">Related Order</th>
                 <th className="px-6 py-4 text-right">Amount</th>
-                <th className="px-6 py-4 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {transactions?.map((tx: any) => {
-                const isCredit = ['platform_fee', 'delivery_fee'].includes(tx.transaction_type)
+                const isCredit = tx.transaction_type === 'platform_fee' || tx.transaction_type === 'delivery_fee'
                 return (
                   <tr key={tx.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 ${isCredit ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-                          {isCredit ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 capitalize">{tx.transaction_type.replace('_', ' ')}</p>
-                          <p className="text-xs text-gray-500">{new Date(tx.created_at).toLocaleString()}</p>
-                        </div>
-                      </div>
+                    <td className="px-6 py-4 font-mono text-xs text-gray-500">{tx.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-xs">
+                      {new Date(tx.created_at).toLocaleString('en-US', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                      })}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="text-xs text-gray-500">{tx.description || '-'}</span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-900 font-medium">
-                      {tx.stores?.name || '-'}
-                    </td>
-                    <td className="px-6 py-4 font-mono text-xs text-gray-500">
-                      {tx.orders?.payment_reference || '-'}
-                    </td>
-                    <td className={`px-6 py-4 text-right font-bold ${isCredit ? 'text-green-600' : 'text-gray-900'}`}>
-                      {isCredit ? '+' : ''}₦{Number(tx.amount).toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 text-center">
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                        tx.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        tx.transaction_type === 'platform_fee' ? 'bg-green-100 text-green-700' : 
+                        tx.transaction_type === 'product_sale' ? 'bg-blue-100 text-blue-700' :
+                        tx.transaction_type === 'payout' ? 'bg-amber-100 text-amber-700' :
+                        'bg-gray-100 text-gray-700'
                       }`}>
-                        {tx.status}
+                        {tx.transaction_type.replace(/_/g, ' ')}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {tx.stores ? (
+                        <Link href={`/hq/sellers/${tx.stores.id}`} className="text-blue-600 hover:underline font-medium">
+                          {tx.stores.name}
+                        </Link>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {tx.orders ? (
+                        <Link href={`/hq/orders/${tx.orders.id}`} className="text-blue-600 font-mono hover:underline text-xs">
+                          {tx.orders.payment_reference}
+                        </Link>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right font-medium">
+                      <div className="flex items-center justify-end gap-1">
+                        {isCredit ? (
+                          <ArrowDownLeft className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <ArrowUpRight className="w-3 h-3 text-blue-500" />
+                        )}
+                        <span className={isCredit ? 'text-green-700' : 'text-gray-900'}>
+                          ₦{Number(tx.amount).toLocaleString()}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -90,6 +137,7 @@ export default async function AdminLedgerPage() {
             </tbody>
           </table>
         </div>
+        <Pagination totalPages={totalPages} currentPage={page} />
       </div>
     </div>
   )

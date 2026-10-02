@@ -1,13 +1,28 @@
-﻿import { createClient } from '@/lib/supabase/server'
-import { Shield, User, Store } from 'lucide-react'
+﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { Shield, User, Store, Eye } from 'lucide-react'
+import Link from 'next/link'
+import { SearchInput } from '../components/search-input'
+import { Pagination } from '../components/pagination'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminUsersPage() {
-  const supabase = await createClient()
+const supabaseAdmin = createAdminClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-  // Fetch all profiles, plus their admin role and store info if they have any
-  const { data: profiles, error } = await supabase
+export default async function AdminUsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>
+}) {
+  const params = await searchParams
+  const q = params.q || ''
+  const page = parseInt(params.page || '1', 10)
+  const pageSize = 20
+  const offset = (page - 1) * pageSize
+
+  let query = supabaseAdmin
     .from('profiles')
     .select(`
       id,
@@ -16,17 +31,27 @@ export default async function AdminUsersPage() {
       created_at,
       admin_users!left(role),
       stores!left(id, name, slug)
-    `)
+    `, { count: 'exact' })
+  
+  if (q) {
+    query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%`)
+  }
+
+  const { data: profiles, count, error } = await query
     .order('created_at', { ascending: false })
+    .range(offset, offset + pageSize - 1)
 
   if (error) {
     console.error('Error fetching users:', error)
   }
 
+  const totalPages = count ? Math.ceil(count / pageSize) : 0
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+        <SearchInput placeholder="Search by name or email..." />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -38,6 +63,7 @@ export default async function AdminUsersPage() {
                 <th className="px-6 py-4">Role</th>
                 <th className="px-6 py-4">Store / Seller Status</th>
                 <th className="px-6 py-4">Joined</th>
+                <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -48,12 +74,12 @@ export default async function AdminUsersPage() {
                   <tr key={profile.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 shrink-0">
                           <User className="w-5 h-5" />
                         </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{profile.full_name || 'No Name'}</p>
-                          <p className="text-xs text-gray-500">{profile.email}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{profile.full_name || 'No Name'}</p>
+                          <p className="text-xs text-gray-500 truncate">{profile.email}</p>
                         </div>
                       </div>
                     </td>
@@ -61,7 +87,7 @@ export default async function AdminUsersPage() {
                       {isAdmin ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                           <Shield className="w-3.5 h-3.5" />
-                          Admin
+                          HQ Staff
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
@@ -88,21 +114,30 @@ export default async function AdminUsersPage() {
                         year: 'numeric', month: 'short', day: 'numeric'
                       })}
                     </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link 
+                        href={`/hq/users/${profile.id}`}
+                        className="inline-flex items-center justify-center p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="View Details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Link>
+                    </td>
                   </tr>
                 )
               })}
               {!profiles?.length && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-gray-500">
-                    No users found.
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    No users found matching your criteria.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        <Pagination totalPages={totalPages} currentPage={page} />
       </div>
     </div>
   )
 }
-
