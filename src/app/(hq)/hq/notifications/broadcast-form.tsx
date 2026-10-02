@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { sendBroadcast } from './actions'
-import { Send, AlertCircle, Users, LayoutGrid, MapPin, Mail, BellRing, Calculator } from 'lucide-react'
+import { Send, AlertCircle, Users, LayoutGrid, MapPin, Mail, BellRing, Calculator, CheckCircle2 } from 'lucide-react'
 
 export function BroadcastForm({ categories, countries, states }: { categories: string[], countries: string[], states: string[] }) {
   const [audience, setAudience] = useState('all')
