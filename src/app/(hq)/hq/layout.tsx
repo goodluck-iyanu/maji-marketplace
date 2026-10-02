@@ -1,7 +1,7 @@
-﻿import { redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell } from 'lucide-react'
+import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell, ShieldCheck } from 'lucide-react'
 
 export const metadata = {
   title: 'HQ',
@@ -39,6 +39,7 @@ export default async function AdminLayout({
     { name: 'Sellers', href: '/hq/sellers', icon: Store },
     { name: 'Products', href: '/hq/products', icon: Package },
     { name: 'Orders', href: '/hq/orders', icon: ShoppingCart },
+    { name: 'Payouts', href: '/hq/payout-changes', icon: ShieldCheck },
     { name: 'Ledger', href: '/hq/ledger', icon: FileText },
     { name: 'Broadcasts', href: '/hq/notifications', icon: Bell },
     { name: 'Settings', href: '/hq/settings', icon: Settings },
