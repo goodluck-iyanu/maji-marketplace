@@ -1,4 +1,4 @@
-﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { ShoppingCart, Eye, Filter } from 'lucide-react'
 import Link from 'next/link'
 import { SearchInput } from '../components/search-input'
@@ -99,10 +99,6 @@ export default async function AdminOrdersPage({
           <select 
             className="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 py-1.5"
             defaultValue={paymentFilter}
-            onChange={`if(this.value){window.location.href='?payment='+this.value+'&fulfillment=${fulfillmentFilter}&logistics=${logisticsFilter}&sort=${sort}&q=${q}'}`}
-            onBlur={(e) => {
-               // We use standard link pushes or basic JS for quick filters
-            }}
           >
             <option value="all">All Payments</option>
             <option value="paid">Paid</option>
@@ -237,3 +233,4 @@ export default async function AdminOrdersPage({
     </div>
   )
 }
+
