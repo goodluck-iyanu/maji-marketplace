@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { LayoutDashboard, Users, Store, Package, ShoppingCart, Activity, Settings, LogOut, FileText, Bell, ShieldCheck, Zap } from 'lucide-react'
+import { HQMobileNav } from './components/hq-mobile-nav'
 
 export const metadata = {
   title: 'HQ',
@@ -46,7 +47,7 @@ export default async function AdminLayout({
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden text-gray-900">
+    <div className="flex h-[100dvh] bg-gray-50 overflow-hidden text-gray-900">
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 flex flex-col border-r border-slate-800 hidden md:flex">
         <div className="h-16 flex items-center px-6 border-b border-slate-800">
@@ -86,6 +87,7 @@ export default async function AdminLayout({
           <Link href="/hq" className="font-bold text-xl tracking-tight text-slate-900 flex items-center gap-2">
             <Zap className="w-5 h-5 text-yellow-500" fill="currentColor" /> HQ
           </Link>
+          <HQMobileNav />
         </header>
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
