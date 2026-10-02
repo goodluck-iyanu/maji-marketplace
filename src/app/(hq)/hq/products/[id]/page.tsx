@@ -168,10 +168,10 @@ export default async function AdminProductDetailPage({
                   {recentSales?.map(sale => (
                     <tr key={sale.id} className="hover:bg-gray-50">
                       <td className="px-5 py-3">
-                        <Link href={`/hq/orders/${sale.orders?.id}`} className="font-mono text-blue-600 hover:underline">
-                          {sale.orders?.payment_reference}
+                        <Link href={`/hq/orders/${(sale.orders as any)?.id}`} className="font-mono text-blue-600 hover:underline">
+                          {(sale.orders as any)?.payment_reference}
                         </Link>
-                        {sale.orders?.payment_status !== 'paid' && (
+                        {(sale.orders as any)?.payment_status !== 'paid' && (
                           <span className="ml-2 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
                             Unpaid
                           </span>
@@ -180,7 +180,7 @@ export default async function AdminProductDetailPage({
                       <td className="px-5 py-3 font-medium">{sale.quantity}</td>
                       <td className="px-5 py-3">₦{Number(sale.price_at_purchase).toLocaleString()}</td>
                       <td className="px-5 py-3 whitespace-nowrap text-xs">
-                        {sale.orders?.created_at ? new Date(sale.orders.created_at).toLocaleDateString() : ''}
+                        {(sale.orders as any)?.created_at ? new Date((sale.orders as any).created_at).toLocaleDateString() : ''}
                       </td>
                     </tr>
                   ))}
@@ -199,4 +199,5 @@ export default async function AdminProductDetailPage({
     </div>
   )
 }
+
 

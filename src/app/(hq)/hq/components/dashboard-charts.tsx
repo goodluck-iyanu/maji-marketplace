@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 
@@ -30,7 +30,7 @@ export function DashboardCharts({ data }: { data: any[] }) {
             <Tooltip 
               cursor={{ fill: '#f1f5f9' }}
               contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              formatter={(value: any, name: string) => [`₦${Number(value || 0).toLocaleString()}`, name === 'gmv' ? 'Total GMV' : 'Platform Revenue']}
+              formatter={(value: any, name: any) => [`₦${Number(value || 0).toLocaleString()}`, name === 'gmv' ? 'Total GMV' : 'Platform Revenue']}
             />
             <Legend wrapperStyle={{ paddingTop: '20px' }} />
             <Bar name="Platform Revenue" dataKey="revenue" fill="#f59e0b" radius={[4, 4, 0, 0]} maxBarSize={40} />

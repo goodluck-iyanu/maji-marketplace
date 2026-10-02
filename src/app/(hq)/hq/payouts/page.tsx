@@ -30,6 +30,7 @@ export default async function AdminPayoutsPage() {
       if (!storeId || !t.stores) return
       
       if (!storeBalances[storeId]) {
+        storeBalances[storeId] = { id: storeId, name: t.stores.name, earned: 0, paid: 0, pending: 0 }
         const storeData = t.stores as any
         storeBalances[storeId] = { id: storeId, name: storeData?.name || 'Unknown', earned: 0, paid: 0, pending: 0 }
       }
