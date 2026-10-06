@@ -100,6 +100,15 @@ export default async function AdminPayoutsPage() {
   const pendingRequests = changeRequests?.filter(r => r.status === 'pending') || []
   const resolvedRequests = changeRequests?.filter(r => r.status !== 'pending') || []
 
+  // 4. Fetch Payout Accounts for Verification
+  const { data: payoutAccounts } = await supabaseAdmin
+    .from('payout_accounts')
+    .select('*, stores(name, slug)')
+    .order('created_at', { ascending: false })
+  
+  const verificationQueue = payoutAccounts?.filter(p => p.status === 'pending_verification') || []
+  const allPayoutAccounts = payoutAccounts || []
+
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-12">
       <div>
@@ -111,28 +120,36 @@ export default async function AdminPayoutsPage() {
       </div>
 
       {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
-          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Building2 className="w-4 h-4" /> Total Balance Owed</p>
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Building2 className="w-4 h-4" /> Total Balance</p>
           <div className="mt-4">
-            <p className="text-2xl font-black text-gray-900">₦{totalBalanceOwed.toLocaleString()}</p>
+            <p className="text-xl font-black text-gray-900">₦{totalBalanceOwed.toLocaleString()}</p>
             <p className="text-xs text-gray-400 mt-1">Across {sellersAwaitingPayout} sellers</p>
           </div>
         </div>
         
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
-          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Wallet className="w-4 h-4 text-orange-500" /> Processing Payouts</p>
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><Wallet className="w-4 h-4 text-orange-500" /> Processing</p>
           <div className="mt-4">
-            <p className="text-2xl font-black text-gray-900">₦{totalPendingPayoutsAmount.toLocaleString()}</p>
+            <p className="text-xl font-black text-gray-900">₦{totalPendingPayoutsAmount.toLocaleString()}</p>
             <p className="text-xs text-gray-400 mt-1">Pending bank confirmation</p>
           </div>
         </div>
 
         <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
-          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-green-500" /> Total Paid Out</p>
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-green-500" /> Paid Out</p>
           <div className="mt-4">
-            <p className="text-2xl font-black text-gray-900">₦{totalPaidOut.toLocaleString()}</p>
+            <p className="text-xl font-black text-gray-900">₦{totalPaidOut.toLocaleString()}</p>
             <p className="text-xs text-green-600 mt-1 font-medium">₦{payoutsThisMonth.toLocaleString()} this month</p>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between">
+          <p className="text-sm font-semibold text-gray-500 flex items-center gap-2"><UserRoundCheck className="w-4 h-4 text-blue-500" /> Verification</p>
+          <div className="mt-4">
+            <p className="text-xl font-black text-gray-900">{verificationQueue.length}</p>
+            <p className="text-xs text-gray-400 mt-1">Sellers awaiting sync</p>
           </div>
         </div>
 
@@ -157,6 +174,8 @@ export default async function AdminPayoutsPage() {
         payoutHistory={payoutHistory} 
         pendingRequests={pendingRequests}
         resolvedRequests={resolvedRequests}
+        verificationQueue={verificationQueue}
+        allPayoutAccounts={allPayoutAccounts}
       />
     </div>
   )

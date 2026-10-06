@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
@@ -25,11 +25,13 @@ export async function processCheckout(formData: FormData) {
 
   let cartItems: CartItem[]
   try {
-    const parsed: unknown = JSON.parse(cartJson)
-    if (!Array.isArray(parsed) || parsed.length === 0) return { error: 'Cart is empty.' }
-    cartItems = parsed as CartItem[]
+    cartItems = JSON.parse(cartJson)
   } catch {
     return { error: 'Invalid cart data.' }
+  }
+
+  if (!cartItems || cartItems.length === 0) {
+    return { error: 'Your cart is empty.' }
   }
 
   const supabase = await createClient()
@@ -41,6 +43,18 @@ export async function processCheckout(formData: FormData) {
 
   if (storeError || !store) return { error: 'Store not found.' }
   const storeId = store.id
+
+  // Verify Seller Payout Account Status
+  const { data: payoutAccount } = await supabase
+    .from('payout_accounts')
+    .select('subaccount_code, status')
+    .eq('store_id', storeId)
+    .maybeSingle()
+
+  if (!payoutAccount || payoutAccount.status !== 'verified' || !payoutAccount.subaccount_code) {
+    return { error: 'This store is not currently eligible to receive payments. Please try again later.' }
+  }
+
   const productIds = [...new Set(cartItems.map(item => item.id))]
 
   const { data: products, error: productsError } = await supabase
@@ -136,8 +150,6 @@ export async function processCheckout(formData: FormData) {
       return { error: liveQuote.error || 'Unable to get a live delivery quote.' }
     }
 
-    // We can't match exact quoteId because it's a new API call, so match by carrierId (which we passed in form)
-    // Actually, in cart/page.tsx we appended deliveryQuoteId which is from the frontend. We can use the fresh quoteId from the backend instead.
     const selectedQuoteStr = formData.get('deliveryQuote')
     let selectedQuote = null
     try {
@@ -173,18 +185,17 @@ export async function processCheckout(formData: FormData) {
       carrier: matchedRate.carrier,
       eta: matchedRate.eta,
     }
-    savedQuote = matchedRate
   } else if (store.product_type === 'physical' && deliveryMethod !== 'arrange') {
     return { error: 'Choose a valid delivery method.' }
   }
 
-  const totalAmount = itemTotal + deliveryFee
-  const { data: payoutAccount } = await supabase
-    .from('payout_accounts')
-    .select('subaccount_code')
-    .eq('store_id', storeId)
-    .eq('status', 'active')
-    .maybeSingle()
+  // Fees calculation
+  // Platform fee defaults to 4% + 50 NGN (TODO: pull from platform_settings if possible)
+  const productSubtotal = itemTotal
+  const platformFee = Math.round(productSubtotal * 0.04) + 50
+  const sellerAmount = productSubtotal - platformFee
+  const totalAmount = productSubtotal + deliveryFee
+  const processingFee = 0 // Customer doesn't pay a processing fee surcharge right now
 
   const reference = `ORD-${uuidv4()}`
   const supabaseAdmin = createSupabaseClient(
@@ -204,6 +215,10 @@ export async function processCheckout(formData: FormData) {
       delivery_fee: deliveryFee,
       delivery_address: finalDeliveryAddress,
       delivery_quote: savedQuote,
+      product_subtotal: productSubtotal,
+      platform_fee: platformFee,
+      seller_amount: sellerAmount,
+      processing_fee: processingFee,
       total_amount: totalAmount,
       payment_reference: reference,
       payment_status: 'pending',
@@ -222,12 +237,16 @@ export async function processCheckout(formData: FormData) {
   }
 
   try {
-    const isFakeSubaccount = payoutAccount?.subaccount_code?.startsWith('SUB_')
+    const isFakeSubaccount = payoutAccount.subaccount_code.startsWith('SUB_')
+    const transactionCharge = (platformFee + deliveryFee) * 100 // in kobo
+
     const paystackData = await initializeTransaction({
       amount: totalAmount,
       email: customerEmail,
       reference,
-      subaccount: isFakeSubaccount ? undefined : payoutAccount?.subaccount_code,
+      subaccount: isFakeSubaccount ? undefined : payoutAccount.subaccount_code,
+      transaction_charge: isFakeSubaccount ? undefined : transactionCharge,
+      bearer: isFakeSubaccount ? undefined : 'subaccount',
       metadata: { storeId, cart: cartItems },
     })
 

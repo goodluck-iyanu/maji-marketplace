@@ -1,87 +1,72 @@
-﻿'use server'
+'use server'
 
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
+import { dispatchTheyutesDelivery } from '@/lib/theyutes'
 
-const supabaseAdmin = createClient(
+const supabaseAdmin = createAdminClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function authorizeDelivery(formData: FormData) {
+export async function dispatchDelivery(formData: FormData) {
   const orderId = formData.get('orderId') as string
-  if (!orderId) throw new Error('Order ID is required')
 
-  // 1. Verify admin (implicit via supabaseAdmin, but in a real app check auth context here)
-  
-  // Fetch order details to verify constraints
-  const { data: order, error: orderError } = await supabaseAdmin
-    .from('orders')
-    .select(`
-      payment_status,
-      logistics_status,
-      delivery_address,
-      store_id,
-      stores (
-        pickup_address,
-        pickup_city,
-        pickup_state,
-        pickup_phone
-      )
-    `)
-    .eq('id', orderId)
-    .single()
+  try {
+    const { data: order, error } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', orderId)
+      .single()
 
-  if (orderError || !order) {
-    throw new Error('Failed to fetch order details')
+    if (error || !order) {
+      throw new Error('Order not found.')
+    }
+
+    if (order.payment_status !== 'paid') {
+      throw new Error('Cannot dispatch unpaid order.')
+    }
+
+    if (order.logistics_status && order.logistics_status !== 'awaiting_processing') {
+      throw new Error('Order has already been dispatched.')
+    }
+
+    const quote = order.delivery_quote as any
+    const quoteId = quote?.quoteId || quote?.id
+    if (!quoteId) {
+      throw new Error('No Theyutes quote ID attached to this order.')
+    }
+
+    // Call Theyutes Dispatch using the consolidated library
+    const dispatchResult = await dispatchTheyutesDelivery(quoteId, order.payment_reference) as any
+
+    const trackingNumber = dispatchResult?.tracking_number || dispatchResult?.id || dispatchResult?.trackingId || 'PENDING'
+    const actualCost = dispatchResult?.cost || quote?.fee || 0
+    const courier = dispatchResult?.courier || quote?.carrier || 'Theyutes'
+
+    // Update order with actual cost and tracking
+    const { error: updateError } = await supabaseAdmin
+      .from('orders')
+      .update({
+        logistics_status: 'dispatched',
+        logistics_tracking_id: trackingNumber,
+        logistics_provider: courier,
+        // If we want to record actual delivery cost later, we can add it to orders schema or just use delivery_quote value
+      })
+      .eq('id', orderId)
+
+    if (updateError) {
+      console.error('Failed to update order after dispatch:', updateError)
+      throw new Error('Dispatched to Theyutes, but failed to save status internally.')
+    }
+
+    revalidatePath(`/hq/orders/${orderId}`)
+    revalidatePath('/hq/orders')
+    
+  } catch (err: any) {
+    console.error('Dispatch error:', err)
+    // We shouldn't throw error in server actions if we want to handle gracefully, but Next.js error boundaries can catch it, or better yet return it.
+    // For simplicity with form action without useActionState, we'll throw.
+    throw err
   }
-
-  // 2. Verify order is paid
-  if (order.payment_status !== 'paid') {
-    throw new Error('Order is not fully paid. Cannot authorize delivery.')
-  }
-
-  // 3. Verify valid seller pickup info exists
-  const store = order.stores as any
-  if (!store?.pickup_address || !store?.pickup_city || !store?.pickup_state) {
-    throw new Error('Seller has incomplete pickup information. Delivery cannot be authorized.')
-  }
-
-  // 4. Verify buyer delivery info exists
-  if (!order.delivery_address) {
-    throw new Error('Buyer delivery information is missing.')
-  }
-
-  // 5. Verify delivery quote if required
-  // TODO: Add delivery quote validation here if FEZ quotes are cached in the DB
-
-  // 6. Prevent duplicate shipment creation
-  if (order.logistics_status && order.logistics_status !== 'awaiting_authorization') {
-    throw new Error('This order has already been authorized or shipped.')
-  }
-
-  // --- FEZ API PLACEHOLDER ---
-  // 7. Call the FEZ API from the Maji server
-  // 8. Create the FEZ shipment
-  // 9. Save the FEZ shipment/reference ID
-  // 10. Save the FEZ tracking information if provided
-  // ---------------------------
-  
-  // 11. Change the Maji delivery status
-  const { error: updateError } = await supabaseAdmin
-    .from('orders')
-    .update({ 
-      logistics_status: 'shipment_requested',
-      // logistics_provider: 'FEZ',
-      // logistics_tracking_id: 'FEZ-MOCK-ID'
-    })
-    .eq('id', orderId)
-
-  if (updateError) {
-    throw new Error('Failed to update delivery status')
-  }
-
-  // 12. Show updated state
-  revalidatePath(`/hq/orders/${orderId}`)
-  revalidatePath(`/hq/orders`)
 }

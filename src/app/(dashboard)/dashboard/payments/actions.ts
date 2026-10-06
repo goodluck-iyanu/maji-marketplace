@@ -84,7 +84,7 @@ export async function connectBankAccount(formData: FormData) {
     account_number: accountNumber,
     account_name: accountName,
     subaccount_code: subaccountCode,
-    status: 'active'
+    status: 'pending_verification'
   })
 
   if (error) {

@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Building2, ShieldAlert } from 'lucide-react'
+import { Building2, ShieldAlert, CheckCircle, Clock, XCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function PaymentsPage() {
@@ -36,9 +36,22 @@ export default async function PaymentsPage() {
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
           <h2 className="text-lg font-medium text-gray-900">Payout Account</h2>
-          {payoutAccount && (
+          {payoutAccount && payoutAccount.status === 'verified' && (
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <CheckCircle className="w-3 h-3 mr-1" />
               Verified
+            </span>
+          )}
+          {payoutAccount && payoutAccount.status === 'pending_verification' && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+              <Clock className="w-3 h-3 mr-1" />
+              Pending verification
+            </span>
+          )}
+          {payoutAccount && payoutAccount.status === 'rejected' && (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              <XCircle className="w-3 h-3 mr-1" />
+              Rejected
             </span>
           )}
         </div>
@@ -69,18 +82,50 @@ export default async function PaymentsPage() {
                  </div>
               </div>
 
-              <div className="bg-amber-50 border border-amber-200 rounded-md p-4 flex items-start">
-                 <ShieldAlert className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
-                 <div>
-                   <h4 className="text-sm font-medium text-amber-800">Changing payout account requires admin review</h4>
-                   <p className="text-sm text-amber-700 mt-1">
-                     For security, any changes to your payout account will temporarily keep the old account active until an admin verifies and approves the new one.
-                   </p>
-                   <button className="mt-3 text-sm font-medium text-amber-800 hover:text-amber-900 bg-amber-100 px-3 py-1.5 rounded-md">
-                     Request Account Change
-                   </button>
-                 </div>
-              </div>
+              {payoutAccount.status === 'pending_verification' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-start mb-6">
+                   <Clock className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                   <div>
+                     <h4 className="text-sm font-medium text-blue-800">Your payout account has been submitted</h4>
+                     <p className="text-sm text-blue-700 mt-1">
+                       Maji is verifying your account before you can receive seller payouts. You cannot receive live payments until verification is complete.
+                     </p>
+                   </div>
+                </div>
+              )}
+
+              {payoutAccount.status === 'rejected' && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-start mb-6">
+                   <XCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                   <div>
+                     <h4 className="text-sm font-medium text-red-800">Verification Failed</h4>
+                     <p className="text-sm text-red-700 mt-1">
+                       We could not verify your payout account. Please connect a valid bank account to continue receiving payouts.
+                     </p>
+                     <Link 
+                       href="/dashboard/payments/connect" 
+                       className="mt-3 inline-block text-sm font-medium text-red-800 hover:text-red-900 bg-red-100 px-3 py-1.5 rounded-md"
+                     >
+                       Update Bank Account
+                     </Link>
+                   </div>
+                </div>
+              )}
+
+              {payoutAccount.status === 'verified' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-md p-4 flex items-start">
+                   <ShieldAlert className="h-5 w-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
+                   <div>
+                     <h4 className="text-sm font-medium text-amber-800">Changing payout account requires admin review</h4>
+                     <p className="text-sm text-amber-700 mt-1">
+                       For security, any changes to your payout account will temporarily keep the old account active until an admin verifies and approves the new one.
+                     </p>
+                     <button className="mt-3 text-sm font-medium text-amber-800 hover:text-amber-900 bg-amber-100 px-3 py-1.5 rounded-md">
+                       Request Account Change
+                     </button>
+                   </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -88,5 +133,3 @@ export default async function PaymentsPage() {
     </div>
   )
 }
-
-
