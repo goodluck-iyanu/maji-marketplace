@@ -44,14 +44,6 @@ export async function syncPaystackVerification(storeId: string) {
         .update({ status: 'verified' })
         .eq('id', payoutAccount.id)
       
-      await supabaseAdmin.from('notifications').insert({
-        store_id: storeId,
-        title: 'Payout Account Verified',
-        message: 'Your Paystack payout account has been approved. You are now ready to receive seller payouts through Maji.',
-        type: 'success',
-        link: '/dashboard/payments'
-      })
-      
       revalidatePath('/hq/payouts')
       revalidatePath('/dashboard/payments')
       return { message: 'Subaccount is verified and active.' }

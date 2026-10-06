@@ -1,4 +1,4 @@
-﻿import 'server-only'
+import 'server-only'
 
 export interface TheyutesLocation {
   lat: number
@@ -51,7 +51,7 @@ export async function getTheyutesRates(
     throw new Error('Theyutes is not configured. Set THEYUTES_API_KEY on the server.')
   }
 
-  const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://api.theyutes.com'
+  const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://theyutes.com'
   const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/logistics/quote`
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -63,7 +63,7 @@ export async function getTheyutesRates(
     body: JSON.stringify({
       pickup,
       dropoff,
-      parcel,
+      parcels: [parcel],
       currency: 'NGN',
     }),
     cache: 'no-store',
@@ -133,7 +133,7 @@ export async function dispatchTheyutesDelivery(
     throw new Error('Theyutes is not configured. Set THEYUTES_API_KEY on the server.')
   }
 
-  const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://api.theyutes.com'
+  const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://theyutes.com'
   const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/logistics/dispatch`
   
   const response = await fetch(endpoint, {
