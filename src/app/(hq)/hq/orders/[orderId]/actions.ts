@@ -60,6 +60,14 @@ export async function dispatchDelivery(formData: FormData) {
       throw new Error('Dispatched to Theyutes, but failed to save status internally.')
     }
 
+    await supabaseAdmin.from('notifications').insert({
+      store_id: order.store_id,
+      title: 'Delivery Dispatched',
+      message: `Your order ${order.payment_reference} has been successfully dispatched to our logistics partner.`,
+      type: 'info',
+      link: `/dashboard/orders/${order.id}`
+    })
+
     revalidatePath(`/hq/orders/${orderId}`)
     revalidatePath('/hq/orders')
     

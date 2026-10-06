@@ -92,6 +92,14 @@ export async function connectBankAccount(formData: FormData) {
     throw new Error('Failed to connect bank account')
   }
 
+  await supabase.from('notifications').insert({
+    store_id: store.id,
+    title: 'Payout Account Submitted',
+    message: 'Your payout account has been submitted. Maji is verifying it before you can receive seller payouts.',
+    type: 'info',
+    link: '/dashboard/payments'
+  })
+
   redirect('/dashboard/payments')
 }
 

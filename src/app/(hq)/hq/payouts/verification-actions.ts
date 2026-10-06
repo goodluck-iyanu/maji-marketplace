@@ -1,4 +1,4 @@
-﻿'use server'
+'use server'
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
@@ -43,6 +43,14 @@ export async function syncPaystackVerification(storeId: string) {
         .from('payout_accounts')
         .update({ status: 'verified' })
         .eq('id', payoutAccount.id)
+      
+      await supabaseAdmin.from('notifications').insert({
+        store_id: storeId,
+        title: 'Payout Account Verified',
+        message: 'Your Paystack payout account has been approved. You are now ready to receive seller payouts through Maji.',
+        type: 'success',
+        link: '/dashboard/payments'
+      })
       
       revalidatePath('/hq/payouts')
       revalidatePath('/dashboard/payments')
