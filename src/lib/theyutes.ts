@@ -1,4 +1,4 @@
-import 'server-only'
+﻿import 'server-only'
 
 export interface TheyutesLocation {
   lat: number
@@ -11,14 +11,9 @@ export interface TheyutesLocation {
 
 export interface TheyutesParcel {
   weight_kg: number
-  value: number
+  value: number // in kobo
   description: string
   fragile: boolean
-  length_cm?: number
-  width_cm?: number
-  height_cm?: number
-  delivery_category?: string
-  service_level?: string
 }
 
 export interface TheyutesRate {
@@ -53,6 +48,19 @@ export async function getTheyutesRates(
 
   const baseUrl = process.env.THEYUTES_API_BASE_URL || 'https://theyutes.com'
   const endpoint = `${baseUrl.replace(/\/+$/, '')}/api/v1/logistics/quote`
+  
+  const payload = {
+    pickup,
+    dropoff,
+    parcels: [{
+      weightKg: parcel.weight_kg,
+      valueKobo: parcel.value,
+      description: parcel.description,
+      isFragile: parcel.fragile
+    }],
+    currency: 'NGN',
+  }
+
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
@@ -60,20 +68,22 @@ export async function getTheyutesRates(
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
-    body: JSON.stringify({
-      pickup,
-      dropoff,
-      parcels: [parcel],
-      currency: 'NGN',
-    }),
+    body: JSON.stringify(payload),
     cache: 'no-store',
     signal: AbortSignal.timeout(15000),
   })
 
   const responseBody: unknown = await response.json().catch(() => null)
   const body = record(responseBody)
+  
   if (!response.ok) {
-    const message = stringValue(body?.message, body?.error)
+    console.error('=== THEYUTES 400 VALIDATION ERROR ===')
+    console.error('Status:', response.status)
+    console.error('Response Body:', JSON.stringify(body, null, 2))
+    console.error('Request Payload Sent:', JSON.stringify(payload, null, 2))
+    console.error('=======================================')
+
+    const message = stringValue(body?.message, record(body?.error)?.message, body?.error)
     throw new Error(message || `Theyutes quote request failed (${response.status}).`)
   }
 
@@ -93,35 +103,39 @@ export async function getTheyutesRates(
   const rates = candidates.flatMap((candidate, index) => {
     const rate = record(candidate)
     if (!rate) return []
-    const fee = Number(rate.amount ?? rate.fee ?? rate.price)
+    
+    // Theyutes returns priceKobo
+    let fee = Number(rate.amount ?? rate.fee ?? rate.price)
+    if (rate.priceKobo) fee = Number(rate.priceKobo) / 100
+
     if (!Number.isFinite(fee) || fee < 0) return []
-    const carrier = stringValue(rate.carrier_name, rate.carrier, rate.provider) || 'Carrier'
-    const serviceLevel = stringValue(rate.service_level, rate.service, rate.name)
-    const eta = stringValue(rate.eta, rate.delivery_time, rate.estimated_delivery)
-    return [{
-      id: stringValue(rate.id, rate.quote_id, rate.rate_id) || `${carrier}:${serviceLevel}:${fee}:${eta}:${index}`,
+    
+    const carrier = stringValue(rate.carrierName, rate.carrier_name, rate.carrier, rate.provider) || 'Carrier'
+    const serviceLevel = stringValue(rate.service_level, rate.service, rate.name) || 'Standard'
+    
+    const totalMinutes = rate.totalMinutes ? `${rate.totalMinutes} mins` : null
+    const eta = stringValue(totalMinutes, rate.eta, rate.delivery_time, rate.estimated_delivery) || 'Same day'
+
+    const id = stringValue(rate.quoteId, rate.quote_id, rate.id) || `rate_${index}`
+
+    return {
+      id,
       fee,
       carrier,
       serviceLevel,
       eta,
       raw: rate,
-    }]
-  }).sort((first, second) => first.fee - second.fee)
+    }
+  })
 
-  if (!rates.length) {
-    throw new Error('Theyutes returned no usable carrier quotes for this route.')
+  // Sort by fee ascending
+  rates.sort((a, b) => a.fee - b.fee)
+
+  if (rates.length === 0) {
+    throw new Error('No delivery routes available for these addresses.')
   }
 
-  return {
-    rates,
-    quote: {
-      requested_at: new Date().toISOString(),
-      pickup,
-      dropoff,
-      parcel,
-      rates: rates.map(({ raw, ...rate }) => ({ ...rate, provider_rate: raw })),
-    },
-  }
+  return { rates, quote: body || {} }
 }
 
 export async function dispatchTheyutesDelivery(
@@ -145,7 +159,7 @@ export async function dispatchTheyutesDelivery(
       'Idempotency-Key': `MAJI-DELIVERY-${reference}`
     },
     body: JSON.stringify({
-      quote_id: quoteId,
+      quoteId: quoteId,
       reference: reference,
     }),
     cache: 'no-store',
@@ -155,7 +169,7 @@ export async function dispatchTheyutesDelivery(
   const responseBody: unknown = await response.json().catch(() => null)
   const body = record(responseBody)
   if (!response.ok) {
-    const message = stringValue(body?.message, body?.error)
+    const message = stringValue(body?.message, record(body?.error)?.message, body?.error)
     throw new Error(message || `Theyutes dispatch failed (${response.status}).`)
   }
 
