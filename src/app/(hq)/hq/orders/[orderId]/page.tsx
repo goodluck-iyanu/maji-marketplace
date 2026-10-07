@@ -1,4 +1,4 @@
-﻿import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ShoppingCart, Truck, CreditCard, Store, User, Box, Clock, ShieldCheck, MapPin } from 'lucide-react'
@@ -16,7 +16,7 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
 
   const { data: order, error } = await supabaseAdmin
     .from('orders')
-    .select('*, order_items(*, products(*)), profiles(full_name, phone), stores(*)')
+    .select('*, order_items(*, products(*)), stores(*)')
     .eq('id', orderId)
     .single()
 
@@ -32,10 +32,9 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
   const deliveryAddr = order.delivery_address as any
   const deliveryQuote = order.delivery_quote as any
   const store = order.stores as any
-  const profile = order.profiles as any
 
   // Delivery State logic
-  const canDispatch = order.payment_status === 'paid' && (!order.logistics_status || order.logistics_status === 'awaiting_processing')
+  const canDispatch = order.payment_status === 'paid' && (!order.logistics_status || order.logistics_status === 'awaiting_processing' || order.logistics_status === 'awaiting_authorization')
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
@@ -74,10 +73,15 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
             <div className="divide-y divide-gray-100">
               {order.order_items.map((item: any) => (
                 <div key={item.id} className="p-5 flex gap-4 items-start hover:bg-gray-50 transition-colors">
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-900 text-lg">{item.products?.name || 'Unknown Product'}</p>
-                    <p className="text-gray-500 text-sm mt-1">{item.products?.is_digital ? '💻 Digital Product' : '📦 Physical Product'}</p>
-                  </div>
+                  {item.products?.images?.[0] && (
+  <div className="w-16 h-16 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+    <img src={item.products.images[0]} alt={item.products.name} className="w-full h-full object-cover" />
+  </div>
+)}
+<div className="flex-1">
+  <p className="font-bold text-gray-900 text-lg">{item.products?.name || "Unknown Product"}</p>
+  <p className="text-gray-500 text-sm mt-1">{item.products?.is_digital ? "?? Digital Product" : "?? Physical Product"}</p>
+</div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900 text-lg">₦{Number(item.price_at_purchase * item.quantity).toLocaleString()}</p>
                     <p className="text-gray-500 text-sm mt-1">{item.quantity} × ₦{Number(item.price_at_purchase).toLocaleString()}</p>
@@ -98,7 +102,11 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Method</p>
                   <p className="font-medium text-gray-900">{order.delivery_method}</p>
-                </div>
+</div>
+<div>
+  <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Total Est. Weight</p>
+  <p className="font-medium text-gray-900">{order.order_items.reduce((acc: number, item: any) => acc + ((item.products?.weight_kg || 0) * item.quantity), 0)} kg</p>
+</div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Logistics Status</p>
                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
@@ -140,10 +148,10 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                     </h4>
                     {deliveryAddr ? (
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p className="font-medium text-gray-900">{profile?.full_name}</p>
+                        <p className="font-medium text-gray-900">{order.customer_name}</p>
                         <p>{[deliveryAddr.house_number, deliveryAddr.address].filter(Boolean).join(', ')}</p>
                         <p>{[deliveryAddr.area, deliveryAddr.city, deliveryAddr.state].filter(Boolean).join(', ')}</p>
-                        <p>Phone: {deliveryAddr.recipient_phone || profile?.phone || 'N/A'}</p>
+                        <p>Phone: {deliveryAddr.recipient_phone || order.customer_phone || 'N/A'}</p>
                       </div>
                     ) : (
                       <p className="text-sm text-red-600 font-medium">Missing buyer delivery information.</p>
@@ -274,3 +282,6 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     </div>
   )
 }
+
+
+

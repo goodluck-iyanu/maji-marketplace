@@ -45,7 +45,8 @@ export default async function AdminOrdersPage({
       logistics_status,
       delivery_method,
       created_at,
-      profiles (full_name, email),
+      customer_name,
+      customer_email,
       stores (id, name)
     `, { count: 'exact' })
   
@@ -53,7 +54,6 @@ export default async function AdminOrdersPage({
     // Basic search across reference, customer email, or store name
     // Supabase ilike on related tables requires a different syntax or view, 
     // but for simple cases we filter the top-level table. 
-    // We'll filter on payment_reference for now as cross-table ORs are complex in PostgREST.
     query = query.ilike('payment_reference', `%${q}%`)
   }
 
@@ -177,8 +177,8 @@ export default async function AdminOrdersPage({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="font-medium text-gray-900 truncate max-w-[150px]">{order.profiles?.full_name || 'No Name'}</p>
-                    <p className="text-xs text-gray-500 truncate max-w-[150px]">{order.profiles?.email}</p>
+                    <p className="font-medium text-gray-900 truncate max-w-[150px]">{order.customer_name || 'No Name'}</p>
+                    <p className="text-xs text-gray-500 truncate max-w-[150px]">{order.customer_email || 'No Email'}</p>
                   </td>
                   <td className="px-6 py-4">
                     <Link href={`/hq/sellers/${order.stores?.id}`} className="text-blue-600 hover:underline font-medium truncate max-w-[150px] block">

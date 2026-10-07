@@ -1,14 +1,14 @@
-﻿const { createClient } = require('@supabase/supabase-js');
+const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
-
-const env = fs.readFileSync('.env.local', 'utf8');
-const urlMatch = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.*)/);
-const keyMatch = env.match(/SUPABASE_SERVICE_ROLE_KEY=(.*)/);
-
-const supabase = createClient(urlMatch[1].trim(), keyMatch[1].trim());
-
-async function checkOrder() {
-    const { data: order, error } = await supabase.from('orders').select('*').limit(1).single();
-    console.log('Order keys:', order ? Object.keys(order) : error);
+const env = fs.readFileSync('.env.local', 'utf8').split('\n').reduce((acc, line) => {
+  const [k, ...v] = line.split('=');
+  if (k && v.length) acc[k.trim()] = v.join('=').trim().replace(/^"|"$/g, '');
+  return acc;
+}, {});
+const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+async function run() {
+  const { data, error } = await supabase.from('orders').select('*').eq('payment_reference', 'ORD-f365195f-45d1-4c02-8c1b-f11d5d5e6009').single();
+  if (error) console.error(error);
+  else console.log(JSON.stringify(data, null, 2));
 }
-checkOrder();
+run();
