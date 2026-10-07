@@ -2,20 +2,25 @@
 
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
-import { dispatchTheyutesDelivery } from '@/lib/theyutes'
+import { sendDeliveryUpdateEmail } from '@/lib/email'
 
 const supabaseAdmin = createAdminClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function dispatchDelivery(formData: FormData) {
+export async function saveManualTracking(formData: FormData) {
   const orderId = formData.get('orderId') as string
+  const shipmentId = formData.get('shipmentId') as string
+  const trackingId = formData.get('trackingId') as string
+  const trackingUrl = formData.get('trackingUrl') as string
+  const carrier = formData.get('carrier') as string
+  const eta = formData.get('eta') as string
 
   try {
     const { data: order, error } = await supabaseAdmin
       .from('orders')
-      .select('*')
+      .select('*, stores(id, name)')
       .eq('id', orderId)
       .single()
 
@@ -24,57 +29,71 @@ export async function dispatchDelivery(formData: FormData) {
     }
 
     if (order.payment_status !== 'paid') {
-      throw new Error('Cannot dispatch unpaid order.')
+      throw new Error('Cannot add tracking to unpaid order.')
     }
 
-    if (order.logistics_status && order.logistics_status !== 'awaiting_processing') {
-      throw new Error('Order has already been dispatched.')
+    const currentMetadata = order.logistics_metadata || {}
+    const isNew = !currentMetadata.tracking_added_at
+
+    const metadata = {
+      ...currentMetadata,
+      theyutes_shipment_id: shipmentId || null,
+      theyutes_tracking_url: trackingUrl || null,
+      tracking_added_at: currentMetadata.tracking_added_at || new Date().toISOString(),
+      tracking_updated_at: new Date().toISOString()
     }
 
-    const quote = order.delivery_quote as any
-    const quoteId = quote?.quoteId || quote?.id
-    if (!quoteId) {
-      throw new Error('No Theyutes quote ID attached to this order.')
+    // Always keep it dispatched if it was dispatched, or bump it to dispatched if it was awaiting.
+    // We do not downgrade statuses via this form.
+    let newStatus = order.logistics_status
+    if (!newStatus || newStatus === 'awaiting_processing' || newStatus === 'awaiting_authorization') {
+      newStatus = 'dispatched'
     }
 
-    // Call Theyutes Dispatch using the consolidated library
-    const dispatchResult = await dispatchTheyutesDelivery(quoteId, order.payment_reference) as any
-
-    const trackingNumber = dispatchResult?.tracking_number || dispatchResult?.id || dispatchResult?.trackingId || 'PENDING'
-    const actualCost = dispatchResult?.cost || quote?.fee || 0
-    const courier = dispatchResult?.courier || quote?.carrier || 'Theyutes'
-
-    // Update order with actual cost and tracking
     const { error: updateError } = await supabaseAdmin
       .from('orders')
       .update({
-        logistics_status: 'dispatched',
-        logistics_tracking_id: trackingNumber,
-        logistics_provider: courier,
-        // If we want to record actual delivery cost later, we can add it to orders schema or just use delivery_quote value
+        logistics_provider: carrier || 'Theyutes',
+        logistics_tracking_id: trackingId || null,
+        logistics_estimated_delivery: eta || null,
+        logistics_metadata: metadata,
+        logistics_status: newStatus
       })
       .eq('id', orderId)
 
     if (updateError) {
-      console.error('Failed to update order after dispatch:', updateError)
-      throw new Error('Dispatched to Theyutes, but failed to save status internally.')
+      console.error('Failed to update order tracking:', updateError)
+      throw new Error('Failed to save tracking information.')
     }
 
-    await supabaseAdmin.from('notifications').insert({
-      store_id: order.store_id,
-      title: 'Delivery Dispatched',
-      message: `Your order ${order.payment_reference} has been successfully dispatched to our logistics partner.`,
-      type: 'info',
-      link: `/dashboard/orders/${order.id}`
-    })
+    // Notify seller
+    if (isNew) {
+      const store = order.stores as any
+      await supabaseAdmin.from('notifications').insert({
+        store_id: order.store_id,
+        title: 'Delivery Booked',
+        message: `Your order ${order.payment_reference} has been booked for delivery with ${carrier || 'Theyutes'}. Tracking ID: ${trackingId || 'N/A'}. Pickup Address: ${store?.pickup_address || 'Your saved pickup address'}.`,
+        type: 'info',
+        link: `/dashboard/orders/${order.id}`
+      })
+
+      // Send email to buyer
+      if (order.customer_email) {
+        await sendDeliveryUpdateEmail({
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          orderReference: order.payment_reference,
+          trackingId: trackingId || '',
+          carrier: carrier || 'Theyutes'
+        })
+      }
+    }
 
     revalidatePath(`/hq/orders/${orderId}`)
     revalidatePath('/hq/orders')
     
   } catch (err: any) {
-    console.error('Dispatch error:', err)
-    // We shouldn't throw error in server actions if we want to handle gracefully, but Next.js error boundaries can catch it, or better yet return it.
-    // For simplicity with form action without useActionState, we'll throw.
+    console.error('Save tracking error:', err)
     throw err
   }
 }

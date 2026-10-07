@@ -2,7 +2,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, ShoppingCart, Truck, CreditCard, Store, User, Box, Clock, ShieldCheck, MapPin } from 'lucide-react'
-import { dispatchDelivery } from './actions'
+import { saveManualTracking } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,35 +160,56 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
                 </div>
               )}
 
-              {/* Arrange Delivery Action */}
+                            {/* Manual Delivery Tracking */}
               {order.delivery_method === 'delivery' && (
-                <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col items-start bg-indigo-50/50 p-4 rounded-lg border border-indigo-100">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-bold text-indigo-900">Theyutes Logistics Integration</h4>
-                    {deliveryQuote && <span className="text-xs bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded font-mono">Quote: {deliveryQuote.quoteId || 'Attached'}</span>}
+                <div className="mt-6 pt-6 border-t border-gray-100 bg-blue-50/30 p-6 rounded-xl border border-blue-100">
+                  <div className="flex items-center justify-between mb-6">
+                    <h4 className="font-bold text-gray-900 text-lg">THEYUTES TRACKING</h4>
+                    {order.logistics_metadata?.tracking_added_at && (
+                      <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">? Tracking information saved</span>
+                    )}
                   </div>
-                  <p className="text-sm text-indigo-700 mb-4 max-w-2xl">
-                    Delivery was quoted at ₦{Number(order.delivery_fee).toLocaleString()} for the customer. Click below to officially dispatch this order via Theyutes.
-                  </p>
                   
-                  {canDispatch ? (
-                    <form action={dispatchDelivery}>
-                      <input type="hidden" name="orderId" value={order.id} />
-                      <button 
-                        type="submit"
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-sm"
-                      >
-                        Arrange Delivery
-                      </button>
-                    </form>
-                  ) : (
-                    <button 
-                      disabled
-                      className="bg-gray-300 text-gray-500 font-bold py-2.5 px-6 rounded-lg cursor-not-allowed"
-                    >
-                      {order.payment_status !== 'paid' ? 'Cannot Dispatch: Unpaid' : 'Delivery Already Dispatched'}
-                    </button>
-                  )}
+                  <form action={saveManualTracking} className="space-y-4">
+                    <input type="hidden" name="orderId" value={order.id} />
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Shipment ID</label>
+                        <input type="text" name="shipmentId" defaultValue={order.logistics_metadata?.theyutes_shipment_id || ''} placeholder="e.g. shp_xxxxx" className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Tracking ID</label>
+                        <input type="text" name="trackingId" defaultValue={order.logistics_tracking_id || ''} placeholder="e.g. TRK-12345" className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Tracking URL</label>
+                        <input type="url" name="trackingUrl" defaultValue={order.logistics_metadata?.theyutes_tracking_url || ''} placeholder="https://" className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Carrier</label>
+                        <input type="text" name="carrier" defaultValue={order.logistics_provider || 'Theyutes'} className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">ETA (Optional)</label>
+                        <input type="text" name="eta" defaultValue={order.logistics_estimated_delivery || ''} placeholder="e.g. 2-3 business days" className="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" />
+                      </div>
+                    </div>
+                    
+                    <div className="pt-4 border-t border-gray-100 flex items-center justify-between">
+                      <p className="text-sm text-gray-500">Maji Tracking Status: <strong className="text-gray-900">{order.logistics_status?.toUpperCase() || 'READY FOR DISPATCH'}</strong></p>
+                      
+                      {order.payment_status === 'paid' ? (
+                        <button type="submit" className="bg-black hover:bg-gray-800 text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+                          {order.logistics_metadata?.tracking_added_at ? 'Update Tracking' : 'SAVE TRACKING'}
+                        </button>
+                      ) : (
+                        <button disabled type="button" className="bg-gray-300 text-gray-500 font-bold py-2.5 px-6 rounded-lg cursor-not-allowed">
+                          Cannot Dispatch Unpaid
+                        </button>
+                      )}
+                    </div>
+                  </form>
                 </div>
               )}
             </div>
@@ -282,6 +303,8 @@ export default async function AdminOrderDetailPage({ params }: { params: Promise
     </div>
   )
 }
+
+
 
 
 

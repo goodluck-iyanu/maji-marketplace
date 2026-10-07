@@ -17,34 +17,35 @@ interface TimelineStep {
 
 function getOrderTimeline(order: any): TimelineStep[] {
   const steps: TimelineStep[] = []
-  const status = order.fulfillment_status || 'pending'
   const isPaid = order.payment_status === 'paid'
+  const logStatus = order.logistics_status || 'READY_FOR_DISPATCH'
 
-  // Maji order statuses (NOT logistics statuses)
   const orderStatuses = [
-    { key: 'payment_received', label: 'Payment Received', description: 'Your payment has been successfully processed.' },
     { key: 'order_confirmed', label: 'Order Confirmed', description: 'Your order has been confirmed and the seller has been notified.' },
     { key: 'preparing', label: 'Preparing Order', description: 'The seller is preparing your order for dispatch.' },
-    { key: 'awaiting_handover', label: 'Awaiting Delivery Handover', description: 'Your order is ready and awaiting handover to our logistics partner.' },
+    { key: 'ready_for_dispatch', label: 'Ready for Dispatch', description: 'Your order is ready and awaiting handover to our logistics partner.' },
+    { key: 'picked_up', label: 'Picked Up', description: 'Our logistics partner has collected your order.' },
+    { key: 'in_transit', label: 'In Transit', description: 'Your order is on the way to the delivery location.' },
+    { key: 'out_for_delivery', label: 'Out for Delivery', description: 'Your order is out for delivery.' },
+    { key: 'delivered', label: 'Delivered', description: 'Your order has been successfully delivered.' },
   ]
 
-  // Map fulfillment_status to completed steps
-  const statusOrder = ['pending', 'processing', 'preparing', 'ready_for_pickup', 'shipped', 'delivered']
-  const currentIdx = statusOrder.indexOf(status)
+  const statusMap: Record<string, number> = {
+    'READY_FOR_DISPATCH': 2,
+    'awaiting_processing': 2,
+    'awaiting_authorization': 2,
+    'dispatched': 3,
+    'PICKED_UP': 3,
+    'IN_TRANSIT': 4,
+    'OUT_FOR_DELIVERY': 5,
+    'DELIVERED': 6
+  }
+
+  const currentIdx = statusMap[logStatus] || 2
 
   for (let i = 0; i < orderStatuses.length; i++) {
-    const completed = isPaid && (
-      (i === 0) || // payment_received
-      (i === 1 && currentIdx >= 1) || // order_confirmed = processing+
-      (i === 2 && currentIdx >= 2) || // preparing
-      (i === 3 && currentIdx >= 3) // awaiting_handover = ready_for_pickup+
-    )
-    const current = isPaid && (
-      (i === 0 && currentIdx === 0) ||
-      (i === 1 && currentIdx === 1) ||
-      (i === 2 && currentIdx === 2) ||
-      (i === 3 && currentIdx >= 3)
-    )
+    const completed = isPaid && (i < currentIdx || (i === 6 && currentIdx === 6))
+    const current = isPaid && i === currentIdx
     steps.push({
       ...orderStatuses[i],
       completed: completed || false,
@@ -87,8 +88,7 @@ export default async function TrackOrderPage({
       confirmation_email_sent,
       logistics_provider,
       logistics_tracking_id,
-      logistics_status,
-      store_id,
+      logistics_status, logistics_estimated_delivery, logistics_metadata, store_id,
       order_items(
         id,
         quantity,
@@ -216,7 +216,33 @@ export default async function TrackOrderPage({
               ))}
             </div>
 
-            {/* Logistics Section — placeholder for Theyutes integration */}
+                        {/* Logistics Section */}
+            {order.logistics_status === 'dispatched' || order.logistics_metadata?.tracking_added_at ? (
+              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <h3 className="font-semibold text-blue-900 mb-2">?? Tracking Information</h3>
+                <p className="text-sm text-blue-800 mb-3">Your order has been booked for delivery.</p>
+                <div className="text-sm space-y-1">
+                  <p><span className="text-blue-700">Delivery Partner:</span> {order.logistics_provider || 'Theyutes'}</p>
+                  <p><span className="text-blue-700">Tracking ID:</span> <span className="font-mono">{order.logistics_tracking_id || order.logistics_metadata?.theyutes_shipment_id || 'N/A'}</span></p>
+                  {order.logistics_estimated_delivery && <p><span className="text-blue-700">ETA:</span> {order.logistics_estimated_delivery}</p>}
+                </div>
+                {order.logistics_metadata?.theyutes_tracking_url && (
+                  <div className="mt-4">
+                    <a href={order.logistics_metadata.theyutes_tracking_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-blue-600 hover:underline">
+                      View External Tracking
+                    </a>
+                  </div>
+                )}
+                <p className="text-[10px] text-blue-400 mt-4 text-right">Tracking provided by {order.logistics_provider || 'Theyutes'}</p>
+              </div>
+            ) : (
+              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">?? READY FOR DISPATCH</span>
+                </p>
+                <p className="text-sm text-gray-500 mt-2">Your order is ready for delivery and will be handed over to our logistics partner soon.</p>
+              </div>
+            )}
             {hasLogistics ? (
               <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
                 <h3 className="font-semibold text-blue-900 mb-2">📦 Logistics Tracking</h3>
@@ -255,3 +281,6 @@ export default async function TrackOrderPage({
     </div>
   )
 }
+
+
+
