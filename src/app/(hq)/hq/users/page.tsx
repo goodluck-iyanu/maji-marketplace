@@ -1,8 +1,11 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { Shield, User, Store, Eye, Search, Filter } from 'lucide-react'
-import Link from 'next/link'
-import { SearchInput } from '../components/search-input'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { User } from 'lucide-react'
 import { Pagination } from '../components/pagination'
+import UsersList from './UsersList'
+import DeleteAllUsersZone from './DeleteAllUsersZone'
+import { getDateRange } from '@/lib/date-filters'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,66 +15,129 @@ const supabaseAdmin = createAdminClient(
 )
 
 export default async function AdminUsersPage({
-  searchParams,
+  searchParams
 }: {
-  searchParams: Promise<{ q?: string; page?: string; role?: string; type?: string }>
+  searchParams: Promise<{ [key: string]: string | undefined }>
 }) {
   const params = await searchParams
-  const q = params.q || ''
-  const roleFilter = params.role || 'all'
-  const typeFilter = params.type || 'all'
-  const page = parseInt(params.page || '1', 10)
+  const page = parseInt(params.page || '1')
   const pageSize = 20
   const offset = (page - 1) * pageSize
 
-  // Fetch all admin user IDs for manual stitching
-  const { data: adminUsersData } = await supabaseAdmin.from('admin_users').select('user_id, role')
-  const adminMap = new Map()
-  adminUsersData?.forEach(a => adminMap.set(a.user_id, a.role))
+  const search = params.search || ''
+  const roleFilter = params.role || 'all'
+  const storeFilter = params.store || 'all'
+  const dateFilter = params.date || 'all'
+  const sort = params.sort || 'newest'
 
-  // Fetch profiles
+  // Identify current admin ID
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  const currentAdminId = user?.id || null
+
+  // 1. Build Select String based on role/store filters
+  // If we want ONLY admins, we inner join admin_users.
+  // If we want ONLY sellers, we inner join stores.
+  let selectString = '*, stores(id, name), admin_users(user_id)'
+  if (roleFilter === 'admin') selectString = '*, stores(id, name), admin_users!inner(user_id)'
+  if (storeFilter === 'has_store' || roleFilter === ('seller' as string)) selectString = '*, stores!inner(id, name), admin_users(user_id)'
+  // Note: if roleFilter === 'admin' AND storeFilter === 'has_store', we need both inner joins.
+  if (roleFilter === 'admin' && (storeFilter === 'has_store' || roleFilter === ('seller' as string))) {
+    selectString = '*, stores!inner(id, name), admin_users!inner(user_id)'
+  }
+
   let query = supabaseAdmin
     .from('profiles')
-    .select(`
-      id,
-      email,
-      full_name,
-      phone,
-      created_at,
-      stores(id, name, slug)
-    `, { count: 'exact' })
-  
-  if (q) {
-    query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%`)
+    .select(selectString, { count: 'exact' })
+
+  // 2. Filters that require exclusion (no store, no admin)
+  if (storeFilter === 'no_store') {
+    // PostgREST doesn't support left join "is null" filtering easily in a single string unless we do it in-memory or via view.
+    // We will fetch all and filter in memory if "no_store" or "customer" is selected, 
+    // BUT to keep pagination somewhat accurate, we'll over-fetch. 
+    // Ideally this is a DB view. We'll increase the limit.
+    query = query.limit(1000)
+  } else if (roleFilter === 'customer') {
+    query = query.limit(1000)
+  } else {
+    query = query.range(offset, offset + pageSize - 1)
+  }
+
+  // 3. Search Logic
+  if (search) {
+    const { data: matchedStores } = await supabaseAdmin
+      .from('stores')
+      .select('user_id')
+      .or(`name.ilike.%${search}%,slug.ilike.%${search}%`)
+      .limit(500)
+    
+    const matchedStoreUserIds = (matchedStores || []).map(s => s.user_id).filter(Boolean)
+    
+    const orClauses = [
+      `full_name.ilike.%${search}%`,
+      `email.ilike.%${search}%`,
+      `phone.ilike.%${search}%`
+    ]
+
+    // Only add UUID search if it's a valid UUID to prevent Postgres syntax errors
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    if (uuidRegex.test(search)) {
+      orClauses.push(`id.eq.${search}`)
+    }
+
+    if (matchedStoreUserIds.length > 0) {
+      orClauses.push(`id.in.(${matchedStoreUserIds.join(',')})`)
+    }
+    
+    query = query.or(orClauses.join(','))
+  }
+
+  // 4. Date Filter
+  if (dateFilter !== 'all') {
+    const range = getDateRange(dateFilter)
+    if (range) {
+      query = query.gte('created_at', range.start).lte('created_at', range.end)
+    }
+  }
+
+  // 5. Sorting
+  switch (sort) {
+    case 'newest': query = query.order('created_at', { ascending: false }); break;
+    case 'oldest': query = query.order('created_at', { ascending: true }); break;
+    case 'name_asc': query = query.order('full_name', { ascending: true }); break;
+    case 'name_desc': query = query.order('full_name', { ascending: false }); break;
+    default: query = query.order('created_at', { ascending: false });
   }
 
   const { data: rawProfiles, count, error } = await query
-    .order('created_at', { ascending: false })
-    .range(offset, offset + pageSize - 1)
 
   if (error) {
     console.error('[Admin Users] Error fetching profiles:', error)
   }
 
-  // Process profiles
-  let profiles = (rawProfiles || []).map(p => {
-    const adminRole = adminMap.get(p.id)
-    return {
-      ...p,
-      isAdmin: !!adminRole,
-      adminRole: adminRole || null,
-      isSeller: p.stores && (p.stores as any[]).length > 0
-    }
-  })
+  let profiles = ((rawProfiles as any[]) || []).map((p: any) => ({
+    ...p,
+    isAdmin: p.admin_users && Array.isArray(p.admin_users) ? p.admin_users.length > 0 : !!p.admin_users,
+    isSeller: p.stores && Array.isArray(p.stores) ? p.stores.length > 0 : !!p.stores
+  }))
 
-  // Apply manual filters since we stitched roles and stores array checking in memory
-  if (roleFilter === 'admin') profiles = profiles.filter(p => p.isAdmin)
-  else if (roleFilter === 'customer') profiles = profiles.filter(p => !p.isAdmin)
+  // 6. In-memory filter for exclusions (since PostgREST makes NOT EXISTS hard on joined tables)
+  if (storeFilter === 'no_store') profiles = profiles.filter(p => !p.isSeller)
+  if (roleFilter === 'customer') profiles = profiles.filter(p => !p.isAdmin)
 
-  if (typeFilter === 'seller') profiles = profiles.filter(p => p.isSeller)
-  else if (typeFilter === 'buyer') profiles = profiles.filter(p => !p.isSeller)
+  // If we overfetched due to in-memory filtering, we slice here.
+  let finalCount = count || 0
+  if (storeFilter === 'no_store' || roleFilter === 'customer') {
+    finalCount = profiles.length
+    profiles = profiles.slice(offset, offset + pageSize)
+  }
 
-  const totalPages = count ? Math.ceil(count / pageSize) : 0
+  const totalPages = Math.ceil(finalCount / pageSize)
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -84,122 +150,15 @@ export default async function AdminUsersPage({
         </div>
       </div>
 
-      {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-wrap gap-4 items-center justify-between">
-        <div className="w-full sm:w-96">
-          <SearchInput placeholder="Search by name or email..." />
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-500 font-medium">Role:</span>
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              <Link href={`?q=${q}&type=${typeFilter}&role=all`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${roleFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>All</Link>
-              <Link href={`?q=${q}&type=${typeFilter}&role=customer`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${roleFilter === 'customer' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>Customers</Link>
-              <Link href={`?q=${q}&type=${typeFilter}&role=admin`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${roleFilter === 'admin' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>Admins</Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500 font-medium">Type:</span>
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              <Link href={`?q=${q}&role=${roleFilter}&type=all`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${typeFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>All</Link>
-              <Link href={`?q=${q}&role=${roleFilter}&type=seller`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${typeFilter === 'seller' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>Sellers</Link>
-              <Link href={`?q=${q}&role=${roleFilter}&type=buyer`} className={`px-3 py-1.5 rounded-md text-xs font-semibold ${typeFilter === 'buyer' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>Buyers Only</Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-600">
-            <thead className="bg-gray-50 text-gray-900 font-medium border-b border-gray-100">
-              <tr>
-                <th className="px-6 py-4">User</th>
-                <th className="px-6 py-4">Contact</th>
-                <th className="px-6 py-4">Role</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Joined</th>
-                <th className="px-6 py-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {profiles.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    No users found matching your criteria.
-                  </td>
-                </tr>
-              ) : (
-                profiles.map((profile: any) => (
-                  <tr key={profile.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold text-lg">
-                          {profile.full_name?.charAt(0)?.toUpperCase() || <User className="w-5 h-5" />}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-bold text-gray-900 truncate">{profile.full_name || 'No Name'}</p>
-                          <p className="text-xs text-gray-500 font-mono truncate">{profile.id}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-gray-900">{profile.email}</p>
-                      {profile.phone && <p className="text-xs text-gray-500 mt-1">{profile.phone}</p>}
-                    </td>
-                    <td className="px-6 py-4">
-                      {profile.isAdmin ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">
-                          <Shield className="w-3 h-3" />
-                          Admin
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                          Customer
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {profile.isSeller ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 w-max">
-                            <Store className="w-3 h-3" />
-                            Seller
-                          </span>
-                          <span className="text-[10px] text-gray-500 font-medium truncate max-w-[120px]">
-                            {(profile.stores as any[])[0]?.name}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">Buyer only</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-xs font-medium">
-                      {new Date(profile.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/hq/users/${profile.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 font-semibold text-xs transition-colors shadow-sm"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <UsersList profiles={profiles} currentAdminId={currentAdminId} />
 
       {totalPages > 1 && (
-        <div className="mt-6">
+        <div className="mt-6 border-t border-gray-100 pt-4">
           <Pagination totalPages={totalPages} currentPage={page} />
         </div>
       )}
+
+      <DeleteAllUsersZone />
     </div>
   )
 }

@@ -1,7 +1,10 @@
 import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { User, Store, Shield, Calendar, Mail, Phone, ShoppingBag, Package, MapPin, Wallet, ArrowUpRight } from 'lucide-react'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { User, Mail, Phone, Calendar, Store, ArrowLeft, Shield, Package, ShoppingBag, Wallet, ArrowUpRight } from 'lucide-react'
+import DeleteUserButton from './DeleteUserButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,78 +14,104 @@ const supabaseAdmin = createAdminClient(
 )
 
 export default async function AdminUserDetailsPage({
-  params,
+  params
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
 
-  // 1. Fetch Profile
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('*')
+    .select(`
+      *,
+      admin_users(user_id)
+    `)
     .eq('id', id)
     .single()
 
   if (!profile) notFound()
 
-  // 2. Fetch Admin status
-  const { data: adminRole } = await supabaseAdmin
-    .from('admin_users')
-    .select('role')
+  const isAdmin = profile.admin_users && Array.isArray(profile.admin_users) ? profile.admin_users.length > 0 : !!profile.admin_users
+
+  // Identify current admin ID
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll() { return cookieStore.getAll() } } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  const currentAdminId = user?.id || null
+
+  const { data: store } = await supabaseAdmin
+    .from('stores')
+    .select('*')
     .eq('user_id', id)
     .single()
 
-  const isAdmin = !!adminRole
-
-  // 3. Fetch Store Info
-  const { data: stores } = await supabaseAdmin
-    .from('stores')
-    .select('id, name, slug, is_active, created_at, store_category')
-    .eq('user_id', id)
-
-  const store = stores && stores.length > 0 ? stores[0] : null
   const isSeller = !!store
 
-  // 4. Fetch Buyer Orders
-  // We match customer_email since orders table uses email for the guest/customer reference
   const { data: buyerOrders } = await supabaseAdmin
     .from('orders')
-    .select('id, payment_reference, total_amount, payment_status, created_at, fulfillment_status')
+    .select('*')
     .eq('customer_email', profile.email)
     .order('created_at', { ascending: false })
 
-  const totalSpent = buyerOrders?.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + Number(o.total_amount), 0) || 0
+  const totalSpent = (buyerOrders || [])
+    .filter(o => o.payment_status === 'paid')
+    .reduce((sum, o) => sum + Number(o.total_amount || 0), 0)
 
-  // 5. If Seller, fetch seller metrics
-  let sellerMetrics: { productsCount: number, totalSales: number, pendingBalance: number, payoutAccount: any } = { productsCount: 0, totalSales: 0, pendingBalance: 0, payoutAccount: null }
-  if (store) {
-    // Products
-    const { count: pCount } = await supabaseAdmin.from('products').select('*', { count: 'exact', head: true }).eq('store_id', store.id)
-    sellerMetrics.productsCount = pCount || 0
+  let sellerMetrics = {
+    productsCount: 0,
+    totalSales: 0,
+    pendingBalance: 0,
+    payoutAccount: null as any
+  }
 
-    // Payout Account
-    const { data: pAcc } = await supabaseAdmin.from('payout_accounts').select('*').eq('store_id', store.id).single()
-    sellerMetrics.payoutAccount = pAcc
+  if (isSeller) {
+    const { count } = await supabaseAdmin
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('store_id', store.id)
+    sellerMetrics.productsCount = count || 0
 
-    // Financials
-    const { data: transactions } = await supabaseAdmin.from('financial_transactions').select('amount, transaction_type, status').eq('store_id', store.id)
-    let earned = 0
-    let paid = 0
-    transactions?.forEach(t => {
-      if (t.transaction_type === 'product_sale') earned += Number(t.amount)
-      else if (t.transaction_type === 'payout' && t.status !== 'failed') paid += Math.abs(Number(t.amount))
-    })
-    sellerMetrics.totalSales = earned
-    sellerMetrics.pendingBalance = earned - paid
+    const { data: txs } = await supabaseAdmin
+      .from('financial_transactions')
+      .select('amount, status, transaction_type')
+      .eq('store_id', store.id)
+
+    if (txs) {
+      sellerMetrics.totalSales = txs
+        .filter(t => t.transaction_type === 'product_sale' && t.status === 'completed')
+        .reduce((sum, t) => sum + Number(t.amount), 0)
+    }
+
+    const { data: ledger } = await supabaseAdmin
+      .from('seller_ledger')
+      .select('pending_balance')
+      .eq('store_id', store.id)
+      .single()
+    if (ledger) {
+      sellerMetrics.pendingBalance = Number(ledger.pending_balance || 0)
+    }
+
+    const { data: payoutAcct } = await supabaseAdmin
+      .from('store_payout_accounts')
+      .select('*')
+      .eq('store_id', store.id)
+      .eq('is_primary', true)
+      .single()
+    sellerMetrics.payoutAccount = payoutAcct
   }
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       <div>
-        <Link href="/hq/users" className="text-blue-600 hover:underline text-sm font-semibold mb-4 inline-block">&larr; Back to Users</Link>
+        <Link href="/hq/users" className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors mb-4">
+          <ArrowLeft className="w-4 h-4" /> Back to Users Directory
+        </Link>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 font-bold text-3xl">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-2xl shrink-0">
             {profile.full_name?.charAt(0)?.toUpperCase() || <User className="w-8 h-8" />}
           </div>
           <div>
@@ -99,7 +128,7 @@ export default async function AdminUserDetailsPage({
         {/* LEFT COL: Profile & Buyer Info */}
         <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-            <h2 className="font-bold text-gray-900 flex items-center gap-2"><User className="w-4 h-4 text-gray-500"/> Profile Information</h2>
+            <h2 className="font-bold text-gray-900 flex items-center gap-2"><User className="w-4 h-4 text-gray-400"/> Profile Information</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3 text-gray-600">
                 <Mail className="w-4 h-4 text-gray-400 shrink-0"/> {profile.email}
@@ -111,6 +140,8 @@ export default async function AdminUserDetailsPage({
                 <Calendar className="w-4 h-4 text-gray-400 shrink-0"/> Joined {new Date(profile.created_at).toLocaleDateString()}
               </div>
             </div>
+
+            <DeleteUserButton user={{ ...profile, isAdmin }} store={store} currentAdminId={currentAdminId} />
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">

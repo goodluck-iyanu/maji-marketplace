@@ -1,64 +1,66 @@
-import { formatInTimeZone, toDate } from 'date-fns-tz'
+import { toDate, formatInTimeZone } from 'date-fns-tz'
+import { subDays, startOfMonth, startOfYear } from 'date-fns'
 
 const TIMEZONE = 'Africa/Lagos'
 
-export function getDateRange(dateFilter: string): { start: string, end: string } | null {
+export function getDateRange(filter: string): { start: string, end: string } | null {
   const now = new Date()
   
-  // Get current date string in Lagos timezone (YYYY-MM-DD)
-  const todayStr = formatInTimeZone(now, TIMEZONE, 'yyyy-MM-dd')
-  
-  // Parse back as midnight in Lagos timezone
-  const todayStart = toDate(`${todayStr}T00:00:00`, { timeZone: TIMEZONE })
-  const todayEnd = toDate(`${todayStr}T23:59:59.999`, { timeZone: TIMEZONE })
-  
-  const msPerDay = 24 * 60 * 60 * 1000
+  // Helper to get the start of the day in Lagos timezone
+  const getStartOfDay = (date: Date) => {
+    const formatted = formatInTimeZone(date, TIMEZONE, 'yyyy-MM-dd')
+    return toDate(`${formatted}T00:00:00`, { timeZone: TIMEZONE })
+  }
 
-  switch (dateFilter) {
+  // Helper to get the end of the day in Lagos timezone
+  const getEndOfDay = (date: Date) => {
+    const formatted = formatInTimeZone(date, TIMEZONE, 'yyyy-MM-dd')
+    return toDate(`${formatted}T23:59:59.999`, { timeZone: TIMEZONE })
+  }
+
+  switch (filter) {
     case 'today':
-      return { start: todayStart.toISOString(), end: todayEnd.toISOString() }
-    
+      return {
+        start: getStartOfDay(now).toISOString(),
+        end: getEndOfDay(now).toISOString()
+      }
     case 'yesterday': {
-      const start = new Date(todayStart.getTime() - msPerDay)
-      const end = new Date(todayEnd.getTime() - msPerDay)
-      return { start: start.toISOString(), end: end.toISOString() }
+      const yesterday = subDays(now, 1)
+      return {
+        start: getStartOfDay(yesterday).toISOString(),
+        end: getEndOfDay(yesterday).toISOString()
+      }
     }
-    
     case '7d': {
-      const start = new Date(todayStart.getTime() - (6 * msPerDay))
-      return { start: start.toISOString(), end: todayEnd.toISOString() }
+      const sevenDaysAgo = subDays(now, 7)
+      return {
+        start: getStartOfDay(sevenDaysAgo).toISOString(),
+        end: getEndOfDay(now).toISOString() // Ends today
+      }
     }
-    
     case '30d': {
-      const start = new Date(todayStart.getTime() - (29 * msPerDay))
-      return { start: start.toISOString(), end: todayEnd.toISOString() }
+      const thirtyDaysAgo = subDays(now, 30)
+      return {
+        start: getStartOfDay(thirtyDaysAgo).toISOString(),
+        end: getEndOfDay(now).toISOString()
+      }
     }
-    
     case 'this_month': {
-      const monthStr = formatInTimeZone(now, TIMEZONE, 'yyyy-MM')
-      const start = toDate(`${monthStr}-01T00:00:00`, { timeZone: TIMEZONE })
-      return { start: start.toISOString(), end: todayEnd.toISOString() }
+      const startOfM = startOfMonth(now)
+      return {
+        start: getStartOfDay(startOfM).toISOString(),
+        end: getEndOfDay(now).toISOString()
+      }
     }
-    
-    case 'last_month': {
-      // Find the first day of this month, then subtract 1 day to get last month
-      const thisMonthStr = formatInTimeZone(now, TIMEZONE, 'yyyy-MM')
-      const thisMonthStart = toDate(`${thisMonthStr}-01T00:00:00`, { timeZone: TIMEZONE })
-      
-      const lastMonthEnd = new Date(thisMonthStart.getTime() - 1)
-      const lastMonthStr = formatInTimeZone(lastMonthEnd, TIMEZONE, 'yyyy-MM')
-      const lastMonthStart = toDate(`${lastMonthStr}-01T00:00:00`, { timeZone: TIMEZONE })
-      
-      return { start: lastMonthStart.toISOString(), end: lastMonthEnd.toISOString() }
-    }
-    
     case 'this_year': {
-      const yearStr = formatInTimeZone(now, TIMEZONE, 'yyyy')
-      const start = toDate(`${yearStr}-01-01T00:00:00`, { timeZone: TIMEZONE })
-      return { start: start.toISOString(), end: todayEnd.toISOString() }
+      const startOfY = startOfYear(now)
+      return {
+        start: getStartOfDay(startOfY).toISOString(),
+        end: getEndOfDay(now).toISOString()
+      }
     }
-    
     default:
       return null
   }
 }
+
