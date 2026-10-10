@@ -173,7 +173,7 @@ export default function CartPage() {
         <p className="text-gray-500 mb-8 text-center max-w-md">Looks like you haven&apos;t added anything to your cart yet.</p>
         <Link 
           href={`/store/${storeSlug}`}
-          className="px-8 py-3 bg-[#111111] text-white rounded-full font-bold hover:bg-[#F05A28] transition-colors shadow-sm"
+          className="px-8 py-3 bg-[#F05A28] text-white rounded-full font-extrabold hover:bg-[#d94d1e] transition-colors shadow-lg shadow-[#F05A28]/25"
         >
           Continue Shopping
         </Link>
@@ -483,7 +483,7 @@ export default function CartPage() {
                     !carrierRates[selectedCarrierIndex] ||
                     isCalculatingFee
                   ))}
-                  className="w-full py-4 bg-[#111111] text-white rounded-xl font-bold text-lg hover:bg-[#F05A28] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-4 shadow-md"
+                  className="w-full py-4 bg-[#F05A28] text-white rounded-xl font-extrabold text-lg hover:bg-[#d94d1e] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-4 shadow-lg shadow-[#F05A28]/25"
                 >
                   {loading ? <MajiSpinner size={22} color="white" /> : `Pay ₦${(hasCompleteDeliveryQuote ? finalTotal : totalBeforeFee).toLocaleString()}`}
                 </button>

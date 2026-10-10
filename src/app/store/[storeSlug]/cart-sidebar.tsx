@@ -63,7 +63,7 @@ export function CartSidebar({ storeId, storeSlug }: any) {
               <p className="font-semibold text-[#111111]">Your cart is empty.</p>
               <button 
                 onClick={() => setIsCartOpen(false)}
-                className="mt-4 px-6 py-2.5 rounded-full bg-[#111111] text-white text-sm font-bold hover:bg-[#F05A28] transition-colors"
+                className="mt-4 px-6 py-2.5 rounded-full bg-[#F05A28] text-white text-sm font-extrabold hover:bg-[#d94d1e] transition-colors shadow-sm shadow-[#F05A28]/25"
               >
                 Continue Shopping
               </button>
@@ -81,7 +81,7 @@ export function CartSidebar({ storeId, storeSlug }: any) {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-bold text-[#111111] line-clamp-2">{item.name || 'Product Variant'}</h3>
-                    <p className="text-[#111111] font-extrabold mt-1">₦{item.price.toLocaleString()}</p>
+                    <p className="text-[#F05A28] font-extrabold mt-1">₦{item.price.toLocaleString()}</p>
                     
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center border border-gray-200 rounded-lg bg-[#FAF8F5]">
@@ -102,7 +102,7 @@ export function CartSidebar({ storeId, storeSlug }: any) {
           <div className="border-t border-gray-100 p-4 bg-[#FAF8F5]">
             <div className="flex justify-between items-center mb-4 text-lg font-extrabold text-[#111111]">
               <span>Total</span>
-              <span>₦{totalAmount.toLocaleString()}</span>
+              <span className="text-[#F05A28]">₦{totalAmount.toLocaleString()}</span>
             </div>
             
             {error && (
@@ -130,7 +130,7 @@ export function CartSidebar({ storeId, storeSlug }: any) {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-4 rounded-xl bg-[#111111] text-white font-bold text-lg hover:bg-[#F05A28] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-2 shadow-sm"
+                className="w-full py-4 rounded-xl bg-[#F05A28] text-white font-extrabold text-lg hover:bg-[#d94d1e] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-2 shadow-lg shadow-[#F05A28]/25"
               >
                 {loading ? <MajiSpinner size={20} color="white" /> : 'Checkout'}
               </button>

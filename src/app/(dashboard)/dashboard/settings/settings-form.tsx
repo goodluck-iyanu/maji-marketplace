@@ -229,13 +229,13 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
               <div>
                 <h4 className="font-extrabold text-sm text-[#111111]">Official Maji Storefront Palette</h4>
                 <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
-                  All Maji storefronts use the standardized Maji brand colors (Deep Obsidian <code className="font-mono text-[#111111]">#111111</code>, Maji Ember <code className="font-mono text-[#F05A28]">#F05A28</code>, and Market Alabaster <code className="font-mono text-gray-600">#FAF8F5</code>) for buyer trust and high conversion.
+                  All Maji storefronts use the standardized Maji marketplace theme (Maji Ember <code className="font-mono text-[#F05A28]">#F05A28</code> primary action buttons, Deep Obsidian <code className="font-mono text-[#111111]">#111111</code>, and Market Alabaster <code className="font-mono text-gray-600">#FAF8F5</code>) for buyer trust and high conversion.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <span className="w-7 h-7 rounded-full bg-[#F05A28] border-2 border-white shadow-xs" title="Maji Ember Primary #F05A28" />
               <span className="w-7 h-7 rounded-full bg-[#111111] border-2 border-white shadow-xs" title="Deep Obsidian #111111" />
-              <span className="w-7 h-7 rounded-full bg-[#F05A28] border-2 border-white shadow-xs" title="Maji Ember #F05A28" />
               <span className="w-7 h-7 rounded-full bg-[#FAF8F5] border-2 border-gray-200 shadow-xs" title="Market Alabaster #FAF8F5" />
             </div>
           </div>

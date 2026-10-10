@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
-import { ProductCard } from './product-card'
+import { MapPin, ShieldCheck, Zap, Truck, BadgeCheck, Store } from 'lucide-react'
 import { CartButton } from './cart-button'
+import { StorefrontCatalog } from './storefront-catalog'
 import { MajiLogo, MajiStorefrontBadge } from '@/components/brand/maji-brand'
 
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string }> }) {
@@ -51,7 +51,7 @@ export default async function StorePage({
 
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, store_settings(*), social_links(*)')
+    .select('id, name, store_category, product_type, store_settings(*), social_links(*)')
     .eq('slug', storeSlug)
     .eq('is_active', true)
     .single()
@@ -71,7 +71,7 @@ export default async function StorePage({
 
   // Unified Maji brand CSS variables across all seller storefronts
   const themeStyles = {
-    '--store-primary': '#111111',
+    '--store-primary': '#F05A28',
     '--store-secondary': '#ffffff',
   } as React.CSSProperties
 
@@ -92,116 +92,132 @@ export default async function StorePage({
 
   return (
     <div style={themeStyles} className="min-h-screen bg-[#FAF8F5] text-[#111111] font-sans flex flex-col">
-      {/* Sticky Top Bar */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200/80 py-3.5 px-4 sm:px-8">
+      {/* Jumia / Temu / Alibaba Style Top Trust & Promo Bar */}
+      <div className="bg-[#111111] text-white text-[11px] sm:text-xs font-semibold py-2 px-4 border-b border-white/10">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
+          <div className="flex items-center gap-1.5 text-[#FF8559]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+            <span>100% Maji Buyer Protection</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 text-gray-300">
+            <Zap className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+            <span>Direct Official Store Pricing · Instant Paystack Checkout</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-gray-300">
+            <Truck className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+            <span>{store.product_type === 'digital' ? 'Instant Digital Delivery' : 'Tracked Delivery Available'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Top Store Navigation Bar */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/80 py-3 px-4 sm:px-8 shadow-2xs">
         <div className="max-w-6xl mx-auto flex justify-between items-center gap-4">
           <Link href={`/store/${storeSlug}`} className="flex items-center gap-2.5 group min-w-0">
-            <span className="w-8 h-8 rounded-xl bg-[#FAF8F5] border border-[#F05A28]/20 flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-xl bg-[#F05A28]/10 border border-[#F05A28]/25 flex items-center justify-center shrink-0">
               <MajiLogo variant="symbol-small" colorway="ember-orange" size={20} />
             </span>
-            <span className="font-extrabold tracking-tight text-lg text-[#111111] group-hover:text-[#F05A28] transition-colors truncate">
-              {store.name}
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-extrabold tracking-tight text-base sm:text-lg text-[#111111] group-hover:text-[#F05A28] transition-colors truncate">
+                {store.name}
+              </span>
+              <BadgeCheck className="w-4 h-4 text-[#F05A28] shrink-0" />
+            </div>
           </Link>
-          <CartButton primaryColor="#111111" secondaryColor="#ffffff" />
+          <CartButton primaryColor="#F05A28" secondaryColor="#ffffff" />
         </div>
       </header>
 
-      {settings.banner_url && (
-        <div className="w-full h-48 sm:h-64 bg-gray-200 relative overflow-hidden">
-          <img src={settings.banner_url} alt={`${store.name} Banner`} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-        </div>
-      )}
-
-      {/* Hero / Profile Section */}
-      <section className="relative overflow-hidden border-b border-gray-200/70 bg-white">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-[640px] h-[260px] rounded-full bg-[#F05A28]/8 blur-3xl"
-        />
-        <div className={`max-w-3xl mx-auto px-4 pb-10 text-center flex flex-col items-center relative z-10 ${settings.banner_url ? '-mt-12 sm:-mt-16' : 'pt-10 sm:pt-12'}`}>
-          {settings.logo_url ? (
-            <img
-              src={settings.logo_url}
-              alt={`${store.name} Logo`}
-              className="h-24 w-24 sm:h-28 sm:w-28 object-cover rounded-3xl shadow-xl shadow-black/8 border-4 border-white mb-4 bg-white"
+      {/* Alibaba / Jumia Official Store Banner & Profile Card */}
+      <section className="relative overflow-hidden border-b border-gray-200/80 bg-white">
+        {settings.banner_url ? (
+          <div className="w-full h-36 sm:h-52 bg-gray-900 relative overflow-hidden">
+            <img src={settings.banner_url} alt={`${store.name} Banner`} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
+          </div>
+        ) : (
+          <div className="w-full h-24 sm:h-32 bg-gradient-to-r from-[#111111] via-[#26140d] to-[#F05A28] relative overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="absolute -right-10 -top-10 w-64 h-64 rounded-full bg-[#FF8559]/25 blur-2xl"
             />
-          ) : (
-            <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-3xl shadow-xl shadow-[#F05A28]/10 border-4 border-white mb-4 bg-[#FAF8F5] flex items-center justify-center">
-              <span className="text-3xl sm:text-4xl text-[#F05A28] font-extrabold">{store.name.charAt(0).toUpperCase()}</span>
-            </div>
-          )}
-          
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111] mb-2.5">
-            {store.name}
-          </h1>
-          
-          {settings.about_text && (
-            <p className="text-gray-600 leading-relaxed max-w-xl mx-auto text-sm sm:text-base mb-5 whitespace-pre-wrap">
-              {settings.about_text}
-            </p>
-          )}
+          </div>
+        )}
 
-          {/* Social Links Pills */}
-          {store.social_links && store.social_links.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-2.5 mb-3">
-              {store.social_links.map((link: any) => (
-                <a 
-                  key={link.platform} 
-                  href={formatSocialUrl(link.platform, link.url)} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="px-4 py-1.5 rounded-full border border-gray-200 bg-[#FAF8F5] text-[#111111] hover:bg-[#F05A28] hover:text-white hover:border-[#F05A28] transition-all text-xs sm:text-sm font-bold capitalize shadow-2xs"
-                >
-                  {link.platform}
-                </a>
-              ))}
-            </div>
-          )}
-          
-          {settings.address && (
-            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#FAF8F5] border border-gray-200/80 text-xs sm:text-sm text-gray-600 mt-1 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
-              <span>{settings.address}</span>
-            </div>
-          )}
-        </div>
-      </section>
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 pb-6 relative z-10 -mt-10 sm:-mt-12">
+          <div className="bg-white rounded-2xl border border-gray-200/90 shadow-md p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start sm:items-center gap-4">
+              {settings.logo_url ? (
+                <img
+                  src={settings.logo_url}
+                  alt={`${store.name} Logo`}
+                  className="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded-2xl shadow-md border-2 border-white bg-white shrink-0"
+                />
+              ) : (
+                <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl shadow-md border-2 border-white bg-gradient-to-br from-[#F05A28] to-[#FF8559] flex items-center justify-center shrink-0">
+                  <span className="text-2xl sm:text-3xl text-white font-black">{store.name.charAt(0).toUpperCase()}</span>
+                </div>
+              )}
 
-      <main className="max-w-6xl w-full mx-auto py-10 px-3 sm:py-14 sm:px-8 flex-1">
-        <div className="flex items-center justify-between mb-6 px-1">
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-lg sm:text-xl font-extrabold text-[#111111] tracking-tight">Latest Products</h2>
-            {products && products.length > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-600">
-                {products.length}
-              </span>
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#111111]">
+                    {store.name}
+                  </h1>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#F05A28]/10 text-[#F05A28] text-[11px] font-extrabold">
+                    <Store className="w-3 h-3" />
+                    Official Store
+                  </span>
+                  {store.store_category && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF8F5] border border-gray-200 text-gray-600 text-[11px] font-bold">
+                      {store.store_category}
+                    </span>
+                  )}
+                </div>
+
+                {settings.about_text && (
+                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 max-w-2xl mb-2">
+                    {settings.about_text}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                  {settings.address && (
+                    <span className="inline-flex items-center gap-1 text-gray-600">
+                      <MapPin className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+                      <span>{settings.address}</span>
+                    </span>
+                  )}
+                  <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>Verified Maji Merchant</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Links Pills */}
+            {store.social_links && store.social_links.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                {store.social_links.map((link: any) => (
+                  <a
+                    key={link.platform}
+                    href={formatSocialUrl(link.platform, link.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-[#FAF8F5] border border-gray-200 text-[#111111] hover:bg-[#F05A28] hover:text-white hover:border-[#F05A28] transition-all text-xs font-bold capitalize"
+                  >
+                    {link.platform}
+                  </a>
+                ))}
+              </div>
             )}
           </div>
         </div>
-        
-        {(!products || products.length === 0) ? (
-          <div className="py-16 px-4 text-center bg-white rounded-3xl border border-gray-200/80 shadow-xs max-w-lg mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-[#FAF8F5] border border-[#F05A28]/20 flex items-center justify-center mx-auto mb-4">
-              <MajiLogo variant="symbol" colorway="ember-duotone-light" size={38} animation="bounce" />
-            </div>
-            <h3 className="text-lg font-extrabold text-[#111111] mb-1">No products published yet</h3>
-            <p className="text-sm text-gray-500">This store is setting up its catalog. Check back soon for new arrivals!</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
-            {products.map(product => (
-              <ProductCard 
-                key={product.id} 
-                storeSlug={storeSlug} 
-                product={product} 
-                primaryColor="#111111"
-                secondaryColor="#ffffff"
-              />
-            ))}
-          </div>
-        )}
+      </section>
+
+      <main className="max-w-6xl w-full mx-auto py-6 px-3 sm:py-8 sm:px-8 flex-1">
+        <StorefrontCatalog storeSlug={storeSlug} products={products || []} />
       </main>
 
       <footer className="py-10 bg-white border-t border-gray-200/80 text-center text-sm text-gray-500 flex flex-col items-center gap-3">
@@ -213,4 +229,3 @@ export default async function StorePage({
     </div>
   )
 }
-

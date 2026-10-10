@@ -22,7 +22,7 @@ export default async function StoreLayout({
     <CartProvider storeSlug={storeSlug}>
       {children}
       {store && (
-        <FloatingCart primaryColor="#111111" secondaryColor="#ffffff" storeSlug={storeSlug} />
+        <FloatingCart primaryColor="#F05A28" secondaryColor="#ffffff" storeSlug={storeSlug} />
       )}
     </CartProvider>
   )
