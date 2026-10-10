@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import NextTopLoader from 'nextjs-toploader';
+import { MajiNavigationLoader } from "@/components/brand/maji-navigation-loader";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -67,6 +68,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextTopLoader color="#F05A28" showSpinner={false} height={3} shadow="0 0 10px #F05A28,0 0 5px #FF8559" />
+        <MajiNavigationLoader />
         {children}
       </body>
     </html>

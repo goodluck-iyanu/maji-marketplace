@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Building, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Building, CheckCircle2, AlertCircle } from 'lucide-react'
 import { getBanks, resolveAccount, connectBankAccount } from '../actions'
 import { SubmitButton } from './submit-button'
+import { MajiSpinner } from '@/components/brand/maji-brand'
 
 export function ConnectBankForm() {
   const [banks, setBanks] = useState<any[]>([])
@@ -98,7 +99,7 @@ export function ConnectBankForm() {
                 placeholder="Automatically resolved"
               />
               <div className="absolute right-3 top-2.5">
-                {isResolving && <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />}
+                {isResolving && <MajiSpinner size={18} color="ember" />}
                 {accountName && !isResolving && <CheckCircle2 className="h-5 w-5 text-green-500" />}
                 {resolveError && !isResolving && <AlertCircle className="h-5 w-5 text-red-500" />}
               </div>

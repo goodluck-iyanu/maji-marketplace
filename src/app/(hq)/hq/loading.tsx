@@ -1,14 +1,13 @@
 import { MajiPageLoader } from '@/components/brand/maji-brand'
 
-export default function HQLoading() {
+export default function HqSubRouteLoading() {
   return (
     <MajiPageLoader
-      animation="pulse"
+      animation="trace"
       theme="dark"
       label="Loading Maji HQ..."
-      sublabel="Synchronizing marketplace telemetry & ledger"
+      sublabel="Syncing live marketplace operations & ledger"
       fullScreen={false}
     />
   )
 }
-

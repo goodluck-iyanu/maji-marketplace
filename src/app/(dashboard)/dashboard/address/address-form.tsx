@@ -2,8 +2,8 @@
 
 import { useActionState } from 'react'
 import { changePickupAddressAction } from './actions'
-import { Loader2 } from 'lucide-react'
 import TerminalAddressForm from '@/components/TerminalAddressForm'
+import { MajiSpinner } from '@/components/brand/maji-brand'
 
 interface PickupDetails {
   pickup_address: string | null
@@ -82,9 +82,9 @@ export function AddressForm({ store }: { store: PickupDetails }) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full bg-black text-white rounded-lg px-4 py-3 font-medium disabled:opacity-50 hover:bg-gray-800 transition-colors flex justify-center items-center"
+        className="w-full bg-[#111111] text-white rounded-xl px-4 py-3 font-bold disabled:opacity-50 hover:bg-[#F05A28] transition-colors flex justify-center items-center gap-2"
       >
-        {isPending ? <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Updating Pickup Location...</> : 'Verify and Update Pickup Location'}
+        {isPending ? <><MajiSpinner size={18} color="white" />Updating Pickup Location...</> : 'Verify and Update Pickup Location'}
       </button>
     </form>
   )

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { NG_STATES, NG_STATES_CITIES } from '@/lib/ng-cities'
-import { MapPin, Loader2, Search, Check } from 'lucide-react'
+import { MapPin, Search, Check } from 'lucide-react'
+import { MajiSpinner } from '@/components/brand/maji-brand'
 
 export interface TerminalAddressData {
   firstName: string;
@@ -398,7 +399,7 @@ export default function TerminalAddressForm({ type, defaultValues, onChange, hid
 
         {showSuggestions && isSearching && addressQuery.length >= 4 && addressSuggestions.length === 0 && (
            <div className="absolute z-50 w-full bg-white border border-gray-200 shadow-xl rounded-lg mt-1 px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-             <Loader2 className="w-4 h-4 animate-spin" /> Searching map data...
+             <MajiSpinner size={16} color="ember" /> Searching map data...
            </div>
         )}
         

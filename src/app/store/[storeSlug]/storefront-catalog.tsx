@@ -272,3 +272,4 @@ export function StorefrontCatalog({ storeSlug, products }: StorefrontCatalogProp
     </div>
   )
 }
+
