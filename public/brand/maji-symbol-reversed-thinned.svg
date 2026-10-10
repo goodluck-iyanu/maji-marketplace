@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Storefront Basket Smile (Reversed Optical Cut)</title>
+  <g id="symbol">
+    <path id="awning" fill="#FFFFFF" d="M28 84 L80 32 H100 L128 60 L156 32 H176 L228 84 V90 A34 34 0 0 1 160 90 V102 A32 32 0 0 1 96 102 V90 A34 34 0 0 1 28 90 Z"/>
+    <path id="smile" fill="#FFFFFF" d="M50 142 H84 V146 A44 44 0 0 0 172 146 V142 H206 V146 A78 78 0 0 1 50 146 Z"/>
+  </g>
+</svg>

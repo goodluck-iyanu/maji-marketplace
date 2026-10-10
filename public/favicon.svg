@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Adaptive Light/Dark Favicon (Storefront Basket Smile)</title>
+  <style>
+    #awning { fill: #F05A28; }
+    #smile { fill: #111111; }
+    @media (prefers-color-scheme: dark) {
+      #awning { fill: #F05A28; }
+      #smile { fill: #FFFFFF; }
+    }
+  </style>
+  <g id="symbol">
+    <path id="awning" d="M28 80 L76 32 H100 L128 60 L156 32 H180 L228 80 V88 A34 34 0 0 1 160 88 V98 A32 32 0 0 1 96 98 V88 A34 34 0 0 1 28 88 Z"/>
+    <path id="smile" d="M48 144 H88 V144 A40 40 0 0 0 168 144 V144 H208 V144 A80 80 0 0 1 48 144 Z"/>
+  </g>
+</svg>
+

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Loading Animation 02: Basket Smile Rocker</title>
+  <style>
+    #awning {
+      transform-box: fill-box;
+      transform-origin: 50% 50%;
+      animation: awningFloat 1.6s ease-in-out infinite;
+    }
+    #smile {
+      transform-box: fill-box;
+      transform-origin: 50% 0%;
+      animation: smileRock 1.6s ease-in-out infinite;
+    }
+    @keyframes awningFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+    @keyframes smileRock {
+      0%, 100% { transform: rotate(-9deg) translateY(2px); }
+      50% { transform: rotate(9deg) translateY(2px); }
+    }
+  </style>
+  <g id="symbol">
+    <path id="awning" fill="#F05A28" d="M28 84 L80 32 H100 L128 60 L156 32 H176 L228 84 V92 A34 34 0 0 1 160 92 V104 A32 32 0 0 1 96 104 V92 A34 34 0 0 1 28 92 Z"/>
+    <path id="smile" fill="#111111" d="M48 140 H84 V144 A44 44 0 0 0 172 144 V140 H208 V144 A80 80 0 0 1 48 144 Z"/>
+  </g>
+</svg>

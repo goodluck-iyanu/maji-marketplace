@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title">
+  <title id="title">Maji — Storefront Basket Smile (Vertical Stacked Lockup)</title>
+  <g id="symbol">
+    <path id="awning" fill="#F05A28" d="M156 96 L208 44 H228 L256 72 L284 44 H304 L356 96 V104 A34 34 0 0 1 288 104 V116 A32 32 0 0 1 224 116 V104 A34 34 0 0 1 156 104 Z"/>
+    <path id="smile" fill="#F05A28" d="M176 152 H212 V156 A44 44 0 0 0 300 156 V152 H336 V156 A80 80 0 0 1 176 156 Z"/>
+  </g>
+  <g id="wordmark">
+    <path id="letter-m" fill="#F05A28" d="M32 436 V360 A32 32 0 0 1 64 328 H156 A32 32 0 0 1 188 360 V436 H160 V364 A18 18 0 0 0 124 364 V436 H96 V364 A18 18 0 0 0 60 364 V436 Z"/>
+    <path id="letter-a" fill="#F05A28" fill-rule="evenodd" d="M305 328 H335 V436 H305 V426 A55 55 0 1 1 305 338 Z M274 357 A25 25 0 1 0 274 407 A25 25 0 1 0 274 357 Z"/>
+    <path id="letter-j" fill="#F05A28" d="M382 328 H412 V428 A40 40 0 0 1 372 468 H354 V438 H372 A10 10 0 0 0 382 428 Z"/>
+    <path id="letter-i" fill="#F05A28" d="M450 328 H480 V436 H450 Z"/>
+    <path id="ji-arc" fill="#F05A28" d="M382 316 A49 49 0 0 1 480 316 H450 A19 19 0 0 0 412 316 Z"/>
+  </g>
+</svg>

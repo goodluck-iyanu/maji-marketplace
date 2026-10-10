@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, Clock, Package } from 'lucide-react'
+import { Clock, Package } from 'lucide-react'
 import { OrderSuccess } from './order-success'
 import { ClearCartListener } from './clear-cart'
+import { MajiStorefrontBadge } from '@/components/brand/maji-brand'
 
 export default async function OrderConfirmationPage({
   params,
@@ -42,9 +43,9 @@ export default async function OrderConfirmationPage({
   const hasDigitalProducts = order.order_items.some((item: any) => item.products.is_digital)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-16 px-4">
+    <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center py-16 px-4">
       <ClearCartListener storeSlug={storeSlug} />
-      <div className="max-w-2xl w-full bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+      <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl shadow-black/[0.03] border border-gray-200/80 p-8">
           {isPaid ? (
             <OrderSuccess storeSlug={storeSlug} autoRedirectSeconds={hasDigitalProducts ? 30 : 5} />
           ) : (
@@ -52,15 +53,15 @@ export default async function OrderConfirmationPage({
               <div className="h-16 w-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mb-4">
                 <Clock className="h-8 w-8" />
               </div>
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">Payment Pending</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight text-[#111111]">Payment Pending</h1>
               <p className="text-gray-500 mt-2">
-                Order reference: <span className="font-mono text-gray-900">{order.payment_reference}</span>
+                Order reference: <span className="font-mono text-[#111111] font-semibold">{order.payment_reference}</span>
               </p>
             </div>
           )}
         
         <div className="border-t border-gray-100 pt-8">
-          <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
+          <h2 className="font-extrabold text-lg text-[#111111] mb-4">Order Summary</h2>
           <div className="space-y-4">
             {order.order_items.map((item: any) => {
               const isDigital = item.products.is_digital
@@ -68,16 +69,16 @@ export default async function OrderConfirmationPage({
               return (
                 <div key={item.id} className="flex justify-between items-center py-2">
                   <div className="flex items-center">
-                    <Package className="h-5 w-5 text-gray-400 mr-3" />
+                    <Package className="h-5 w-5 text-[#F05A28] mr-3" />
                     <div>
-                      <p className="font-medium text-gray-900">{item.products.name}</p>
+                      <p className="font-bold text-[#111111]">{item.products.name}</p>
                       <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                       
                       {isDigital && isPaid && (
                         <div className="mt-2">
                           <a 
                             href={`/api/download/${item.id}`}
-                            className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-black rounded-md hover:bg-gray-800 transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 text-xs font-bold text-white bg-[#111111] rounded-lg hover:bg-[#F05A28] transition-colors"
                           >
                             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                             Download Ebook
@@ -86,7 +87,7 @@ export default async function OrderConfirmationPage({
                       )}
                     </div>
                   </div>
-                  <div className="font-medium text-gray-900">
+                  <div className="font-bold text-[#111111]">
                     ₦{item.price_at_purchase.toLocaleString()}
                   </div>
                 </div>
@@ -94,15 +95,18 @@ export default async function OrderConfirmationPage({
             })}
           </div>
 
-          <div className="mt-8 border-t border-gray-100 pt-4 flex justify-between items-center font-bold text-lg">
+          <div className="mt-8 border-t border-gray-100 pt-4 flex justify-between items-center font-extrabold text-lg text-[#111111]">
             <span>Total Paid</span>
             <span>₦{order.total_amount.toLocaleString()}</span>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gray-100 flex justify-center">
-          <Link href={`/store/${storeSlug}`} className="text-black font-medium hover:underline">
-            Return to {store.name}
+        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center gap-4">
+          <Link href={`/store/${storeSlug}`} className="text-[#111111] font-bold hover:text-[#F05A28] transition-colors">
+            ← Return to {store.name}
+          </Link>
+          <Link href="/" className="inline-block hover:opacity-85 transition-opacity">
+            <MajiStorefrontBadge height={30} />
           </Link>
         </div>
       </div>

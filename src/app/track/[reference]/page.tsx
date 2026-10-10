@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { MajiLogo, MajiStorefrontBadge } from '@/components/brand/maji-brand'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -104,12 +105,12 @@ export default async function TrackOrderPage({
   // Only show tracking for paid orders
   if (order.payment_status !== 'paid') {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-        <div className="max-w-lg w-full bg-white rounded-2xl shadow-sm border p-8 text-center">
-          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⏳</span>
+      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-4">
+        <div className="max-w-lg w-full bg-white rounded-3xl shadow-sm border border-gray-200/80 p-8 text-center">
+          <div className="w-16 h-16 bg-[#FAF8F5] border border-[#F05A28]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <MajiLogo variant="symbol" colorway="ember-duotone-light" size={38} animation="pulse" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">Payment Pending</h1>
+          <h1 className="text-2xl font-extrabold text-[#111111] mb-2">Payment Pending</h1>
           <p className="text-gray-500">This order has not been paid yet. Tracking will be available once payment is confirmed.</p>
           <p className="text-sm text-gray-400 mt-4 font-mono">{reference}</p>
         </div>
@@ -133,58 +134,62 @@ export default async function TrackOrderPage({
   const hasLogistics = !!(order.logistics_provider && order.logistics_tracking_id)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FAF8F5]">
       {/* Header */}
-      <header className="bg-black text-white">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-extrabold tracking-tight">maji</Link>
-          <span className="text-sm text-gray-400">Order Tracking</span>
+      <header className="bg-[#111111] text-white border-b border-white/10">
+        <div className="max-w-3xl mx-auto px-4 py-5 flex items-center justify-between">
+          <Link href="/" className="flex items-center">
+            <MajiLogo variant="horizontal" colorway="ember-duotone-dark" size={32} />
+          </Link>
+          <span className="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-white/10 text-gray-300">
+            Order Tracking
+          </span>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         {/* Order Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm border p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 mb-6">
           <div className="flex items-start justify-between flex-wrap gap-4">
             <div>
               <p className="text-sm text-gray-500">Order Reference</p>
-              <p className="text-lg font-bold font-mono text-gray-900">{order.payment_reference}</p>
+              <p className="text-lg font-extrabold font-mono text-[#111111]">{order.payment_reference}</p>
             </div>
             <div className="text-right">
-              <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+              <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Paid</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-100">
             <div>
               <p className="text-xs text-gray-500">Date</p>
-              <p className="text-sm font-medium">{new Date(order.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+              <p className="text-sm font-semibold text-[#111111]">{new Date(order.created_at).toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Store</p>
-              <p className="text-sm font-medium">{store?.name || 'Maji Store'}</p>
+              <p className="text-sm font-semibold text-[#111111]">{store?.name || 'Maji Store'}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Total</p>
-              <p className="text-sm font-bold">₦{Number(order.total_amount).toLocaleString()}</p>
+              <p className="text-sm font-extrabold text-[#111111]">₦{Number(order.total_amount).toLocaleString()}</p>
             </div>
             <div>
               <p className="text-xs text-gray-500">Status</p>
-              <p className="text-sm font-medium capitalize">{(order.fulfillment_status || 'processing').replace(/_/g, ' ')}</p>
+              <p className="text-sm font-semibold text-[#F05A28] capitalize">{(order.fulfillment_status || 'processing').replace(/_/g, ' ')}</p>
             </div>
           </div>
         </div>
 
         {/* Items */}
-        <div className="bg-white rounded-2xl shadow-sm border p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">Items Ordered</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 mb-6">
+          <h2 className="text-lg font-extrabold text-[#111111] mb-4">Items Ordered</h2>
           <div className="space-y-4">
             {(order.order_items as any[]).map((item: any) => (
               <div key={item.id} className="flex justify-between items-start py-3 border-b border-gray-50 last:border-0">
                 <div>
-                  <p className="font-semibold text-gray-900">{item.products?.name || 'Product'}</p>
+                  <p className="font-bold text-[#111111]">{item.products?.name || 'Product'}</p>
                   <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                 </div>
-                <p className="font-bold text-gray-900">₦{(item.price_at_purchase * item.quantity).toLocaleString()}</p>
+                <p className="font-extrabold text-[#111111]">₦{(item.price_at_purchase * item.quantity).toLocaleString()}</p>
               </div>
             ))}
           </div>
@@ -192,23 +197,23 @@ export default async function TrackOrderPage({
 
         {/* Timeline — only for physical delivery */}
         {order.delivery_method === 'delivery' && (
-          <div className="bg-white rounded-2xl shadow-sm border p-6 mb-6">
-            <h2 className="text-lg font-bold mb-6">Order Status</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 mb-6">
+            <h2 className="text-lg font-extrabold text-[#111111] mb-6">Order Status</h2>
             <div className="relative">
               {timeline.map((step, i) => (
                 <div key={i} className="flex gap-4 mb-8 last:mb-0">
                   <div className="flex flex-col items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                      step.completed ? 'bg-green-500 text-white' : step.current ? 'bg-blue-500 text-white animate-pulse' : 'bg-gray-200 text-gray-400'
+                      step.completed ? 'bg-emerald-500 text-white' : step.current ? 'bg-[#F05A28] text-white animate-pulse shadow-md shadow-[#F05A28]/25' : 'bg-gray-200 text-gray-400'
                     }`}>
                       {step.completed ? '✓' : i + 1}
                     </div>
                     {i < timeline.length - 1 && (
-                      <div className={`w-0.5 flex-1 mt-2 ${step.completed ? 'bg-green-300' : 'bg-gray-200'}`} />
+                      <div className={`w-0.5 flex-1 mt-2 ${step.completed ? 'bg-emerald-300' : 'bg-gray-200'}`} />
                     )}
                   </div>
                   <div className="pt-1">
-                    <p className={`font-semibold ${step.completed || step.current ? 'text-gray-900' : 'text-gray-400'}`}>{step.label}</p>
+                    <p className={`font-bold ${step.completed || step.current ? 'text-[#111111]' : 'text-gray-400'}`}>{step.label}</p>
                     <p className={`text-sm mt-1 ${step.completed || step.current ? 'text-gray-600' : 'text-gray-400'}`}>{step.description}</p>
                     {step.timestamp && <p className="text-xs text-gray-400 mt-1">{new Date(step.timestamp).toLocaleString('en-NG')}</p>}
                   </div>
@@ -216,45 +221,45 @@ export default async function TrackOrderPage({
               ))}
             </div>
 
-                        {/* Logistics Section */}
+            {/* Logistics Section */}
             {order.logistics_status === 'dispatched' || order.logistics_metadata?.tracking_added_at ? (
-              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <h3 className="font-semibold text-blue-900 mb-2">?? Tracking Information</h3>
-                <p className="text-sm text-blue-800 mb-3">Your order has been booked for delivery.</p>
+              <div className="mt-6 p-4 bg-[#FAF8F5] rounded-xl border border-[#F05A28]/20">
+                <h3 className="font-bold text-[#111111] mb-2">📦 Tracking Information</h3>
+                <p className="text-sm text-gray-700 mb-3">Your order has been booked for delivery.</p>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-blue-700">Delivery Partner:</span> {order.logistics_provider || 'Theyutes'}</p>
-                  <p><span className="text-blue-700">Tracking ID:</span> <span className="font-mono">{order.logistics_tracking_id || order.logistics_metadata?.theyutes_shipment_id || 'N/A'}</span></p>
-                  {order.logistics_estimated_delivery && <p><span className="text-blue-700">ETA:</span> {order.logistics_estimated_delivery}</p>}
+                  <p><span className="text-gray-500 font-medium">Delivery Partner:</span> <span className="font-semibold text-[#111111]">{order.logistics_provider || 'Theyutes'}</span></p>
+                  <p><span className="text-gray-500 font-medium">Tracking ID:</span> <span className="font-mono font-bold text-[#111111]">{order.logistics_tracking_id || order.logistics_metadata?.theyutes_shipment_id || 'N/A'}</span></p>
+                  {order.logistics_estimated_delivery && <p><span className="text-gray-500 font-medium">ETA:</span> <span className="font-semibold text-[#111111]">{order.logistics_estimated_delivery}</span></p>}
                 </div>
                 {order.logistics_metadata?.theyutes_tracking_url && (
                   <div className="mt-4">
-                    <a href={order.logistics_metadata.theyutes_tracking_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-blue-600 hover:underline">
-                      View External Tracking
+                    <a href={order.logistics_metadata.theyutes_tracking_url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-[#F05A28] hover:underline">
+                      View External Tracking →
                     </a>
                   </div>
                 )}
-                <p className="text-[10px] text-blue-400 mt-4 text-right">Tracking provided by {order.logistics_provider || 'Theyutes'}</p>
+                <p className="text-[10px] text-gray-400 mt-4 text-right">Tracking provided by {order.logistics_provider || 'Theyutes'}</p>
               </div>
             ) : (
-              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold">?? READY FOR DISPATCH</span>
+              <div className="mt-6 p-4 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
+                <p className="text-sm text-[#111111]">
+                  <span className="font-bold">📦 READY FOR DISPATCH</span>
                 </p>
                 <p className="text-sm text-gray-500 mt-2">Your order is ready for delivery and will be handed over to our logistics partner soon.</p>
               </div>
             )}
             {hasLogistics ? (
-              <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                <h3 className="font-semibold text-blue-900 mb-2">📦 Logistics Tracking</h3>
+              <div className="mt-6 p-4 bg-[#FAF8F5] rounded-xl border border-[#F05A28]/20">
+                <h3 className="font-bold text-[#111111] mb-2">📦 Logistics Tracking</h3>
                 <div className="text-sm space-y-1">
-                  <p><span className="text-blue-700">Provider:</span> {order.logistics_provider}</p>
-                  <p><span className="text-blue-700">Tracking ID:</span> <span className="font-mono">{order.logistics_tracking_id}</span></p>
-                  {order.logistics_status && <p><span className="text-blue-700">Status:</span> {order.logistics_status}</p>}
+                  <p><span className="text-gray-500 font-medium">Provider:</span> <span className="font-semibold text-[#111111]">{order.logistics_provider}</span></p>
+                  <p><span className="text-gray-500 font-medium">Tracking ID:</span> <span className="font-mono font-bold text-[#111111]">{order.logistics_tracking_id}</span></p>
+                  {order.logistics_status && <p><span className="text-gray-500 font-medium">Status:</span> <span className="font-semibold text-[#111111]">{order.logistics_status}</span></p>}
                 </div>
               </div>
             ) : (
-              <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <p className="text-sm text-gray-600">
+              <div className="mt-6 p-4 bg-[#FAF8F5] rounded-xl border border-gray-200/80">
+                <p className="text-sm text-gray-700">
                   <span className="font-semibold">📦 Delivery tracking will become available once your order is handed over to our logistics partner.</span>
                 </p>
                 <p className="text-xs text-gray-400 mt-2">Real-time shipment tracking, courier details, and estimated delivery will appear here when logistics fulfillment begins.</p>
@@ -265,17 +270,20 @@ export default async function TrackOrderPage({
 
         {/* Delivery Address */}
         {addressStr && order.delivery_method === 'delivery' && (
-          <div className="bg-white rounded-2xl shadow-sm border p-6 mb-6">
-            <h2 className="text-lg font-bold mb-3">Delivery Address</h2>
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-6 mb-6">
+            <h2 className="text-lg font-extrabold text-[#111111] mb-3">Delivery Address</h2>
             <p className="text-gray-700">{addressStr}</p>
             {deliveryAddr?.landmark && <p className="text-sm text-gray-500 mt-1">Landmark: {deliveryAddr.landmark}</p>}
           </div>
         )}
 
         {/* Footer */}
-        <div className="text-center py-8">
-          <p className="text-sm text-gray-500">Need help? Contact <a href="mailto:support.hoberg@gmail.com" className="text-black font-medium hover:underline">support.hoberg@gmail.com</a></p>
-          <p className="text-xs text-gray-400 mt-2">© {new Date().getFullYear()} Maji Marketplace</p>
+        <div className="text-center py-8 flex flex-col items-center gap-3">
+          <Link href="/" className="inline-block hover:opacity-85 transition-opacity">
+            <MajiStorefrontBadge height={34} />
+          </Link>
+          <p className="text-sm text-gray-500">Need help? Contact <a href="mailto:support.hoberg@gmail.com" className="text-[#111111] font-bold hover:text-[#F05A28] transition-colors">support.hoberg@gmail.com</a></p>
+          <p className="text-xs text-gray-400">© {new Date().getFullYear()} Maji Marketplace</p>
         </div>
       </main>
     </div>

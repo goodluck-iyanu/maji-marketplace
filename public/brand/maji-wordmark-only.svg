@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 256" width="512" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Wordmark Only (Connected j-i Bridge)</title>
+  <g id="wordmark">
+    <path id="letter-m" fill="#F05A28" d="M32 192 V116 A32 32 0 0 1 64 84 H156 A32 32 0 0 1 188 116 V192 H160 V120 A18 18 0 0 0 124 120 V192 H96 V120 A18 18 0 0 0 60 120 V192 Z"/>
+    <path id="letter-a" fill="#F05A28" fill-rule="evenodd" d="M305 84 H335 V192 H305 V182 A55 55 0 1 1 305 94 Z M274 113 A25 25 0 1 0 274 163 A25 25 0 1 0 274 113 Z"/>
+    <path id="letter-j" fill="#F05A28" d="M382 84 H412 V184 A40 40 0 0 1 372 224 H354 V194 H372 A10 10 0 0 0 382 184 Z"/>
+    <path id="letter-i" fill="#F05A28" d="M450 84 H480 V192 H450 Z"/>
+    <path id="ji-arc" fill="#F05A28" d="M382 72 A49 49 0 0 1 480 72 H450 A19 19 0 0 0 412 72 Z"/>
+  </g>
+</svg>

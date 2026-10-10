@@ -1,10 +1,12 @@
-import { Loader2 } from 'lucide-react'
+import { MajiPageLoader } from '@/components/brand/maji-brand'
 
-export default function GlobalLoading() {
+export default function Loading() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-      <Loader2 className="w-12 h-12 text-[#FF7A00] animate-spin mb-4" />
-      <p className="text-gray-500 font-medium animate-pulse">Loading...</p>
-    </div>
+    <MajiPageLoader
+      animation="splash"
+      label="Loading Maji..."
+      sublabel="Your marketplace, your way"
+      fullScreen={true}
+    />
   )
 }

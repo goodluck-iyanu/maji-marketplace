@@ -1,13 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Official Maji Brand Palette (Concept F · S6 Storefront Basket Smile) */
+  --maji-ember: #F05A28;
+  --maji-amber: #FF8559;
+  --maji-obsidian: #111111;
+  --maji-alabaster: #FAF8F5;
+  --maji-white: #FFFFFF;
+
+  --background: #FAF8F5;
+  --foreground: #111111;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-maji-ember: var(--maji-ember);
+  --color-maji-amber: var(--maji-amber);
+  --color-maji-obsidian: var(--maji-obsidian);
+  --color-maji-alabaster: var(--maji-alabaster);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -15,6 +26,72 @@
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection styling in Maji Ember Orange */
+::selection {
+  background-color: rgba(240, 90, 40, 0.16);
+  color: #111111;
+}
+
+/* Magic UI & Motion-inspired subtle patterns & animations */
+@keyframes majiShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes majiFloatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes majiFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.maji-shimmer-bar {
+  animation: majiShimmer 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.maji-float {
+  animation: majiFloatGentle 3.6s ease-in-out infinite;
+}
+
+.maji-fade-up {
+  animation: majiFadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.maji-dot-bg {
+  background-image: radial-gradient(rgba(17, 17, 17, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.maji-dot-bg-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.maji-grid-bg {
+  background-size: 36px 36px;
+  background-image:
+    linear-gradient(to right, rgba(17, 17, 17, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 17, 17, 0.04) 1px, transparent 1px);
 }

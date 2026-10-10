@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Loading Animation 06: Storefront Outline Trace &amp; Fill</title>
+  <style>
+    .trace-path {
+      fill: #F05A28;
+      stroke: #F05A28;
+      stroke-width: 8;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      stroke-dasharray: 680;
+      stroke-dashoffset: 680;
+      animation: traceAndFill 2.2s ease-in-out infinite;
+    }
+    #smile-trace {
+      animation-delay: 0.2s;
+    }
+    @keyframes traceAndFill {
+      0% { stroke-dashoffset: 680; fill-opacity: 0; }
+      45% { stroke-dashoffset: 0; fill-opacity: 0.15; }
+      65%, 82% { stroke-dashoffset: 0; fill-opacity: 1; }
+      100% { stroke-dashoffset: -680; fill-opacity: 0; }
+    }
+  </style>
+  <g id="symbol">
+    <path id="awning-trace" class="trace-path" d="M28 84 L80 32 H100 L128 60 L156 32 H176 L228 84 V92 A34 34 0 0 1 160 92 V104 A32 32 0 0 1 96 104 V92 A34 34 0 0 1 28 92 Z"/>
+    <path id="smile-trace" class="trace-path" d="M48 140 H84 V144 A44 44 0 0 0 172 144 V140 H208 V144 A80 80 0 0 1 48 144 Z"/>
+  </g>
+</svg>

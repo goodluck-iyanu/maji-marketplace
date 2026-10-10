@@ -1,7 +1,7 @@
 'use client'
 
 import { useCart } from '../cart-context'
-import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
+import { Minus, Plus, ShoppingBag, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { processCheckout } from '../checkout/actions'
 import { getDeliveryQuotes } from '../checkout/delivery-actions'
@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
 import TerminalAddressForm, { type TerminalAddressData } from '@/components/TerminalAddressForm'
+import { MajiLogo, MajiSpinner, MajiStorefrontBadge } from '@/components/brand/maji-brand'
 
 export default function CartPage() {
   const params = useParams()
@@ -164,13 +165,15 @@ export default function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <ShoppingBag className="h-24 w-24 mb-6 text-gray-200" />
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
-        <p className="text-gray-500 mb-8 text-center max-w-md">Looks like you haven't added anything to your cart yet.</p>
+      <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-4">
+        <div className="w-20 h-20 rounded-3xl bg-white border border-gray-200/80 flex items-center justify-center mb-6 shadow-sm">
+          <MajiLogo variant="symbol" colorway="ember-duotone-light" size={44} animation="rocker" />
+        </div>
+        <h1 className="text-2xl font-extrabold text-[#111111] mb-2">Your cart is empty</h1>
+        <p className="text-gray-500 mb-8 text-center max-w-md">Looks like you haven&apos;t added anything to your cart yet.</p>
         <Link 
           href={`/store/${storeSlug}`}
-          className="px-8 py-3 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors"
+          className="px-8 py-3 bg-[#111111] text-white rounded-full font-bold hover:bg-[#F05A28] transition-colors shadow-sm"
         >
           Continue Shopping
         </Link>
@@ -179,17 +182,18 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center">
-          <Link href={`/store/${storeSlug}`} className="text-gray-500 hover:text-black flex items-center font-medium">
-            <ArrowLeft className="h-5 w-5 mr-2" /> Back to Store
+    <div className="min-h-screen bg-[#FAF8F5] pb-20">
+      <div className="bg-white/95 backdrop-blur-md border-b border-gray-200/80 sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href={`/store/${storeSlug}`} className="text-gray-600 hover:text-[#111111] flex items-center font-semibold text-sm transition-colors">
+            <ArrowLeft className="h-4 w-4 mr-2" /> Back to Store
           </Link>
+          <MajiLogo variant="horizontal" colorway="ember-duotone-light" size={26} />
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-8">Checkout</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight text-[#111111] mb-8">Checkout</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
@@ -225,8 +229,8 @@ export default function CartPage() {
 
           {/* Checkout Form */}
           <div className="md:col-span-5">
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm sticky top-24">
-              <h2 className="text-xl font-bold mb-6">Payment Summary</h2>
+            <div className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm sticky top-24">
+              <h2 className="text-xl font-extrabold text-[#111111] mb-6">Payment Summary</h2>
               
               <div className="space-y-3 mb-6 pb-6 border-b border-gray-100">
                 <div className="flex justify-between text-gray-600">
@@ -245,8 +249,8 @@ export default function CartPage() {
                     {deliveryMethod === 'delivery' ? (
                       <span className="flex items-center">
                         {isCalculatingFee ? (
-                          <span className="flex items-center text-blue-600 font-medium animate-pulse">
-                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                          <span className="flex items-center gap-1.5 text-[#F05A28] font-semibold">
+                            <MajiSpinner size={14} color="ember" />
                             Getting live quote...
                           </span>
                         ) : selectedRate ? (
@@ -403,8 +407,8 @@ export default function CartPage() {
                             Choose Delivery Option
                           </h4>
                           {isCalculatingFee ? (
-                            <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
-                              <Loader2 className="w-4 h-4 animate-spin" />
+                            <div className="flex items-center gap-2.5 p-4 bg-[#FAF8F5] rounded-xl text-sm font-medium text-gray-600">
+                              <MajiSpinner size={16} color="ember" />
                               Getting delivery prices...
                             </div>
                           ) : carrierRates.length > 0 ? (
@@ -452,13 +456,13 @@ export default function CartPage() {
                   <div className="pt-4 border-t border-gray-100">
                      <div className="p-4 bg-gray-50 border border-gray-200 rounded-xl flex gap-3">
                        <ShieldCheck className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
-                       <p className="text-sm text-gray-700">You'll arrange delivery or pickup directly with the seller. After payment, we'll provide the seller's relevant contact and order information.</p>
+                       <p className="text-sm text-gray-700">You&apos;ll arrange delivery or pickup directly with the seller. After payment, we&apos;ll provide the seller&apos;s relevant contact and order information.</p>
                      </div>
                   </div>
                 )}
                 <div className="mt-6 mb-2">
                   <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-                    By clicking "Pay", you agree to Maji's <Link href="#" className="underline hover:text-gray-800">Terms & Conditions</Link>. 
+                    By clicking &ldquo;Pay&rdquo;, you agree to Maji&apos;s <Link href="#" className="underline hover:text-gray-800">Terms &amp; Conditions</Link>. 
                     Payments are securely processed by Paystack and settled in accordance with their T+1 payout schedule.
                   </p>
                 </div>
@@ -479,15 +483,20 @@ export default function CartPage() {
                     !carrierRates[selectedCarrierIndex] ||
                     isCalculatingFee
                   ))}
-                  className="w-full py-4 bg-black text-white rounded-lg font-bold text-lg hover:bg-gray-800 transition-colors flex justify-center items-center disabled:opacity-70 mt-4 shadow-md"
+                  className="w-full py-4 bg-[#111111] text-white rounded-xl font-bold text-lg hover:bg-[#F05A28] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-4 shadow-md"
                 >
-                  {loading ? <Loader2 className="animate-spin h-6 w-6" /> : `Pay ₦${(hasCompleteDeliveryQuote ? finalTotal : totalBeforeFee).toLocaleString()}`}
+                  {loading ? <MajiSpinner size={22} color="white" /> : `Pay ₦${(hasCompleteDeliveryQuote ? finalTotal : totalBeforeFee).toLocaleString()}`}
                 </button>
               </form>
               
-              <p className="text-xs text-center text-gray-500 mt-6 flex items-center justify-center">
-                 Secured by Paystack
-              </p>
+              <div className="mt-6 pt-4 border-t border-gray-100 flex flex-col items-center gap-2">
+                <p className="text-xs text-center text-gray-500">
+                  Secured by Paystack
+                </p>
+                <Link href="/" className="inline-block hover:opacity-85 transition-opacity">
+                  <MajiStorefrontBadge height={28} />
+                </Link>
+              </div>
             </div>
           </div>
 

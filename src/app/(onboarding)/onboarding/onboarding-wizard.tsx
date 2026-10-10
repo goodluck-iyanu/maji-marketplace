@@ -4,6 +4,7 @@ import { useState, useActionState, useEffect, useRef } from 'react'
 import { Store, Package, Box, ArrowRight, Loader2, Shirt, Smartphone, ShoppingBasket, Sparkles, Heart, Home, Car, Gem, Dumbbell, Book, Baby, Dog, Wrench, Leaf, Gamepad2, Briefcase, Palette, MoreHorizontal, Camera, Video, Users, Hash, PlaySquare, Send, MessageCircle, MapPin, Search } from 'lucide-react'
 import { createStoreAction } from './actions'
 import { NG_STATES_CITIES } from '@/lib/ng-cities'
+import { MajiLogo, MajiSpinner } from '@/components/brand/maji-brand'
 
 type Step = 'product_type' | 'store_name_logo' | 'store_category' | 'pickup_details' | 'social_links' | 'creating'
 
@@ -228,13 +229,13 @@ export function OnboardingWizard() {
 
     return (
       <div className="mb-8 text-center">
-        <div className="text-sm font-semibold text-gray-500 mb-1">
+        <div className="text-xs font-bold uppercase tracking-wider text-[#F05A28] mb-1">
           Step {currentStepNum} of {totalSteps}
         </div>
-        <div className="text-sm text-gray-400">{msg}</div>
-        <div className="w-full bg-gray-200 h-2 rounded-full mt-3 overflow-hidden">
+        <div className="text-sm text-neutral-500">{msg}</div>
+        <div className="w-full bg-neutral-100 h-2 rounded-full mt-3 overflow-hidden">
           <div 
-            className="bg-black h-full transition-all duration-300"
+            className="bg-gradient-to-r from-[#F05A28] to-[#FF8559] h-full transition-all duration-300 rounded-full"
             style={{ width: `${(currentStepNum / totalSteps) * 100}%` }}
           />
         </div>
@@ -248,11 +249,11 @@ export function OnboardingWizard() {
 
       <div className={step === 'product_type' ? 'block' : 'hidden'}>
         <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-black text-white rounded-full flex items-center justify-center mb-4">
-            <Store className="h-6 w-6" />
+          <div className="mx-auto h-16 w-16 bg-[#FAF8F5] border border-[#111111]/[0.07] rounded-2xl flex items-center justify-center mb-4">
+            <MajiLogo variant="symbol" colorway="ember-duotone-light" size={40} animation="bounce" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-900">What are you selling?</h2>
-          <p className="mt-2 text-sm text-gray-500">This helps us tailor your experience.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-[#111111]">What are you selling?</h2>
+          <p className="mt-2 text-sm text-neutral-500">This helps us tailor your Maji storefront experience.</p>
           
           <div className="space-y-4 mt-8">
             <button
@@ -659,19 +660,36 @@ export function OnboardingWizard() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-2/3 bg-black text-white rounded-md px-4 py-3 font-medium hover:bg-gray-800 transition-colors flex items-center justify-center disabled:opacity-70"
+            className="w-2/3 bg-[#111111] text-white rounded-xl px-4 py-3 font-semibold hover:bg-[#F05A28] transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
           >
-            {isPending ? 'Creating...' : Object.values(socials).some(Boolean) ? 'Finish & Create' : 'Skip & Create'}
+            {isPending ? (
+              <>
+                <MajiSpinner size={18} color="white" /> Creating...
+              </>
+            ) : Object.values(socials).some(Boolean) ? (
+              'Finish & Create'
+            ) : (
+              'Skip & Create'
+            )}
           </button>
         </div>
       </div>
 
-      <div className={isPending ? 'block text-center py-12' : 'hidden'}>
-        <div className="mx-auto h-16 w-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6">
-          <Loader2 className="h-8 w-8 animate-spin" />
+      <div className={isPending ? 'block text-center py-10' : 'hidden'}>
+        <div className="mx-auto mb-6 flex flex-col items-center justify-center gap-4 rounded-3xl bg-[#FAF8F5] border border-[#111111]/[0.07] p-6 max-w-xs">
+          <MajiLogo variant="symbol" colorway="ember-orange" size={68} animation="trace" />
+          <MajiLogo variant="horizontal" colorway="ember-duotone-light" size={38} animation="splash" />
         </div>
-        <h2 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">You're almost done! 🎉</h2>
-        <p className="text-gray-500 text-lg">We're creating your store now.</p>
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#111111] mb-2">
+          Building your Maji storefront...
+        </h2>
+        <p className="text-neutral-500 text-sm sm:text-base mb-5">
+          Configuring your store URL, catalog, and checkout settings.
+        </p>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F05A28]/10 text-[#F05A28] text-xs font-semibold">
+          <MajiSpinner size={16} color="ember" />
+          <span>Almost ready</span>
+        </div>
       </div>
     </form>
   )

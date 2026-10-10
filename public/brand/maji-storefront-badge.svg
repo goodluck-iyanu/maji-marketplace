@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 256" width="840" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Verified Merchant Storefront Badge</title>
+  <rect id="badge-bg" x="16" y="16" width="808" height="224" rx="112" fill="#111111"/>
+  <g id="symbol" transform="translate(52, 24) scale(0.8125)">
+    <path id="awning" fill="#F05A28" d="M28 84 L80 32 H100 L128 60 L156 32 H176 L228 84 V92 A34 34 0 0 1 160 92 V104 A32 32 0 0 1 96 104 V92 A34 34 0 0 1 28 92 Z"/>
+    <path id="smile" fill="#FFFFFF" d="M48 140 H84 V144 A44 44 0 0 0 172 144 V140 H208 V144 A80 80 0 0 1 48 144 Z"/>
+  </g>
+  <g id="wordmark" transform="translate(272, 16) scale(0.88)">
+    <path id="letter-m" fill="#FFFFFF" d="M32 192 V116 A32 32 0 0 1 64 84 H156 A32 32 0 0 1 188 116 V192 H160 V120 A18 18 0 0 0 124 120 V192 H96 V120 A18 18 0 0 0 60 120 V192 Z"/>
+    <path id="letter-a" fill="#FFFFFF" fill-rule="evenodd" d="M305 84 H335 V192 H305 V182 A55 55 0 1 1 305 94 Z M274 113 A25 25 0 1 0 274 163 A25 25 0 1 0 274 113 Z"/>
+    <path id="letter-j" fill="#FFFFFF" d="M382 84 H412 V184 A40 40 0 0 1 372 224 H354 V194 H372 A10 10 0 0 0 382 184 Z"/>
+    <path id="letter-i" fill="#FFFFFF" d="M450 84 H480 V192 H450 Z"/>
+    <path id="ji-arc" fill="#F05A28" d="M382 72 A49 49 0 0 1 480 72 H450 A19 19 0 0 0 412 72 Z"/>
+  </g>
+</svg>

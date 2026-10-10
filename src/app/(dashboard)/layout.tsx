@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -54,12 +53,12 @@ export default async function DashboardLayout({
   const totalSales = (orders || []).reduce((sum, order) => sum + Number(order.total_amount), 0)
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+    <div className="flex flex-col md:flex-row min-h-screen bg-[#FAF8F5] text-[#111111]">
       <Sidebar storeId={store.id} storeName={store.name} storeSlug={store.slug} productType={store.product_type} />
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto md:w-[calc(100%-16rem)]">
-        <main className="p-4 md:p-8">
+      <div className="flex-1 overflow-auto md:w-[calc(100%-16.5rem)]">
+        <main className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
           {children}
         </main>
       </div>
@@ -75,4 +74,3 @@ export default async function DashboardLayout({
     </div>
   )
 }
-

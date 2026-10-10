@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 256" width="760" height="256" role="img" aria-labelledby="title">
+  <title id="title">Maji — Loading Animation 05: Full Lockup Splash Reveal</title>
+  <style>
+    #awning {
+      transform-box: fill-box;
+      transform-origin: 50% 0%;
+      animation: splashDrop 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+    }
+    #smile {
+      transform-box: fill-box;
+      transform-origin: 50% 0%;
+      animation: splashSmile 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+    }
+    #letter-m { transform-box: fill-box; transform-origin: 50% 100%; animation: letterRise 2.4s cubic-bezier(0.22, 1, 0.36, 1) 0.08s infinite; }
+    #letter-a { transform-box: fill-box; transform-origin: 50% 100%; animation: letterRise 2.4s cubic-bezier(0.22, 1, 0.36, 1) 0.16s infinite; }
+    #letter-j { transform-box: fill-box; transform-origin: 50% 100%; animation: letterRise 2.4s cubic-bezier(0.22, 1, 0.36, 1) 0.24s infinite; }
+    #letter-i { transform-box: fill-box; transform-origin: 50% 100%; animation: letterRise 2.4s cubic-bezier(0.22, 1, 0.36, 1) 0.32s infinite; }
+    #ji-arc {
+      transform-box: fill-box;
+      transform-origin: 0% 100%;
+      animation: arcBridge 2.4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+    }
+    @keyframes splashDrop {
+      0%, 100% { transform: translateY(0) scale(1); }
+      12% { transform: translateY(-16px) scale(0.92); }
+      28% { transform: translateY(4px) scale(1.04); }
+      45% { transform: translateY(0) scale(1); }
+    }
+    @keyframes splashSmile {
+      0%, 10% { transform: scale(0.7); opacity: 0.2; }
+      32% { transform: scale(1.06); opacity: 1; }
+      50%, 100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes letterRise {
+      0%, 12% { transform: translateY(14px); opacity: 0.15; }
+      38%, 100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes arcBridge {
+      0%, 25% { transform: scaleX(0.2) translateY(8px); opacity: 0; }
+      52% { transform: scaleX(1.05) translateY(-2px); opacity: 1; }
+      68%, 100% { transform: scaleX(1) translateY(0); opacity: 1; }
+    }
+  </style>
+  <g id="symbol">
+    <path id="awning" fill="#F05A28" d="M28 84 L80 32 H100 L128 60 L156 32 H176 L228 84 V92 A34 34 0 0 1 160 92 V104 A32 32 0 0 1 96 104 V92 A34 34 0 0 1 28 92 Z"/>
+    <path id="smile" fill="#111111" d="M48 140 H84 V144 A44 44 0 0 0 172 144 V140 H208 V144 A80 80 0 0 1 48 144 Z"/>
+  </g>
+  <g id="wordmark">
+    <path id="letter-m" fill="#111111" d="M288 192 V116 A32 32 0 0 1 320 84 H412 A32 32 0 0 1 444 116 V192 H416 V120 A18 18 0 0 0 380 120 V192 H352 V120 A18 18 0 0 0 316 120 V192 Z"/>
+    <path id="letter-a" fill="#111111" fill-rule="evenodd" d="M561 84 H591 V192 H561 V182 A55 55 0 1 1 561 94 Z M530 113 A25 25 0 1 0 530 163 A25 25 0 1 0 530 113 Z"/>
+    <path id="letter-j" fill="#111111" d="M638 84 H668 V184 A40 40 0 0 1 628 224 H610 V194 H628 A10 10 0 0 0 638 184 Z"/>
+    <path id="letter-i" fill="#111111" d="M706 84 H736 V192 H706 Z"/>
+    <path id="ji-arc" fill="#F05A28" d="M638 72 A49 49 0 0 1 736 72 H706 A19 19 0 0 0 668 72 Z"/>
+  </g>
+</svg>

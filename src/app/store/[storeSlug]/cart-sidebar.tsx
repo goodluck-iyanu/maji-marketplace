@@ -1,9 +1,10 @@
 'use client'
 
 import { useCart } from './cart-context'
-import { X, Minus, Plus, ShoppingBag, Loader2 } from 'lucide-react'
+import { X, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { processCheckout } from './checkout/actions'
+import { MajiSpinner } from '@/components/brand/maji-brand'
 
 export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }: any) {
   const { items, isCartOpen, setIsCartOpen, updateQty, removeFromCart, totalAmount } = useCart()
@@ -38,7 +39,7 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="absolute inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
         onClick={() => setIsCartOpen(false)}
       ></div>
 
@@ -128,9 +129,9 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
                 type="submit" 
                 disabled={loading}
                 style={{ backgroundColor: primaryColor, color: secondaryColor }}
-                className="w-full py-4 rounded-md font-medium text-lg hover:opacity-90 transition-opacity flex justify-center items-center disabled:opacity-70 mt-2"
+                className="w-full py-4 rounded-md font-medium text-lg hover:opacity-90 transition-opacity flex justify-center items-center gap-2 disabled:opacity-70 mt-2"
               >
-                {loading ? <Loader2 className="animate-spin h-5 w-5" /> : 'Checkout'}
+                {loading ? <MajiSpinner size={20} color="white" /> : 'Checkout'}
               </button>
             </form>
           </div>

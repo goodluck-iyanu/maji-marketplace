@@ -1,9 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ShoppingBag } from 'lucide-react'
 import { ProductCard } from './product-card'
 import { CartButton } from './cart-button'
+import { MajiStorefrontBadge } from '@/components/brand/maji-brand'
 
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string }> }) {
   const { storeSlug } = await params
@@ -172,9 +172,11 @@ export default async function StorePage({
         )}
       </main>
 
-      <footer className="py-8 border-t border-gray-100 text-center text-sm text-gray-500">
+      <footer className="py-10 border-t border-gray-100 text-center text-sm text-gray-500 flex flex-col items-center gap-3">
         <p>© {new Date().getFullYear()} {store.name}. All rights reserved.</p>
-        <p className="mt-2 text-xs text-gray-400">Powered by Maji</p>
+        <Link href="/" className="inline-block hover:opacity-85 transition-opacity">
+          <MajiStorefrontBadge height={34} />
+        </Link>
       </footer>
     </div>
   )
