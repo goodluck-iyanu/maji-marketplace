@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { X, Send, Bot } from 'lucide-react'
-import { MajiLogo } from '@/components/brand/maji-brand'
+import { X, Send } from 'lucide-react'
+import { MajiLogo, MajiSpinner } from '@/components/brand/maji-brand'
 
 type Message = {
   id: string
@@ -144,17 +144,19 @@ export function MajiAIAssistant({
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating AI Assistant Button with Animated Maji Basket Smile Rocker */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-14 w-14 bg-[#111111] text-white rounded-2xl shadow-xl border border-white/10 flex items-center justify-center hover:bg-[#F05A28] transition-all hover:scale-105 z-50 group animate-in zoom-in-50 fade-in duration-300 ease-out cursor-pointer"
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-14 w-14 bg-[#111111] text-white rounded-2xl shadow-xl shadow-black/25 border border-[#F05A28]/30 flex items-center justify-center hover:bg-[#1a1a1a] hover:border-[#F05A28] transition-all hover:scale-105 z-50 group animate-in zoom-in-50 fade-in duration-300 ease-out cursor-pointer"
           aria-label="Open Hoberg AI Assistant"
         >
           <MajiLogo
-            variant="symbol-small"
+            variant="symbol"
             colorway="ember-duotone-dark"
-            size={28}
+            size={32}
+            animation="rocker"
+            title="Hoberg AI Assistant"
             className="group-hover:scale-110 transition-transform"
           />
 
@@ -180,14 +182,20 @@ export function MajiAIAssistant({
           {/* Header */}
           <div className="bg-[#111111] p-4 text-white flex justify-between items-center border-b border-white/10">
             <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 bg-white/10 rounded-xl flex items-center justify-center">
-                <MajiLogo variant="symbol-small" colorway="ember-duotone-dark" size={22} />
+              <div className="h-9 w-9 bg-white/10 border border-[#F05A28]/30 rounded-xl flex items-center justify-center">
+                <MajiLogo
+                  variant="symbol"
+                  colorway="ember-duotone-dark"
+                  size={24}
+                  animation={isTyping ? 'bounce' : 'rocker'}
+                  title="Hoberg AI"
+                />
               </div>
               <div>
                 <h3 className="font-bold text-sm">Hoberg AI Assistant</h3>
                 <p className="text-neutral-400 text-xs flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#F05A28]" />
-                  Online &amp; ready to help
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#F05A28] animate-pulse" />
+                  {isTyping ? 'Thinking...' : 'Online & ready to help'}
                 </p>
               </div>
             </div>
@@ -220,8 +228,14 @@ export function MajiAIAssistant({
                 className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.sender === 'ai' && (
-                  <div className="h-6 w-6 rounded-lg bg-white border border-neutral-200 text-[#F05A28] flex items-center justify-center mr-2 mt-1 shrink-0">
-                    <Bot className="h-3.5 w-3.5" />
+                  <div className="h-7 w-7 rounded-xl bg-white border border-[#F05A28]/25 flex items-center justify-center mr-2 mt-1 shrink-0 shadow-2xs">
+                    <MajiLogo
+                      variant="symbol"
+                      colorway="ember-duotone-light"
+                      size={18}
+                      animation="pulse"
+                      title="AI"
+                    />
                   </div>
                 )}
 
@@ -244,22 +258,18 @@ export function MajiAIAssistant({
 
             {isTyping && (
               <div className="flex justify-start">
-                <div className="h-6 w-6 rounded-lg bg-white border border-neutral-200 text-[#F05A28] flex items-center justify-center mr-2 mt-1 shrink-0">
-                  <Bot className="h-3.5 w-3.5" />
+                <div className="h-7 w-7 rounded-xl bg-white border border-[#F05A28]/25 flex items-center justify-center mr-2 mt-1 shrink-0 shadow-2xs">
+                  <MajiLogo
+                    variant="symbol"
+                    colorway="ember-orange"
+                    size={18}
+                    animation="bounce"
+                    title="AI Thinking"
+                  />
                 </div>
-                <div className="bg-white border border-neutral-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-2xs flex items-center gap-1.5">
-                  <span
-                    className="h-1.5 w-1.5 bg-[#F05A28] rounded-full animate-bounce"
-                    style={{ animationDelay: '0ms' }}
-                  ></span>
-                  <span
-                    className="h-1.5 w-1.5 bg-[#F05A28] rounded-full animate-bounce"
-                    style={{ animationDelay: '150ms' }}
-                  ></span>
-                  <span
-                    className="h-1.5 w-1.5 bg-[#F05A28] rounded-full animate-bounce"
-                    style={{ animationDelay: '300ms' }}
-                  ></span>
+                <div className="bg-white border border-neutral-200 rounded-2xl rounded-bl-sm px-4 py-2.5 shadow-2xs flex items-center gap-2 text-xs font-semibold text-neutral-500">
+                  <MajiSpinner size={16} color="ember" />
+                  <span>Thinking...</span>
                 </div>
               </div>
             )}
