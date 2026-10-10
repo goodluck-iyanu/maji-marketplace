@@ -12,21 +12,17 @@ export default async function StoreLayout({
   const { storeSlug } = await params
   const supabase = await createClient()
 
-  // We need to fetch basic store settings to color the CartSidebar
   const { data: store } = await supabase
     .from('stores')
-    .select('id, store_settings(primary_color, secondary_color)')
+    .select('id')
     .eq('slug', storeSlug)
     .single()
-
-  const primaryColor = (Array.isArray(store?.store_settings) ? store?.store_settings[0] : store?.store_settings)?.primary_color || '#000000'
-  const secondaryColor = (Array.isArray(store?.store_settings) ? store?.store_settings[0] : store?.store_settings)?.secondary_color || '#ffffff'
 
   return (
     <CartProvider storeSlug={storeSlug}>
       {children}
       {store && (
-        <FloatingCart primaryColor={primaryColor} secondaryColor={secondaryColor} storeSlug={storeSlug} />
+        <FloatingCart primaryColor="#111111" secondaryColor="#ffffff" storeSlug={storeSlug} />
       )}
     </CartProvider>
   )

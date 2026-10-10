@@ -20,8 +20,8 @@ export async function saveSettingsAction(prevState: any, formData: FormData) {
   if (!store) return { error: 'Store not found' }
 
   const about_text = (formData.get('about_text') as string) || ''
-  const primary_color = (formData.get('primary_color') as string) || '#000000'
-  const secondary_color = (formData.get('secondary_color') as string) || '#ffffff'
+  const primary_color = '#111111'
+  const secondary_color = '#ffffff'
   const layout = (formData.get('layout') as string) || 'classic'
 
   const address = (formData.get('address') as string) || ''

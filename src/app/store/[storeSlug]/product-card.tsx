@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { Plus, Minus, ShoppingCart } from 'lucide-react'
 import { useCart } from './cart-context'
@@ -17,7 +16,7 @@ const colorMap: Record<string, string> = {
   'sky blue': '#87CEEB',
 }
 
-export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }: any) {
+export function ProductCard({ storeSlug, product }: any) {
   const { items, addToCart, removeFromCart, updateQty } = useCart()
 
   // Check if product is already in cart
@@ -66,7 +65,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
   // Generate a smart specs summary string (e.g. "Apple • New • 256GB • 8GB RAM")
   const specParts = []
   if (product.brand) specParts.push(product.brand)
-  if (product.condition && product.condition !== 'New') specParts.push(product.condition) // Skip 'New' to save space if needed, but let's include it
+  if (product.condition && product.condition !== 'New') specParts.push(product.condition)
   else if (product.condition) specParts.push(product.condition)
   
   if (product.attributes) {
@@ -79,16 +78,16 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
   const specsSummary = specParts.slice(0, 3).join(' • ')
 
   return (
-    <div className="flex flex-col bg-white rounded-md overflow-hidden relative border border-gray-100 hover:shadow-lg transition-shadow">
+    <div className="flex flex-col bg-white rounded-2xl overflow-hidden relative border border-gray-200/80 shadow-xs hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
       
       {/* Discount Badge */}
       {hasDiscount && (
-        <div className="absolute top-2 right-2 z-10 bg-orange-100 text-orange-600 font-bold text-xs sm:text-sm px-2 py-1 rounded">
+        <div className="absolute top-2.5 right-2.5 z-10 bg-[#F05A28] text-white font-extrabold text-xs px-2.5 py-1 rounded-full shadow-xs">
           -{product.discount_percent}%
         </div>
       )}
 
-      <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block relative aspect-square bg-gray-50 overflow-hidden group">
+      <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block relative aspect-square bg-[#FAF8F5] overflow-hidden group">
         {product.product_images && product.product_images.length > 0 ? (
           <img 
             src={product.product_images[0].image_url} 
@@ -110,7 +109,7 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
                 <div 
                   key={idx}
                   title={color}
-                  className="w-4 h-4 rounded-full border border-gray-200 shadow-sm"
+                  className="w-4 h-4 rounded-full border border-white shadow-sm"
                   style={{ backgroundColor: hex }}
                 />
               )
@@ -126,20 +125,20 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
 
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <Link href={`/store/${storeSlug}/product/${product.slug}`} className="block flex-1">
-          <h3 className="text-sm sm:text-base font-medium text-gray-800 line-clamp-2 leading-snug mb-1">{product.name}</h3>
+          <h3 className="text-sm sm:text-base font-bold text-[#111111] line-clamp-2 leading-snug mb-1">{product.name}</h3>
           
           {specsSummary ? (
-            <p className="text-xs font-medium text-blue-600/80 line-clamp-1 mb-2">
+            <p className="text-xs font-semibold text-[#F05A28] line-clamp-1 mb-2">
               {specsSummary}
             </p>
           ) : product.description ? (
-            <p className="text-xs text-gray-500 line-clamp-1 mb-2 opacity-80">
+            <p className="text-xs text-gray-500 line-clamp-1 mb-2">
               {product.description}
             </p>
           ) : null}
 
           <div className="mb-3">
-            <p className="font-extrabold text-lg sm:text-xl text-gray-900 leading-none">
+            <p className="font-extrabold text-lg sm:text-xl text-[#111111] leading-none">
               ₦{Math.round(currentPrice).toLocaleString()}
             </p>
             {hasDiscount && (
@@ -152,32 +151,29 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
 
         <div className="mt-auto">
           {inCartQty > 0 && !product.has_variants ? (
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-2 bg-[#FAF8F5] p-1 rounded-xl border border-gray-200/80">
               <button 
                 onClick={handleDecrease}
-                style={{ backgroundColor: primaryColor, color: secondaryColor }}
-                className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-md font-bold text-xl shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-[#111111] text-white hover:bg-[#F05A28] transition-colors font-bold shrink-0"
               >
-                <Minus className="w-5 h-5" />
+                <Minus className="w-4 h-4" />
               </button>
               
-              <span className="font-bold text-lg text-gray-900 text-center flex-1">
+              <span className="font-extrabold text-base text-[#111111] text-center flex-1">
                 {inCartQty}
               </span>
               
               <button 
                 onClick={handleIncrease}
-                style={{ backgroundColor: primaryColor, color: secondaryColor }}
-                className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-md font-bold text-xl shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg bg-[#111111] text-white hover:bg-[#F05A28] transition-colors font-bold shrink-0"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4 h-4" />
               </button>
             </div>
           ) : (
             <button 
               onClick={handleAddToCart}
-              style={{ backgroundColor: primaryColor, color: secondaryColor }}
-              className="w-full py-2.5 sm:py-3 rounded-md font-semibold text-sm sm:text-base hover:opacity-90 transition-opacity flex items-center justify-center"
+              className="w-full py-2.5 sm:py-3 rounded-xl bg-[#111111] text-white font-bold text-xs sm:text-sm hover:bg-[#F05A28] transition-all flex items-center justify-center shadow-xs"
             >
               {product.has_variants ? 'Choose Options' : 'Add to Cart'}
             </button>
@@ -187,3 +183,4 @@ export function ProductCard({ storeSlug, product, primaryColor, secondaryColor }
     </div>
   )
 }
+

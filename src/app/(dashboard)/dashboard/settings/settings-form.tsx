@@ -1,13 +1,13 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState } from 'react'
 import { SubmitButton } from './submit-button'
 import { saveSettingsAction } from './actions'
+import { Lock, CheckCircle2 } from 'lucide-react'
+import { MajiLogo } from '@/components/brand/maji-brand'
 
 export function SettingsForm({ store, settings }: { store: any, settings: any }) {
   const [state, formAction] = useActionState(saveSettingsAction, null)
-  const [primaryColor, setPrimaryColor] = useState(settings.primary_color || '#000000')
-  const [secondaryColor, setSecondaryColor] = useState(settings.secondary_color || '#ffffff')
 
   const compressImage = async (file: File): Promise<File> => {
     return new Promise((resolve, reject) => {
@@ -51,158 +51,159 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
   return (
     <form action={handleAction} className="space-y-6">
       {state?.error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg text-sm font-medium">
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-100 text-sm font-semibold">
           {state.error}
         </div>
       )}
       {state?.success && (
-        <div className="bg-green-50 text-green-700 p-4 rounded-lg text-sm font-medium">
-          Settings saved successfully!
+        <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl border border-emerald-200/70 text-sm font-semibold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>Settings saved successfully!</span>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-medium text-gray-900">General Information</h2>
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-[#FAF8F5]">
+          <h2 className="text-base font-extrabold text-[#111111]">General Information</h2>
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store Logo</label>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Store Logo</label>
             {settings.logo_url && (
-              <div className="mb-2">
-                <img src={settings.logo_url} alt="Store Logo" className="h-16 w-16 object-cover rounded-md border" />
+              <div className="mb-3">
+                <img src={settings.logo_url} alt="Store Logo" className="h-16 w-16 object-cover rounded-2xl border border-gray-200 shadow-xs" />
               </div>
             )}
             <input 
               type="file" 
               name="logo"
               accept="image/*"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#F05A28]" 
             />
             <p className="text-xs text-gray-500 mt-1">Upload a square image (optional).</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Store Name</label>
             <input 
               type="text" 
               defaultValue={store?.name} 
               disabled
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed" 
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed text-sm font-medium" 
             />
             <p className="text-xs text-gray-500 mt-1">Store name cannot be changed.</p>
           </div>
           {store?.product_type === 'physical' && store?.store_category && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Store Category</label>
+              <label className="block text-sm font-bold text-[#111111] mb-1.5">Store Category</label>
               <input 
                 type="text" 
                 defaultValue={store.store_category.charAt(0).toUpperCase() + store.store_category.slice(1)} 
                 disabled
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed" 
+                className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed text-sm font-medium" 
               />
               <p className="text-xs text-gray-500 mt-1">Products will be added under this category.</p>
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store URL Slug</label>
-            <div className="flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Store URL Slug</label>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200">
+              <span className="inline-flex items-center px-3.5 border-r border-gray-200 bg-gray-50 text-gray-500 text-xs sm:text-sm font-medium">
                 maji.hoberg.com.ng/store/
               </span>
               <input 
                 type="text" 
                 defaultValue={store?.slug} 
                 disabled
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 bg-gray-50 text-gray-500 sm:text-sm cursor-not-allowed" 
+                className="flex-1 min-w-0 block w-full px-3.5 py-2.5 bg-gray-50 text-gray-500 text-sm cursor-not-allowed font-medium" 
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Store Address (Optional)</label>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Store Address (Optional)</label>
             <textarea 
               name="address"
               defaultValue={settings.address || ''} 
               rows={2}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28] text-sm" 
               placeholder="123 Main St, Lagos, Nigeria"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">About Store (Optional)</label>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">About Store (Optional)</label>
             <textarea 
               name="about_text"
               defaultValue={settings.about_text || ''} 
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28] text-sm" 
               placeholder="Tell customers about your store..."
             />
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-lg font-medium text-gray-900">Social Links (Optional)</h2>
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-[#FAF8F5]">
+          <h2 className="text-base font-extrabold text-[#111111]">Social Links (Optional)</h2>
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">WhatsApp Number</label>
             <input 
               type="text" 
               name="whatsapp"
               defaultValue={store.social_links?.find((s: any) => s.platform === 'whatsapp')?.url || ''} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black" 
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28] text-sm" 
               placeholder="e.g. +2349012345678"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">TikTok Username</label>
-            <div className="flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">TikTok Username</label>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-[#F05A28]">
+              <span className="inline-flex items-center px-3.5 border-r border-gray-200 bg-[#FAF8F5] text-gray-500 text-sm font-semibold">@</span>
               <input 
                 type="text" 
                 name="tiktok"
                 defaultValue={store.social_links?.find((s: any) => s.platform === 'tiktok')?.url || ''} 
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                className="flex-1 min-w-0 block w-full px-3.5 py-2.5 focus:outline-none text-sm" 
                 placeholder="yourstore"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Username</label>
-            <div className="flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Instagram Username</label>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-[#F05A28]">
+              <span className="inline-flex items-center px-3.5 border-r border-gray-200 bg-[#FAF8F5] text-gray-500 text-sm font-semibold">@</span>
               <input 
                 type="text" 
                 name="instagram"
                 defaultValue={store.social_links?.find((s: any) => s.platform === 'instagram')?.url || ''} 
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                className="flex-1 min-w-0 block w-full px-3.5 py-2.5 focus:outline-none text-sm" 
                 placeholder="yourstore"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter (X) Username</label>
-            <div className="flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">@</span>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Twitter (X) Username</label>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-[#F05A28]">
+              <span className="inline-flex items-center px-3.5 border-r border-gray-200 bg-[#FAF8F5] text-gray-500 text-sm font-semibold">@</span>
               <input 
                 type="text" 
                 name="twitter"
                 defaultValue={store.social_links?.find((s: any) => s.platform === 'twitter')?.url || ''} 
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                className="flex-1 min-w-0 block w-full px-3.5 py-2.5 focus:outline-none text-sm" 
                 placeholder="yourstore"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Username / Page</label>
-            <div className="flex rounded-md shadow-sm">
-              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">facebook.com/</span>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Facebook Username / Page</label>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 focus-within:ring-2 focus-within:ring-[#F05A28]">
+              <span className="inline-flex items-center px-3.5 border-r border-gray-200 bg-[#FAF8F5] text-gray-500 text-sm font-semibold">facebook.com/</span>
               <input 
                 type="text" 
                 name="facebook"
                 defaultValue={store.social_links?.find((s: any) => s.platform === 'facebook')?.url || ''} 
-                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-black focus:border-black sm:text-sm" 
+                className="flex-1 min-w-0 block w-full px-3.5 py-2.5 focus:outline-none text-sm" 
                 placeholder="yourstore"
               />
             </div>
@@ -210,77 +211,45 @@ export function SettingsForm({ store, settings }: { store: any, settings: any })
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-          <h2 className="text-lg font-medium text-gray-900">Appearance</h2>
-          <button 
-            type="button" 
-            onClick={() => { setPrimaryColor('#000000'); setSecondaryColor('#ffffff'); }}
-            className="text-sm font-medium text-gray-600 hover:text-black border px-3 py-1 rounded bg-white hover:bg-gray-100 transition-colors"
-          >
-            Reset to Default
-          </button>
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 bg-[#FAF8F5] flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-extrabold text-[#111111]">Storefront Appearance</h2>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-gray-200 text-[11px] font-bold text-gray-600">
+              <Lock className="w-3 h-3 text-[#F05A28]" /> Unified Maji Theme
+            </span>
+          </div>
         </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <label className="block text-sm font-bold text-gray-900 mb-1">Brand Color (Primary)</label>
-            <p className="text-xs text-gray-500 mb-3">Main color used for buttons, badges, and accents.</p>
-            <div className="flex items-center gap-3">
-              <input 
-                type="color" 
-                name="primary_color"
-                value={primaryColor}
-                onChange={(e) => setPrimaryColor(e.target.value)}
-                className="h-10 w-16 cursor-pointer border border-gray-300 rounded p-0.5" 
-              />
-              <span className="text-sm font-mono font-medium text-gray-600 uppercase">{primaryColor}</span>
-            </div>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <label className="block text-sm font-bold text-gray-900 mb-1">Text Color (Secondary)</label>
-            <p className="text-xs text-gray-500 mb-3">Color used for the text inside your primary buttons.</p>
-            <div className="flex items-center gap-3">
-              <input 
-                type="color" 
-                name="secondary_color"
-                value={secondaryColor}
-                onChange={(e) => setSecondaryColor(e.target.value)}
-                className="h-10 w-16 cursor-pointer border border-gray-300 rounded p-0.5" 
-              />
-              <span className="text-sm font-mono font-medium text-gray-600 uppercase">{secondaryColor}</span>
-            </div>
-          </div>
-          
-          <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-900 mb-2">Live Preview</label>
-            <div 
-              className="p-6 rounded-lg flex items-center justify-between border shadow-sm transition-colors duration-300" 
-              style={{ backgroundColor: primaryColor, color: secondaryColor, borderColor: primaryColor }}
-            >
+        <div className="p-6 space-y-5">
+          <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-gray-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-white border border-[#F05A28]/20 flex items-center justify-center shrink-0 shadow-2xs">
+                <MajiLogo variant="symbol-small" colorway="ember-orange" size={24} />
+              </div>
               <div>
-                <h4 className="font-bold text-lg sm:text-xl">Your Custom Store</h4>
-                <p className="opacity-90 text-sm mt-1">This is how your Add to Cart buttons will look.</p>
+                <h4 className="font-extrabold text-sm text-[#111111]">Official Maji Storefront Palette</h4>
+                <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+                  All Maji storefronts use the standardized Maji brand colors (Deep Obsidian <code className="font-mono text-[#111111]">#111111</code>, Maji Ember <code className="font-mono text-[#F05A28]">#F05A28</code>, and Market Alabaster <code className="font-mono text-gray-600">#FAF8F5</code>) for buyer trust and high conversion.
+                </p>
               </div>
-              <div 
-                className="px-4 py-2 sm:px-6 sm:py-3 rounded font-bold shadow-sm" 
-                style={{ backgroundColor: secondaryColor, color: primaryColor }}
-              >
-                Add to Cart
-              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="w-7 h-7 rounded-full bg-[#111111] border-2 border-white shadow-xs" title="Deep Obsidian #111111" />
+              <span className="w-7 h-7 rounded-full bg-[#F05A28] border-2 border-white shadow-xs" title="Maji Ember #F05A28" />
+              <span className="w-7 h-7 rounded-full bg-[#FAF8F5] border-2 border-gray-200 shadow-xs" title="Market Alabaster #FAF8F5" />
             </div>
           </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-bold text-gray-900 mb-1 mt-2">Layout Style</label>
+          <div>
+            <label className="block text-sm font-bold text-[#111111] mb-1.5">Layout Style</label>
             <select 
               name="layout"
               defaultValue={settings.layout || 'classic'} 
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-black focus:border-black bg-white"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28] bg-white text-sm font-medium text-[#111111]"
             >
               <option value="classic">Classic (Standard Ecommerce)</option>
-              <option value="minimal">Minimal (Clean & Modern)</option>
-              <option value="brand">Brand Focused (Highlights Logo & Bio)</option>
+              <option value="minimal">Minimal (Clean &amp; Modern)</option>
+              <option value="brand">Brand Focused (Highlights Logo &amp; Bio)</option>
             </select>
           </div>
         </div>

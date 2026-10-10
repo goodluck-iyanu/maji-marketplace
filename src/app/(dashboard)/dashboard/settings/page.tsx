@@ -28,7 +28,10 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">Store Settings</h1>
+      <div>
+        <h1 className="text-2xl font-extrabold tracking-tight text-[#111111]">Store Settings</h1>
+        <p className="text-sm text-gray-500 mt-0.5">Manage your store profile, social links, and storefront layout</p>
+      </div>
       <SettingsForm store={store} settings={settings} />
     </div>
   )

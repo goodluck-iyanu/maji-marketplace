@@ -4,9 +4,9 @@ import { useCart } from './cart-context'
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { processCheckout } from './checkout/actions'
-import { MajiSpinner } from '@/components/brand/maji-brand'
+import { MajiLogo, MajiSpinner } from '@/components/brand/maji-brand'
 
-export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }: any) {
+export function CartSidebar({ storeId, storeSlug }: any) {
   const { items, isCartOpen, setIsCartOpen, updateQty, removeFromCart, totalAmount } = useCart()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -46,10 +46,10 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
       {/* Sidebar */}
       <div className="relative w-full max-w-md bg-white shadow-2xl h-full flex flex-col animate-in slide-in-from-right duration-300">
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
-          <h2 className="text-xl font-bold flex items-center">
-            <ShoppingBag className="mr-2 h-5 w-5" /> Your Cart
+          <h2 className="text-xl font-extrabold text-[#111111] flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5 text-[#F05A28]" /> Your Cart
           </h2>
-          <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+          <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 hover:text-[#111111]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -57,11 +57,13 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
         <div className="flex-1 overflow-y-auto p-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <ShoppingBag className="h-16 w-16 mb-4 opacity-20" />
-              <p>Your cart is empty.</p>
+              <div className="w-16 h-16 rounded-2xl bg-[#FAF8F5] border border-[#F05A28]/20 flex items-center justify-center mb-4">
+                <MajiLogo variant="symbol" colorway="ember-duotone-light" size={38} animation="rocker" />
+              </div>
+              <p className="font-semibold text-[#111111]">Your cart is empty.</p>
               <button 
                 onClick={() => setIsCartOpen(false)}
-                className="mt-4 px-6 py-2 rounded-full border border-gray-300 font-medium hover:bg-gray-50"
+                className="mt-4 px-6 py-2.5 rounded-full bg-[#111111] text-white text-sm font-bold hover:bg-[#F05A28] transition-colors"
               >
                 Continue Shopping
               </button>
@@ -70,7 +72,7 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
             <div className="space-y-6">
               {items.map(item => (
                 <div key={item.id} className="flex gap-4">
-                  <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                  <div className="w-20 h-20 bg-[#FAF8F5] rounded-xl overflow-hidden flex-shrink-0 border border-gray-100">
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
@@ -78,16 +80,16 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 line-clamp-2">{item.name || 'Product Variant'}</h3>
-                    <p className="text-[var(--store-primary)] font-bold mt-1">₦{item.price.toLocaleString()}</p>
+                    <h3 className="font-bold text-[#111111] line-clamp-2">{item.name || 'Product Variant'}</h3>
+                    <p className="text-[#111111] font-extrabold mt-1">₦{item.price.toLocaleString()}</p>
                     
                     <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center border border-gray-200 rounded-md">
-                        <button onClick={() => updateQty(item.id, item.qty - 1)} className="p-1 px-2 hover:bg-gray-100"><Minus className="h-3 w-3"/></button>
-                        <span className="px-2 text-sm font-medium">{item.qty}</span>
-                        <button onClick={() => updateQty(item.id, item.qty + 1)} className="p-1 px-2 hover:bg-gray-100"><Plus className="h-3 w-3"/></button>
+                      <div className="flex items-center border border-gray-200 rounded-lg bg-[#FAF8F5]">
+                        <button onClick={() => updateQty(item.id, item.qty - 1)} className="p-1 px-2 hover:bg-gray-200/70 rounded-l-lg"><Minus className="h-3 w-3"/></button>
+                        <span className="px-2.5 text-sm font-bold text-[#111111]">{item.qty}</span>
+                        <button onClick={() => updateQty(item.id, item.qty + 1)} className="p-1 px-2 hover:bg-gray-200/70 rounded-r-lg"><Plus className="h-3 w-3"/></button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-sm text-red-500 hover:underline">Remove</button>
+                      <button onClick={() => removeFromCart(item.id)} className="text-sm font-semibold text-red-500 hover:underline">Remove</button>
                     </div>
                   </div>
                 </div>
@@ -97,14 +99,14 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-gray-100 p-4 bg-gray-50">
-            <div className="flex justify-between items-center mb-4 text-lg font-bold">
+          <div className="border-t border-gray-100 p-4 bg-[#FAF8F5]">
+            <div className="flex justify-between items-center mb-4 text-lg font-extrabold text-[#111111]">
               <span>Total</span>
               <span>₦{totalAmount.toLocaleString()}</span>
             </div>
             
             {error && (
-              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-md border border-red-100">
+              <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100">
                 {error}
               </div>
             )}
@@ -115,21 +117,20 @@ export function CartSidebar({ storeId, storeSlug, primaryColor, secondaryColor }
                 name="name" 
                 placeholder="Your Full Name" 
                 required 
-                className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28]"
               />
               <input 
                 type="email" 
                 name="email" 
                 placeholder="Your Email Address" 
                 required 
-                className="w-full px-4 py-3 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F05A28]"
               />
               
               <button 
                 type="submit" 
                 disabled={loading}
-                style={{ backgroundColor: primaryColor, color: secondaryColor }}
-                className="w-full py-4 rounded-md font-medium text-lg hover:opacity-90 transition-opacity flex justify-center items-center gap-2 disabled:opacity-70 mt-2"
+                className="w-full py-4 rounded-xl bg-[#111111] text-white font-bold text-lg hover:bg-[#F05A28] transition-colors flex justify-center items-center gap-2 disabled:opacity-70 mt-2 shadow-sm"
               >
                 {loading ? <MajiSpinner size={20} color="white" /> : 'Checkout'}
               </button>
