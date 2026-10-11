@@ -136,6 +136,12 @@ export function MajiMarketplaceHome({
   const [trackError, setTrackError] = useState<string | null>(null)
   const [isTrackingLoading, setIsTrackingLoading] = useState(false)
 
+  // Interactive Hero Storefront Preview & Claim Link state
+  const [heroStoreSlug, setHeroStoreSlug] = useState<string>(
+    () => stores.find((s) => s.productCount > 0)?.slug || stores[0]?.slug || ''
+  )
+  const [claimStoreHandle, setClaimStoreHandle] = useState('')
+
   // Derived real category pills from actual products & stores
   const availableCategories = useMemo(() => {
     const map = new Map<string, { label: string; count: number }>()
@@ -166,11 +172,30 @@ export function MajiMarketplaceHome({
     [products]
   )
 
-  // Featured hero product (first real product that has an uploaded image)
-  const heroSpotlightProduct = useMemo(
-    () => products.find((p) => Boolean(p.image_url)) || products[0] || null,
-    [products]
-  )
+  // Active store shown in the interactive Hero Storefront Showcase
+  const activeHeroStore = useMemo(() => {
+    if (!stores.length) return null
+    return (
+      stores.find((s) => s.slug === heroStoreSlug) ||
+      stores.find((s) => s.productCount > 0) ||
+      stores[0]
+    )
+  }, [stores, heroStoreSlug])
+
+  // Real products displayed inside the Hero Storefront Showcase (prioritizing the selected store's products, falling back to live catalog items)
+  const activeHeroProducts = useMemo(() => {
+    if (!products.length) return []
+    if (activeHeroStore) {
+      const storeMatches = products.filter((p) => p.store.slug === activeHeroStore.slug)
+      if (storeMatches.length >= 2) return storeMatches.slice(0, 2)
+      if (storeMatches.length === 1) {
+        const extra = products.find((p) => p.id !== storeMatches[0].id && Boolean(p.image_url))
+        return extra ? [storeMatches[0], extra] : storeMatches
+      }
+    }
+    const withImages = products.filter((p) => Boolean(p.image_url))
+    return (withImages.length >= 2 ? withImages : products).slice(0, 2)
+  }, [products, activeHeroStore])
 
   // Filtered & sorted products
   const filteredProducts = useMemo(() => {
@@ -269,6 +294,17 @@ export function MajiMarketplaceHome({
     setIsTrackingLoading(true)
     router.push(`/track/${encodeURIComponent(ref)}`)
   }
+
+  const handleClaimStorefrontSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    router.push(isAuthenticated ? '/dashboard' : '/login?mode=signup')
+  }
+
+  const sanitizedClaimPreview = claimStoreHandle
+    .toLowerCase()
+    .replace(/[^a-z0-9-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#111111] flex flex-col selection:bg-[#F05A28]/15">
@@ -409,7 +445,7 @@ export function MajiMarketplaceHome({
                   className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
                 >
                   <Store className="w-4 h-4" />
-                  <span>Seller Studio</span>
+                  <span>Open Storefront</span>
                 </Link>
               ) : (
                 <>
@@ -423,7 +459,8 @@ export function MajiMarketplaceHome({
                     href="/login?mode=signup"
                     className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
                   >
-                    <span>Start Selling</span>
+                    <Store className="w-4 h-4" />
+                    <span>Open Storefront</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </>
@@ -545,7 +582,7 @@ export function MajiMarketplaceHome({
                   href="/login?mode=signup"
                   className="flex-1 py-2.5 text-center rounded-xl bg-[#F05A28] font-extrabold text-sm text-white"
                 >
-                  Create Store
+                  Open Storefront
                 </Link>
               </div>
             )}
@@ -554,58 +591,184 @@ export function MajiMarketplaceHome({
       </header>
 
       <main className="flex-1">
-        {/* 3. Image-Led Asymmetric Nigerian Marketplace Hero */}
-        <section className="relative overflow-hidden pt-8 pb-14 sm:pt-14 sm:pb-20 border-b border-[#111111]/[0.08]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
-              {/* Left Column: Editorial Marketplace Headline & Conversion Paths */}
-              <div className="lg:col-span-6 space-y-6">
-                <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white border border-[#111111]/10 shadow-2xs">
+        {/* 3. Flagship Storefront-First & Nigerian Marketplace Hero Section */}
+        <section className="relative overflow-hidden pt-7 pb-14 sm:pt-12 sm:pb-20 border-b border-[#111111]/[0.08]">
+          {/* Subtle Warm Editorial Background Glow */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-36 right-1/4 w-[540px] h-[540px] rounded-full bg-[#F05A28]/[0.06] blur-3xl"
+          />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {/* Left Column: Storefront-First Hero Pitch + URL Claim Bar + Marketplace Shopping Access */}
+              <div className="lg:col-span-6 space-y-5 sm:space-y-6">
+                {/* Top Identity & Dual-Role Badge */}
+                <div className="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#111111]/12 shadow-2xs">
                   <MajiLogo variant="symbol" colorway="ember-orange" size={18} animation="bounce" />
-                  <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#111111]">
-                    Nigeria&apos;s Multi-Vendor Commerce Platform
+                  <span className="text-[11px] font-extrabold uppercase tracking-[0.11em] text-[#111111]">
+                    Nigeria&apos;s Storefront Builder &amp; Marketplace
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-[#F05A28]/10 text-[#F05A28] text-[10px] font-extrabold">
+                    Physical &amp; Digital
                   </span>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[#111111] leading-[1.04]">
-                  Buy directly from independent{' '}
-                  <span className="text-[#F05A28]">Nigerian stores.</span>
-                </h1>
+                {/* Primary Storefront-First Headline */}
+                <div className="space-y-3">
+                  <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[#111111] leading-[1.03]">
+                    Launch your{' '}
+                    <span className="text-[#F05A28]">Nigerian storefront.</span>{' '}
+                    Sell everywhere.
+                  </h1>
 
-                <p className="text-base sm:text-lg text-neutral-700 leading-relaxed max-w-xl">
-                  Discover clothing, footwear, electronics, jewelry, and digital downloads from verified merchants across Nigeria — or launch your own Paystack-ready storefront in minutes.
-                </p>
-
-                {/* Primary Shopping & Seller Calls to Action */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
-                  <a
-                    href="#catalog"
-                    className="inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-base shadow-lg shadow-[#F05A28]/25 transition-all hover:-translate-y-0.5"
-                  >
-                    <ShoppingBag className="w-5 h-5" />
-                    <span>Shop Live Catalog ({products.length})</span>
-                  </a>
-
-                  <Link
-                    href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
-                    className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#111111] hover:bg-neutral-800 text-white font-extrabold text-base transition-all"
-                  >
-                    <Store className="w-4 h-4 text-[#F05A28]" />
-                    <span>{isAuthenticated ? 'Open Seller Studio' : 'Open Your Storefront'}</span>
-                  </Link>
+                  <p className="text-base sm:text-lg text-neutral-700 leading-relaxed max-w-xl">
+                    Open a custom online storefront for your physical or digital products in minutes — with automated{' '}
+                    <strong className="font-extrabold text-[#111111]">Paystack T+1 bank payouts</strong>, live{' '}
+                    <strong className="font-extrabold text-[#111111]">courier delivery quotes</strong>, and{' '}
+                    <strong className="font-extrabold text-[#111111]">Hoberg AI</strong>. Or{' '}
+                    <a
+                      href="#catalog"
+                      className="font-extrabold text-[#F05A28] underline decoration-[#F05A28]/40 underline-offset-4 hover:decoration-[#F05A28]"
+                    >
+                      buy directly from independent Nigerian stores
+                    </a>{' '}
+                    below.
+                  </p>
                 </div>
 
-                {/* Live Category Jump Pills */}
+                {/* Interactive "Claim Your Storefront Link" Builder Bar */}
+                <form
+                  onSubmit={handleClaimStorefrontSubmit}
+                  className="p-2 rounded-2xl bg-white border-2 border-[#111111]/12 focus-within:border-[#F05A28] shadow-md transition-all"
+                >
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <div className="flex items-center flex-1 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#111111]/[0.07] min-w-0">
+                      <Store className="w-4 h-4 text-[#F05A28] shrink-0 mr-2" />
+                      <span className="text-xs font-mono font-bold text-neutral-400 shrink-0 select-none">
+                        maji.hoberg.com.ng/store/
+                      </span>
+                      <input
+                        type="text"
+                        aria-label="Preview your custom Maji storefront link"
+                        value={claimStoreHandle}
+                        onChange={(e) => setClaimStoreHandle(e.target.value)}
+                        placeholder="your-store-name"
+                        className="w-full bg-transparent text-xs sm:text-sm font-mono font-extrabold text-[#111111] placeholder:text-neutral-400 focus:outline-none min-w-[90px]"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-6 py-3.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] active:scale-[0.99] text-white font-extrabold text-sm shadow-md shadow-[#F05A28]/25 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+                    >
+                      <span>Open Storefront</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {sanitizedClaimPreview && (
+                    <div className="px-3 pt-2 pb-0.5 flex items-center justify-between text-[11px]">
+                      <span className="text-neutral-500">
+                        Your live storefront link:{' '}
+                        <strong className="font-mono text-[#111111]">
+                          maji.hoberg.com.ng/store/{sanitizedClaimPreview}
+                        </strong>
+                      </span>
+                      <span className="text-[#F05A28] font-extrabold">Ready to claim</span>
+                    </div>
+                  )}
+                </form>
+
+                {/* Primary Storefront CTA + Secondary "Buy Directly from Independent Nigerian Stores" CTA */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <Link
+                    href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
+                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-[#F05A28]/25 transition-all hover:-translate-y-0.5"
+                  >
+                    <Store className="w-4 h-4" />
+                    <span>{isAuthenticated ? 'Open Storefront Studio' : 'Open Storefront — Free'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+
+                  <a
+                    href="#catalog"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#111111] hover:bg-neutral-800 text-white font-extrabold text-sm sm:text-base transition-all"
+                  >
+                    <ShoppingBag className="w-4 h-4 text-[#F05A28]" />
+                    <span>Buy from Nigerian Stores ({products.length})</span>
+                  </a>
+                </div>
+
+                {/* Everything Included in Your Storefront (4-Card Bento Matrix) */}
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <div className="p-3 rounded-2xl bg-white border border-[#111111]/[0.08] flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#F05A28]/10 text-[#F05A28] flex items-center justify-center shrink-0 mt-0.5">
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-extrabold text-[#111111]">100% Seller Payout (T+1)</p>
+                      <p className="text-[11px] text-neutral-500 leading-snug mt-0.5">
+                        Direct Paystack bank subaccount · <span className="tabular-nums font-semibold">4% + ₦50</span> paid by buyer
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white border border-[#111111]/[0.08] flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#F05A28]/10 text-[#F05A28] flex items-center justify-center shrink-0 mt-0.5">
+                      <Truck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-extrabold text-[#111111]">Live Delivery Quotes</p>
+                      <p className="text-[11px] text-neutral-500 leading-snug mt-0.5">
+                        Courier rates at checkout or seller pickup + <span className="font-mono">ORD-...</span> tracking
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white border border-[#111111]/[0.08] flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#F05A28]/10 text-[#F05A28] flex items-center justify-center shrink-0 mt-0.5">
+                      <Package className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-extrabold text-[#111111]">30 Store Categories</p>
+                      <p className="text-[11px] text-neutral-500 leading-snug mt-0.5">
+                        18 physical &amp; 12 digital product builders + Hoberg AI Assistant
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-white border border-[#111111]/[0.08] flex items-start gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-[#F05A28]/10 text-[#F05A28] flex items-center justify-center shrink-0 mt-0.5">
+                      <ShoppingBag className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-extrabold text-[#111111]">Buy Directly from Stores</p>
+                      <p className="text-[11px] text-neutral-500 leading-snug mt-0.5">
+                        Shop <span className="tabular-nums font-semibold">{stores.length}</span> active storefronts &amp;{' '}
+                        <span className="tabular-nums font-semibold">{products.length}</span> listings
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Direct Shopper Strip: "Buy Directly from Independent Nigerian Stores" Category Pills */}
                 {availableCategories.length > 0 && (
-                  <div className="pt-2">
-                    <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-neutral-500 mb-2.5">
-                      Browse Active Catalog Categories
-                    </p>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="pt-3 border-t border-[#111111]/10">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-neutral-500">
+                        Or buy directly from independent Nigerian stores:
+                      </p>
+                      <a
+                        href="#stores"
+                        className="text-[11px] font-extrabold text-[#F05A28] hover:underline"
+                      >
+                        View all {stores.length} stores →
+                      </a>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
                       <button
                         type="button"
                         onClick={() => handleCategorySelect('all')}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
                           selectedCategory === 'all'
                             ? 'bg-[#111111] text-white'
                             : 'bg-white border border-[#111111]/12 text-[#111111] hover:border-[#F05A28]'
@@ -618,7 +781,7 @@ export function MajiMarketplaceHome({
                           key={cat.key}
                           type="button"
                           onClick={() => handleCategorySelect(cat.key)}
-                          className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                             selectedCategory === cat.key
                               ? 'bg-[#F05A28] text-white'
                               : 'bg-white border border-[#111111]/12 text-[#111111] hover:border-[#F05A28]'
@@ -630,146 +793,241 @@ export function MajiMarketplaceHome({
                     </div>
                   </div>
                 )}
-
-                {/* Verified Platform Facts */}
-                <div className="pt-4 border-t border-[#111111]/10 grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xl sm:text-2xl font-black text-[#111111] tabular-nums">
-                      {stores.length}
-                    </p>
-                    <p className="text-xs font-semibold text-neutral-600">Active Stores</p>
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-black text-[#111111] tabular-nums">
-                      {products.length}
-                    </p>
-                    <p className="text-xs font-semibold text-neutral-600">Published Products</p>
-                  </div>
-                  <div>
-                    <p className="text-xl sm:text-2xl font-black text-[#F05A28] tabular-nums">
-                      T+1
-                    </p>
-                    <p className="text-xs font-semibold text-neutral-600">Paystack Settlement</p>
-                  </div>
-                </div>
               </div>
 
-              {/* Right Column: Authentic Nigerian Editorial Photography + Live Catalog Spotlight */}
+              {/* Right Column: Interactive Live Maji Storefront Showcase & Merchant Command Preview */}
               <div className="lg:col-span-6">
-                <div className="grid grid-cols-12 gap-3.5 sm:gap-4 items-stretch">
-                  {/* Primary Lagos Fashion & Retail Editorial Portrait */}
-                  <div className="col-span-7 relative rounded-3xl overflow-hidden bg-[#111111] border border-[#111111]/10 shadow-xl min-h-[360px] sm:min-h-[440px] flex flex-col justify-between">
-                    <img
-                      src="https://images.unsplash.com/photo-1787779350771-a4253704dcad?auto=format&fit=crop&w=900&q=80"
-                      alt="Nigerian woman in blue satin kaftan walking on a Lagos street — Photo by Ben Iwara"
-                      width={720}
-                      height={900}
-                      fetchPriority="high"
-                      decoding="async"
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-
-                    <div className="relative z-10 p-4 flex items-center justify-between">
-                      <span className="px-3 py-1 rounded-full bg-black/65 backdrop-blur-xs text-white text-[11px] font-bold border border-white/15">
-                        Lagos · Abuja · Nationwide
-                      </span>
+                <div className="rounded-3xl bg-[#111111] text-white border border-[#111111] shadow-2xl overflow-hidden">
+                  {/* Top Storefront Browser Chrome + Interactive Store Switcher */}
+                  <div className="px-4 py-3 bg-[#18181b] border-b border-white/10 flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#F05A28]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#FF8559]/70" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                      </div>
+                      <div className="ml-1 px-3 py-1 rounded-lg bg-black/60 border border-white/10 text-[11px] font-mono text-neutral-300 truncate">
+                        maji.hoberg.com.ng/store/
+                        <span className="text-[#FF8559] font-bold">
+                          {activeHeroStore?.slug || 'your-store'}
+                        </span>
+                      </div>
                     </div>
 
-                    {/* Live Product Overlay Card (Directly from Maji Database) */}
-                    {heroSpotlightProduct ? (
-                      <div className="relative z-10 p-3.5 sm:p-4 m-3 sm:m-4 rounded-2xl bg-white/95 backdrop-blur-md border border-white shadow-lg">
-                        <div className="flex items-center gap-3">
-                          {heroSpotlightProduct.image_url ? (
-                            <img
-                              src={heroSpotlightProduct.image_url}
-                              alt={heroSpotlightProduct.name}
-                              width={64}
-                              height={64}
-                              className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover bg-[#FAF8F5] border border-neutral-200 shrink-0"
-                            />
-                          ) : (
-                            <div className="w-14 h-14 rounded-xl bg-[#FAF8F5] flex items-center justify-center shrink-0">
-                              <ShoppingBag className="w-6 h-6 text-[#F05A28]" />
-                            </div>
-                          )}
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-[#F05A28]">
-                              <BadgeCheck className="w-3 h-3 shrink-0" />
-                              <span className="truncate">{heroSpotlightProduct.store.name}</span>
-                            </div>
-                            <h2 className="text-sm font-extrabold text-[#111111] truncate">
-                              {heroSpotlightProduct.name}
-                            </h2>
-                            <p className="text-sm font-black text-[#F05A28] tabular-nums mt-0.5">
-                              {formatNaira(heroSpotlightProduct.price)}
-                            </p>
-                          </div>
-                          <Link
-                            href={`/store/${heroSpotlightProduct.store.slug}/product/${heroSpotlightProduct.slug}`}
-                            aria-label={`View ${heroSpotlightProduct.name}`}
-                            className="p-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white transition-colors shrink-0"
-                          >
-                            <ArrowUpRight className="w-4 h-4" />
-                          </Link>
-                        </div>
-                      </div>
-                    ) : null}
+                    {activeHeroStore && (
+                      <Link
+                        href={`/store/${activeHeroStore.slug}`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F05A28] hover:bg-[#d94d1e] text-white text-[11px] font-extrabold transition-colors shrink-0"
+                      >
+                        <span>Visit Storefront</span>
+                        <ArrowUpRight className="w-3 h-3" />
+                      </Link>
+                    )}
                   </div>
 
-                  {/* Secondary Column: Nigerian Merchant Frame + Verified Storefront Card */}
-                  <div className="col-span-5 flex flex-col gap-3.5 sm:gap-4">
-                    <div className="relative flex-1 rounded-3xl overflow-hidden bg-[#111111] border border-[#111111]/10 min-h-[210px] flex flex-col justify-end p-4">
+                  {/* Interactive Storefront Switcher Bar (Preview Real Active Nigerian Stores on Maji) */}
+                  {stores.length > 0 && (
+                    <div className="px-4 py-2.5 bg-white/[0.03] border-b border-white/10 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400 shrink-0">
+                        Live Stores:
+                      </span>
+                      {stores.slice(0, 5).map((st) => {
+                        const isSelected = activeHeroStore?.id === st.id
+                        return (
+                          <button
+                            key={st.id}
+                            type="button"
+                            onClick={() => setHeroStoreSlug(st.slug)}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 cursor-pointer ${
+                              isSelected
+                                ? 'bg-[#F05A28] text-white shadow-xs'
+                                : 'bg-white/10 text-neutral-300 hover:bg-white/15 hover:text-white'
+                            }`}
+                          >
+                            <Store className="w-3 h-3" />
+                            <span>{st.name}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Inside the Live Storefront Preview */}
+                  <div className="p-4 sm:p-5 space-y-4 bg-[#FAF8F5] text-[#111111]">
+                    {/* Storefront Editorial Banner & Verified Merchant Header */}
+                    <div className="relative rounded-2xl overflow-hidden bg-[#111111] text-white p-4 sm:p-5 min-h-[155px] flex flex-col justify-between border border-[#111111]/10">
                       <img
-                        src="https://images.unsplash.com/photo-1761370980776-93f2110a99a7?auto=format&fit=crop&w=700&q=80"
-                        alt="Nigerian merchant at a market in Abuja — Photo by Muhammad-Taha Ibrahim"
-                        width={500}
-                        height={620}
-                        loading="lazy"
+                        src={
+                          activeHeroStore?.banner_url ||
+                          'https://images.unsplash.com/photo-1787779350771-a4253704dcad?auto=format&fit=crop&w=900&q=80'
+                        }
+                        alt="Nigerian storefront showcase banner — Photo by Ben Iwara in Lagos"
+                        width={720}
+                        height={360}
+                        fetchPriority="high"
                         decoding="async"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover opacity-55"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
-                      <div className="relative z-10 text-white">
-                        <span className="inline-block px-2 py-0.5 rounded bg-[#F05A28] text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
-                          For Merchants
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/30" />
+
+                      <div className="relative z-10 flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-xs border border-white/15 text-[10px] font-extrabold uppercase tracking-wider text-[#FF8559]">
+                          <BadgeCheck className="w-3.5 h-3.5 text-[#F05A28]" />
+                          <span>Verified Maji Storefront</span>
                         </span>
-                        <p className="text-xs sm:text-sm font-extrabold leading-snug">
-                          Built for Nigerian SMEs &amp; Independent Brands
-                        </p>
+                        <span className="px-2.5 py-1 rounded-full bg-[#F05A28] text-white text-[10px] font-extrabold uppercase tracking-wider">
+                          {activeHeroStore?.product_type || 'physical'} store
+                        </span>
+                      </div>
+
+                      <div className="relative z-10 flex items-end justify-between gap-3 pt-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {activeHeroStore?.logo_url ? (
+                            <img
+                              src={activeHeroStore.logo_url}
+                              alt={activeHeroStore.name}
+                              width={48}
+                              height={48}
+                              className="w-12 h-12 rounded-2xl object-cover bg-white border-2 border-white shadow-md shrink-0"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#F05A28] to-[#FF8559] text-white font-black text-lg flex items-center justify-center border-2 border-white shadow-md shrink-0">
+                              {(activeHeroStore?.name || 'M').trim().charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <h2 className="text-lg sm:text-xl font-extrabold text-white truncate">
+                              {activeHeroStore?.name || 'Your Nigerian Storefront'}
+                            </h2>
+                            <p className="text-xs text-neutral-300 truncate">
+                              {activeHeroStore?.store_category
+                                ? `${activeHeroStore.store_category} · Paystack Direct Checkout`
+                                : 'Custom Storefront · Paystack Direct Checkout'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {activeHeroStore && (
+                          <Link
+                            href={`/store/${activeHeroStore.slug}`}
+                            className="hidden sm:inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-white text-[#111111] hover:bg-[#F05A28] hover:text-white text-xs font-extrabold transition-colors shrink-0"
+                          >
+                            <span>Shop Store</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                     </div>
 
-                    <div className="rounded-3xl bg-[#111111] text-white p-4 sm:p-5 border border-[#111111] flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <MajiLogo
-                            variant="symbol"
-                            colorway="ember-duotone-dark"
-                            size={28}
-                            animation="rocker"
-                          />
-                          <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/10 text-[#FF8559]">
-                            Verified
-                          </span>
-                        </div>
-                        <p className="text-xs sm:text-sm font-extrabold text-white leading-snug">
-                          Instant Storefront + Paystack Subaccount
-                        </p>
-                        <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
-                          Share your custom store link on WhatsApp, Instagram &amp; TikTok.
-                        </p>
+                    {/* Live Storefront Products Shelf Inside Hero Preview */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">
+                          Live Storefront Products (Buy Directly)
+                        </span>
+                        <a
+                          href="#catalog"
+                          className="text-[11px] font-extrabold text-[#F05A28] hover:underline"
+                        >
+                          Browse all {products.length} products →
+                        </a>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-white/10">
-                        <Link
-                          href="/login?mode=signup"
-                          className="inline-flex items-center justify-between w-full text-xs font-extrabold text-[#FF8559] hover:text-white transition-colors"
-                        >
-                          <span>Launch your store</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
+                      <div className="grid grid-cols-2 gap-3">
+                        {activeHeroProducts.map((item) => {
+                          const hasDiscount = Boolean(
+                            item.discount_percent && item.discount_percent > 0
+                          )
+                          const finalPrice = hasDiscount
+                            ? item.price * (1 - (item.discount_percent || 0) / 100)
+                            : item.price
+
+                          return (
+                            <div
+                              key={item.id}
+                              className="group rounded-2xl bg-white border border-[#111111]/10 overflow-hidden flex flex-col justify-between hover:border-[#F05A28]/50 transition-all shadow-2xs"
+                            >
+                              <Link
+                                href={`/store/${item.store.slug}/product/${item.slug}`}
+                                className="relative aspect-[4/3] bg-[#FAF8F5] overflow-hidden block"
+                              >
+                                {item.image_url ? (
+                                  <img
+                                    src={item.image_url}
+                                    alt={item.name}
+                                    width={280}
+                                    height={210}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-[#FAF8F5]">
+                                    <MajiLogo
+                                      variant="symbol-small"
+                                      colorway="ember-duotone-light"
+                                      size={28}
+                                    />
+                                  </div>
+                                )}
+                                <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/75 text-white text-[10px] font-bold truncate max-w-[85%]">
+                                  {item.store.name}
+                                </span>
+                              </Link>
+
+                              <div className="p-3 flex flex-col flex-1 justify-between">
+                                <div>
+                                  <Link
+                                    href={`/store/${item.store.slug}/product/${item.slug}`}
+                                    className="block"
+                                  >
+                                    <h3 className="text-xs font-extrabold text-[#111111] truncate group-hover:text-[#F05A28] transition-colors">
+                                      {item.name}
+                                    </h3>
+                                  </Link>
+                                  <p className="text-sm font-black text-[#F05A28] tabular-nums mt-0.5">
+                                    {formatNaira(finalPrice)}
+                                  </p>
+                                </div>
+
+                                <Link
+                                  href={`/store/${item.store.slug}/product/${item.slug}`}
+                                  className="mt-2.5 w-full py-2 px-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-[11px] font-extrabold flex items-center justify-center gap-1 transition-colors"
+                                >
+                                  <ShoppingCart className="w-3 h-3" />
+                                  <span>Buy Now</span>
+                                </Link>
+                              </div>
+                            </div>
+                          )
+                        })}
                       </div>
+                    </div>
+
+                    {/* Merchant + Buyer Ecosystem Bar at Bottom of Storefront Showcase */}
+                    <div className="p-3.5 rounded-2xl bg-[#111111] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <MajiLogo
+                          variant="symbol"
+                          colorway="ember-duotone-dark"
+                          size={26}
+                          animation="rocker"
+                        />
+                        <div>
+                          <p className="text-xs font-extrabold text-white">
+                            Want a storefront like this for your business?
+                          </p>
+                          <p className="text-[11px] text-neutral-400">
+                            Share your link on WhatsApp, Instagram &amp; TikTok with instant Paystack checkout.
+                          </p>
+                        </div>
+                      </div>
+
+                      <Link
+                        href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
+                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shrink-0 transition-colors"
+                      >
+                        <span>Open Storefront</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
                     </div>
                   </div>
                 </div>
