@@ -308,8 +308,8 @@ export function MajiMarketplaceHome({
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#111111] flex flex-col selection:bg-[#F05A28]/15">
-      {/* 1. Top Deep Obsidian Marketplace Utility & Live Order Tracker Strip */}
-      <div className="bg-[#111111] text-white border-b border-white/10 text-xs">
+      {/* 1. Top Deep Obsidian Marketplace Utility & Live Order Tracker Strip (Desktop/Tablet Only to Keep Mobile Above-the-Fold Clean) */}
+      <div className="hidden md:block bg-[#111111] text-white border-b border-white/10 text-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar whitespace-nowrap">
             <span className="inline-flex items-center gap-1.5 font-bold text-[#FF8559]">
@@ -358,16 +358,16 @@ export function MajiMarketplaceHome({
         </div>
       </div>
 
-      {/* 2. Sticky Marketplace Header & Search Experience */}
+      {/* 2. Sticky Marketplace Header (Single Clean Bar on Mobile, Full Search Header on Desktop) */}
       <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-[#111111]/[0.08] shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-18 flex items-center justify-between gap-3 sm:gap-6">
+          <div className="h-15 md:h-18 flex items-center justify-between gap-2.5 sm:gap-6">
             {/* Official Maji Horizontal Brand Lockup */}
             <Link href="/" className="flex items-center gap-2 shrink-0 group" aria-label="Maji Marketplace Home">
               <MajiLogo
                 variant="horizontal"
                 colorway="ember-duotone-light"
-                size={36}
+                size={32}
                 className="transition-transform duration-200 group-hover:scale-[1.02]"
               />
             </Link>
@@ -438,13 +438,22 @@ export function MajiMarketplaceHome({
               </a>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Mobile Quick Search Jump Icon */}
+              <a
+                href="#catalog"
+                aria-label="Search products"
+                className="md:hidden p-2 rounded-xl text-[#111111] hover:bg-[#FAF8F5]"
+              >
+                <Search className="w-4 h-4" />
+              </a>
+
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
                 >
-                  <Store className="w-4 h-4" />
+                  <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Open Storefront</span>
                 </Link>
               ) : (
@@ -457,11 +466,10 @@ export function MajiMarketplaceHome({
                   </Link>
                   <Link
                     href="/login?mode=signup"
-                    className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs sm:text-sm font-extrabold shadow-sm shadow-[#F05A28]/25 transition-all"
                   >
-                    <Store className="w-4 h-4" />
+                    <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span>Open Storefront</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </>
               )}
@@ -476,58 +484,27 @@ export function MajiMarketplaceHome({
               </button>
             </div>
           </div>
-
-          {/* Mobile Search Bar (Always visible on mobile for immediate shopping) */}
-          <form onSubmit={handleSearchSubmit} className="md:hidden pb-3" role="search">
-            <div className="flex items-center bg-[#FAF8F5] border border-[#111111]/15 focus-within:border-[#F05A28] rounded-xl overflow-hidden">
-              <Search className="w-4 h-4 text-neutral-400 ml-3 shrink-0" />
-              <input
-                type="search"
-                aria-label="Search products or stores"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, stores, or categories..."
-                className="w-full px-2.5 py-2 bg-transparent text-sm text-[#111111] placeholder:text-neutral-400 focus:outline-none"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                  className="p-1.5 text-neutral-400"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#F05A28] text-white text-xs font-extrabold shrink-0"
-              >
-                Search
-              </button>
-            </div>
-          </form>
         </div>
 
         {/* Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-[#111111]/10 px-4 py-4 space-y-4">
-            <nav className="grid grid-cols-2 gap-2 text-sm font-bold">
+          <div className="md:hidden bg-white border-t border-[#111111]/10 px-4 py-4 space-y-4 shadow-xl">
+            <nav className="grid grid-cols-2 gap-2 text-xs font-extrabold">
               <a
                 href="#catalog"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 rounded-xl bg-[#FAF8F5] text-[#111111] flex items-center justify-between"
               >
                 <span>Shop Catalog</span>
-                <ArrowRight className="w-4 h-4 text-[#F05A28]" />
+                <ArrowRight className="w-3.5 h-3.5 text-[#F05A28]" />
               </a>
               <a
                 href="#stores"
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-3 rounded-xl bg-[#FAF8F5] text-[#111111] flex items-center justify-between"
               >
-                <span>Verified Stores</span>
-                <ArrowRight className="w-4 h-4 text-[#F05A28]" />
+                <span>Nigerian Stores</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#F05A28]" />
               </a>
               <a
                 href="#categories"
@@ -535,7 +512,7 @@ export function MajiMarketplaceHome({
                 className="p-3 rounded-xl bg-[#FAF8F5] text-[#111111] flex items-center justify-between"
               >
                 <span>Categories</span>
-                <ArrowRight className="w-4 h-4 text-[#F05A28]" />
+                <ArrowRight className="w-3.5 h-3.5 text-[#F05A28]" />
               </a>
               <a
                 href="#sell-on-maji"
@@ -543,13 +520,13 @@ export function MajiMarketplaceHome({
                 className="p-3 rounded-xl bg-[#FAF8F5] text-[#111111] flex items-center justify-between"
               >
                 <span>Sell on Maji</span>
-                <ArrowRight className="w-4 h-4 text-[#F05A28]" />
+                <ArrowRight className="w-3.5 h-3.5 text-[#F05A28]" />
               </a>
             </nav>
 
             <form onSubmit={handleTrackOrder} className="pt-3 border-t border-neutral-100">
               <label htmlFor="mobile-order-track" className="block text-xs font-bold text-neutral-600 mb-1.5">
-                Track Existing Order Reference
+                Track Order Reference (ORD-...)
               </label>
               <div className="flex gap-2">
                 <input
@@ -574,13 +551,13 @@ export function MajiMarketplaceHome({
               <div className="pt-2 flex gap-2">
                 <Link
                   href="/login"
-                  className="flex-1 py-2.5 text-center rounded-xl border border-[#111111]/15 font-bold text-sm text-[#111111]"
+                  className="flex-1 py-2.5 text-center rounded-xl border border-[#111111]/15 font-bold text-xs text-[#111111]"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/login?mode=signup"
-                  className="flex-1 py-2.5 text-center rounded-xl bg-[#F05A28] font-extrabold text-sm text-white"
+                  className="flex-1 py-2.5 text-center rounded-xl bg-[#F05A28] font-extrabold text-xs text-white"
                 >
                   Open Storefront
                 </Link>
@@ -592,7 +569,7 @@ export function MajiMarketplaceHome({
 
       <main className="flex-1">
         {/* 3. Flagship Storefront-First & Nigerian Marketplace Hero Section */}
-        <section className="relative overflow-hidden pt-7 pb-14 sm:pt-12 sm:pb-20 border-b border-[#111111]/[0.08]">
+        <section className="relative overflow-hidden pt-5 pb-10 sm:pt-12 sm:pb-20 border-b border-[#111111]/[0.08]">
           {/* Subtle Warm Editorial Background Glow */}
           <div
             aria-hidden="true"
@@ -600,9 +577,138 @@ export function MajiMarketplaceHome({
           />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+            {/* =====================================================================
+                3A. DEDICATED MOBILE HERO (lg:hidden)
+                Designed specifically for phone screens: concise 5-word headline,
+                single high-contrast CTA, zero button clutter, and 1 clean visual card.
+               ===================================================================== */}
+            <div className="lg:hidden space-y-5">
+              {/* Minimalist Eyebrow Pill */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#111111]/10 shadow-2xs">
+                <MajiLogo variant="symbol" colorway="ember-orange" size={14} animation="bounce" />
+                <span className="text-[11px] font-extrabold tracking-wide text-[#111111]">
+                  Nigerian Storefront &amp; Marketplace
+                </span>
+              </div>
+
+              {/* Clean, Punchy Headline & Concise 2-Line Subtitle */}
+              <div className="space-y-2.5">
+                <h1 className="text-[2.15rem] sm:text-4xl font-extrabold tracking-tight text-[#111111] leading-[1.06]">
+                  Launch your{' '}
+                  <span className="text-[#F05A28]">Nigerian storefront.</span>
+                </h1>
+                <p className="text-sm sm:text-base text-neutral-600 leading-relaxed">
+                  Sell physical or digital products with automated Paystack payouts &amp; live delivery — or buy directly from Nigerian stores.
+                </p>
+              </div>
+
+              {/* Single Dominant Thumb-Friendly Primary CTA + Lightweight Shop Link */}
+              <div className="space-y-2.5 pt-0.5">
+                <Link
+                  href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] active:scale-[0.99] text-white font-extrabold text-base shadow-lg shadow-[#F05A28]/25 flex items-center justify-center gap-2 transition-all"
+                >
+                  <Store className="w-4 h-4" />
+                  <span>Open Storefront</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+
+                <div className="flex items-center justify-center gap-1.5 text-xs">
+                  <span className="text-neutral-500">Shopping today?</span>
+                  <a
+                    href="#catalog"
+                    className="font-extrabold text-[#111111] underline decoration-[#F05A28] decoration-2 underline-offset-4"
+                  >
+                    Buy from {stores.length} Nigerian stores ({products.length}) ↓
+                  </a>
+                </div>
+              </div>
+
+              {/* Single Editorial Visual Showcase Card with Live Storefront Pill */}
+              <div className="relative rounded-3xl overflow-hidden bg-[#111111] border border-[#111111]/10 shadow-xl aspect-[4/3] sm:aspect-[16/10] flex flex-col justify-between p-3.5">
+                <img
+                  src="https://images.unsplash.com/photo-1787779350771-a4253704dcad?auto=format&fit=crop&w=800&q=80"
+                  alt="Nigerian storefront showcase in Lagos — Photo by Ben Iwara"
+                  width={640}
+                  height={480}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/20" />
+
+                {/* Top Floating Badge */}
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-xs border border-white/15 text-[10px] font-extrabold text-white">
+                    Paystack T+1 Payouts · Live Delivery
+                  </span>
+                </div>
+
+                {/* Bottom Glassmorphic Live Storefront Preview Bar */}
+                {activeHeroStore && (
+                  <Link
+                    href={`/store/${activeHeroStore.slug}`}
+                    className="relative z-10 p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-white shadow-md flex items-center justify-between gap-3"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      {activeHeroStore.logo_url ? (
+                        <img
+                          src={activeHeroStore.logo_url}
+                          alt={activeHeroStore.name}
+                          width={40}
+                          height={40}
+                          className="w-10 h-10 rounded-xl object-cover bg-[#FAF8F5] border border-neutral-200 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#F05A28] to-[#FF8559] text-white font-black text-sm flex items-center justify-center shrink-0">
+                          {activeHeroStore.name.trim().charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-extrabold text-[#111111] truncate">
+                            {activeHeroStore.name}
+                          </span>
+                          <BadgeCheck className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+                        </div>
+                        <p className="text-[11px] text-neutral-500 font-mono truncate">
+                          maji.hoberg.com.ng/store/{activeHeroStore.slug}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span className="px-3 py-1.5 rounded-xl bg-[#F05A28] text-white text-[11px] font-extrabold shrink-0">
+                      Visit →
+                    </span>
+                  </Link>
+                )}
+              </div>
+
+              {/* Compact 3-Metric Trust Strip (1 Single Clean Row) */}
+              <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+                <div className="p-2.5 rounded-2xl bg-white border border-[#111111]/[0.07]">
+                  <p className="text-sm font-black text-[#111111] tabular-nums">100%</p>
+                  <p className="text-[10px] font-semibold text-neutral-500">Seller Payout</p>
+                </div>
+                <div className="p-2.5 rounded-2xl bg-white border border-[#111111]/[0.07]">
+                  <p className="text-sm font-black text-[#F05A28] tabular-nums">T+1</p>
+                  <p className="text-[10px] font-semibold text-neutral-500">Paystack Bank</p>
+                </div>
+                <div className="p-2.5 rounded-2xl bg-white border border-[#111111]/[0.07]">
+                  <p className="text-sm font-black text-[#111111] tabular-nums">{stores.length}</p>
+                  <p className="text-[10px] font-semibold text-neutral-500">Active Stores</p>
+                </div>
+              </div>
+            </div>
+
+            {/* =====================================================================
+                3B. DESKTOP HERO (hidden lg:grid)
+                Full 12-column Storefront-First Hero with URL builder, 4-card bento,
+                and interactive live storefront preview browser window.
+               ===================================================================== */}
+            <div className="hidden lg:grid lg:grid-cols-12 gap-10 items-start">
               {/* Left Column: Storefront-First Hero Pitch + URL Claim Bar + Marketplace Shopping Access */}
-              <div className="lg:col-span-6 space-y-5 sm:space-y-6">
+              <div className="lg:col-span-6 space-y-6">
                 {/* Top Identity & Dual-Role Badge */}
                 <div className="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#111111]/12 shadow-2xs">
                   <MajiLogo variant="symbol" colorway="ember-orange" size={18} animation="bounce" />
@@ -616,13 +722,13 @@ export function MajiMarketplaceHome({
 
                 {/* Primary Storefront-First Headline */}
                 <div className="space-y-3">
-                  <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[#111111] leading-[1.03]">
+                  <h2 className="text-5xl lg:text-[3.5rem] font-extrabold tracking-tight text-[#111111] leading-[1.03]">
                     Launch your{' '}
                     <span className="text-[#F05A28]">Nigerian storefront.</span>{' '}
                     Sell everywhere.
-                  </h1>
+                  </h2>
 
-                  <p className="text-base sm:text-lg text-neutral-700 leading-relaxed max-w-xl">
+                  <p className="text-lg text-neutral-700 leading-relaxed max-w-xl">
                     Open a custom online storefront for your physical or digital products in minutes — with automated{' '}
                     <strong className="font-extrabold text-[#111111]">Paystack T+1 bank payouts</strong>, live{' '}
                     <strong className="font-extrabold text-[#111111]">courier delivery quotes</strong>, and{' '}
@@ -642,7 +748,7 @@ export function MajiMarketplaceHome({
                   onSubmit={handleClaimStorefrontSubmit}
                   className="p-2 rounded-2xl bg-white border-2 border-[#111111]/12 focus-within:border-[#F05A28] shadow-md transition-all"
                 >
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="flex items-center flex-1 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#111111]/[0.07] min-w-0">
                       <Store className="w-4 h-4 text-[#F05A28] shrink-0 mr-2" />
                       <span className="text-xs font-mono font-bold text-neutral-400 shrink-0 select-none">
@@ -654,7 +760,7 @@ export function MajiMarketplaceHome({
                         value={claimStoreHandle}
                         onChange={(e) => setClaimStoreHandle(e.target.value)}
                         placeholder="your-store-name"
-                        className="w-full bg-transparent text-xs sm:text-sm font-mono font-extrabold text-[#111111] placeholder:text-neutral-400 focus:outline-none min-w-[90px]"
+                        className="w-full bg-transparent text-sm font-mono font-extrabold text-[#111111] placeholder:text-neutral-400 focus:outline-none min-w-[90px]"
                       />
                     </div>
                     <button
@@ -679,10 +785,10 @@ export function MajiMarketplaceHome({
                 </form>
 
                 {/* Primary Storefront CTA + Secondary "Buy Directly from Independent Nigerian Stores" CTA */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                <div className="flex items-center gap-3">
                   <Link
                     href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
-                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-[#F05A28]/25 transition-all hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-base shadow-lg shadow-[#F05A28]/25 transition-all hover:-translate-y-0.5"
                   >
                     <Store className="w-4 h-4" />
                     <span>{isAuthenticated ? 'Open Storefront Studio' : 'Open Storefront — Free'}</span>
@@ -691,7 +797,7 @@ export function MajiMarketplaceHome({
 
                   <a
                     href="#catalog"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#111111] hover:bg-neutral-800 text-white font-extrabold text-sm sm:text-base transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#111111] hover:bg-neutral-800 text-white font-extrabold text-base transition-all"
                   >
                     <ShoppingBag className="w-4 h-4 text-[#F05A28]" />
                     <span>Buy from Nigerian Stores ({products.length})</span>
@@ -853,9 +959,9 @@ export function MajiMarketplaceHome({
                   )}
 
                   {/* Inside the Live Storefront Preview */}
-                  <div className="p-4 sm:p-5 space-y-4 bg-[#FAF8F5] text-[#111111]">
+                  <div className="p-5 space-y-4 bg-[#FAF8F5] text-[#111111]">
                     {/* Storefront Editorial Banner & Verified Merchant Header */}
-                    <div className="relative rounded-2xl overflow-hidden bg-[#111111] text-white p-4 sm:p-5 min-h-[155px] flex flex-col justify-between border border-[#111111]/10">
+                    <div className="relative rounded-2xl overflow-hidden bg-[#111111] text-white p-5 min-h-[155px] flex flex-col justify-between border border-[#111111]/10">
                       <img
                         src={
                           activeHeroStore?.banner_url ||
@@ -864,7 +970,6 @@ export function MajiMarketplaceHome({
                         alt="Nigerian storefront showcase banner — Photo by Ben Iwara in Lagos"
                         width={720}
                         height={360}
-                        fetchPriority="high"
                         decoding="async"
                         className="absolute inset-0 w-full h-full object-cover opacity-55"
                       />
@@ -896,9 +1001,9 @@ export function MajiMarketplaceHome({
                             </div>
                           )}
                           <div className="min-w-0">
-                            <h2 className="text-lg sm:text-xl font-extrabold text-white truncate">
+                            <h3 className="text-xl font-extrabold text-white truncate">
                               {activeHeroStore?.name || 'Your Nigerian Storefront'}
-                            </h2>
+                            </h3>
                             <p className="text-xs text-neutral-300 truncate">
                               {activeHeroStore?.store_category
                                 ? `${activeHeroStore.store_category} · Paystack Direct Checkout`
@@ -910,7 +1015,7 @@ export function MajiMarketplaceHome({
                         {activeHeroStore && (
                           <Link
                             href={`/store/${activeHeroStore.slug}`}
-                            className="hidden sm:inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-white text-[#111111] hover:bg-[#F05A28] hover:text-white text-xs font-extrabold transition-colors shrink-0"
+                            className="inline-flex items-center gap-1 px-3.5 py-2 rounded-xl bg-white text-[#111111] hover:bg-[#F05A28] hover:text-white text-xs font-extrabold transition-colors shrink-0"
                           >
                             <span>Shop Store</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -979,9 +1084,9 @@ export function MajiMarketplaceHome({
                                     href={`/store/${item.store.slug}/product/${item.slug}`}
                                     className="block"
                                   >
-                                    <h3 className="text-xs font-extrabold text-[#111111] truncate group-hover:text-[#F05A28] transition-colors">
+                                    <h4 className="text-xs font-extrabold text-[#111111] truncate group-hover:text-[#F05A28] transition-colors">
                                       {item.name}
-                                    </h3>
+                                    </h4>
                                   </Link>
                                   <p className="text-sm font-black text-[#F05A28] tabular-nums mt-0.5">
                                     {formatNaira(finalPrice)}
@@ -1003,7 +1108,7 @@ export function MajiMarketplaceHome({
                     </div>
 
                     {/* Merchant + Buyer Ecosystem Bar at Bottom of Storefront Showcase */}
-                    <div className="p-3.5 rounded-2xl bg-[#111111] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="p-3.5 rounded-2xl bg-[#111111] text-white flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5">
                         <MajiLogo
                           variant="symbol"
@@ -1023,7 +1128,7 @@ export function MajiMarketplaceHome({
 
                       <Link
                         href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
-                        className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shrink-0 transition-colors"
+                        className="px-4 py-2.5 rounded-xl bg-[#F05A28] hover:bg-[#d94d1e] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shrink-0 transition-colors"
                       >
                         <span>Open Storefront</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -1037,25 +1142,25 @@ export function MajiMarketplaceHome({
         </section>
 
         {/* 4. Live Product Discovery & Marketplace Catalog Section (#catalog) */}
-        <section id="catalog" className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <section id="catalog" className="py-10 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 mb-5 sm:mb-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#F05A28] mb-1.5">
+              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-[0.14em] text-[#F05A28] mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Live Marketplace Catalog</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
-                Shop Published Products from Active Stores
+              <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                Buy Directly from Nigerian Stores
               </h2>
             </div>
 
             {/* Filter & Sort Controls */}
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
               {discountedProductsCount > 0 && (
                 <button
                   type="button"
                   onClick={() => setOnlyDeals(!onlyDeals)}
-                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
+                  className={`px-3 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
                     onlyDeals
                       ? 'bg-[#F05A28] text-white shadow-sm shadow-[#F05A28]/25'
                       : 'bg-white border border-[#F05A28]/30 text-[#F05A28] hover:bg-[#F05A28]/10'
@@ -1083,6 +1188,61 @@ export function MajiMarketplaceHome({
                 </select>
               </div>
             </div>
+          </div>
+
+          {/* Mobile Search & Single-Row Horizontal Category Scroller (md:hidden) */}
+          <div className="md:hidden space-y-3 mb-5">
+            <div className="flex items-center bg-white border border-[#111111]/15 focus-within:border-[#F05A28] rounded-xl overflow-hidden shadow-2xs">
+              <Search className="w-4 h-4 text-neutral-400 ml-3 shrink-0" />
+              <input
+                type="search"
+                aria-label="Search products or stores"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products or stores..."
+                className="w-full px-2.5 py-2.5 bg-transparent text-xs font-medium text-[#111111] placeholder:text-neutral-400 focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                  className="p-2 text-neutral-400"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {availableCategories.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory('all')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-extrabold shrink-0 transition-all ${
+                    selectedCategory === 'all'
+                      ? 'bg-[#111111] text-white'
+                      : 'bg-white border border-[#111111]/10 text-[#111111]'
+                  }`}
+                >
+                  All ({products.length})
+                </button>
+                {availableCategories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.key)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-bold shrink-0 transition-all ${
+                      selectedCategory === cat.key
+                        ? 'bg-[#F05A28] text-white'
+                        : 'bg-white border border-[#111111]/10 text-[#111111]'
+                    }`}
+                  >
+                    {cat.label} ({cat.count})
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Active Filter Status Bar */}
@@ -1375,26 +1535,26 @@ export function MajiMarketplaceHome({
         </section>
 
         {/* 6. Editorial Nigerian Category Discovery (#categories) */}
-        <section id="categories" className="py-14 sm:py-18 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-8">
-            <span className="inline-block text-xs font-extrabold uppercase tracking-[0.14em] text-[#F05A28] mb-1.5">
+        <section id="categories" className="py-10 sm:py-18 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mb-5 sm:mb-8">
+            <span className="inline-block text-xs font-extrabold uppercase tracking-[0.14em] text-[#F05A28] mb-1">
               Curated Nigerian Commerce
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+            <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
               Shop by Category
             </h2>
-            <p className="mt-1.5 text-sm sm:text-base text-neutral-600">
+            <p className="hidden sm:block mt-1.5 text-sm sm:text-base text-neutral-600">
               Select a category to filter active listings from Nigerian merchants on Maji.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {EDITORIAL_CATEGORIES.map((cat) => (
               <button
                 key={cat.key}
                 type="button"
                 onClick={() => handleCategorySelect(cat.key)}
-                className="group relative h-72 sm:h-80 rounded-3xl overflow-hidden bg-[#111111] text-left border border-[#111111]/10 flex flex-col justify-end p-5 cursor-pointer shadow-sm hover:shadow-xl transition-all"
+                className="group relative h-44 sm:h-80 rounded-2xl sm:rounded-3xl overflow-hidden bg-[#111111] text-left border border-[#111111]/10 flex flex-col justify-end p-3.5 sm:p-5 cursor-pointer shadow-sm hover:shadow-xl transition-all"
               >
                 <img
                   src={cat.image}
@@ -1408,11 +1568,13 @@ export function MajiMarketplaceHome({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-transparent" />
 
                 <div className="relative z-10">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F05A28] text-white text-[10px] font-extrabold uppercase tracking-wider mb-2">
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#F05A28] text-white text-[10px] font-extrabold uppercase tracking-wider mb-2">
                     Explore Category
                   </span>
-                  <h3 className="text-lg font-extrabold text-white">{cat.title}</h3>
-                  <p className="text-xs text-neutral-300 mt-1 line-clamp-2 leading-relaxed">
+                  <h3 className="text-sm sm:text-lg font-extrabold text-white leading-snug">
+                    {cat.title}
+                  </h3>
+                  <p className="hidden sm:line-clamp-2 text-xs text-neutral-300 mt-1 leading-relaxed">
                     {cat.subtitle}
                   </p>
                 </div>
@@ -1422,65 +1584,64 @@ export function MajiMarketplaceHome({
         </section>
 
         {/* 7. Transparent Nigerian Commerce Architecture & Seller Callout (#sell-on-maji) */}
-        <section id="sell-on-maji" className="py-16 sm:py-22 bg-[#111111] text-white">
+        <section id="sell-on-maji" className="py-12 sm:py-22 bg-[#111111] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              <div className="lg:col-span-6 space-y-6">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15">
+              <div className="lg:col-span-6 space-y-5 sm:space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15">
                   <MajiLogo
                     variant="symbol"
                     colorway="ember-orange"
-                    size={18}
+                    size={16}
                     animation="pulse"
                   />
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#FF8559]">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#FF8559]">
                     Built for Nigerian Merchants
                   </span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.06]">
+                <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-[1.08]">
                   Launch your Nigerian storefront with{' '}
                   <span className="text-[#F05A28]">automated Paystack payouts.</span>
                 </h2>
 
-                <p className="text-neutral-300 text-base leading-relaxed">
-                  Whether you run a fashion boutique in Lagos, sell electronics and gadgets, or publish digital ebooks and courses, Maji gives your business a dedicated online storefront that settles directly to your Nigerian bank account.
+                <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
+                  Sell physical or digital products from your own dedicated Maji storefront link and settle directly to your Nigerian bank account.
                 </p>
 
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                <div className="space-y-3 sm:space-y-4 pt-1">
+                  <div className="flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10">
                     <CreditCard className="w-5 h-5 text-[#F05A28] shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="text-sm font-extrabold text-white">
-                        Direct Paystack Bank Account Verification &amp; Split Settlement
+                      <h3 className="text-xs sm:text-sm font-extrabold text-white">
+                        100% Seller Payout via Paystack Subaccount
                       </h3>
-                      <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                        Connect your Nigerian bank account in Seller Studio. Buyers pay the{' '}
-                        <span className="text-white font-bold tabular-nums">4% + ₦50</span> platform fee at checkout so you receive 100% of your product subtotal.
+                      <p className="text-xs text-neutral-400 mt-0.5 leading-relaxed">
+                        Buyers pay the <span className="text-white font-bold tabular-nums">4% + ₦50</span> fee at checkout so you receive 100% of your product price.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                  <div className="flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10">
                     <Truck className="w-5 h-5 text-[#F05A28] shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="text-sm font-extrabold text-white">
-                        Live Delivery Quotes or Direct Seller Arrangement
+                      <h3 className="text-xs sm:text-sm font-extrabold text-white">
+                        Live Delivery Quotes &amp; Order Reference Tracking
                       </h3>
-                      <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                        Physical stores can offer live courier delivery rate calculation at checkout or let customers arrange pickup directly with the seller, backed by order reference tracking (<code className="text-[#FF8559]">/track/ORD-...</code>).
+                      <p className="text-xs text-neutral-400 mt-0.5 leading-relaxed">
+                        Offer live courier rates or direct seller pickup with <code className="text-[#FF8559]">/track/ORD-...</code> tracking.
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                  <div className="flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10">
                     <Package className="w-5 h-5 text-[#F05A28] shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="text-sm font-extrabold text-white">
-                        18 Physical &amp; 12 Digital Store Categories + Hoberg AI Assistant
+                      <h3 className="text-xs sm:text-sm font-extrabold text-white">
+                        18 Physical &amp; 12 Digital Categories + Hoberg AI
                       </h3>
-                      <p className="text-xs text-neutral-400 mt-1 leading-relaxed">
-                        Dedicated product builders for clothing, shoes, gadgets, jewelry, food, ebooks, and templates — with an in-dashboard AI assistant to guide your setup.
+                      <p className="text-xs text-neutral-400 mt-0.5 leading-relaxed">
+                        Tailored product builders for fashion, shoes, gadgets, ebooks, and courses.
                       </p>
                     </div>
                   </div>
@@ -1489,22 +1650,23 @@ export function MajiMarketplaceHome({
                 <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <Link
                     href={isAuthenticated ? '/dashboard' : '/login?mode=signup'}
-                    className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-base shadow-lg shadow-[#F05A28]/25 transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 sm:py-4 rounded-2xl bg-[#F05A28] hover:bg-[#d94d1e] text-white font-extrabold text-sm sm:text-base shadow-lg shadow-[#F05A28]/25 transition-all"
                   >
-                    <span>{isAuthenticated ? 'Go to Seller Studio' : 'Create Your Free Store'}</span>
+                    <Store className="w-4 h-4" />
+                    <span>Open Storefront</span>
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                   <Link
                     href="/login"
-                    className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-base border border-white/15 transition-all"
+                    className="hidden sm:inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-base border border-white/15 transition-all"
                   >
                     <span>Sign In to Existing Store</span>
                   </Link>
                 </div>
               </div>
 
-              {/* Right Column: How a Maji Order Works Step-by-Step */}
-              <div className="lg:col-span-6">
+              {/* Right Column: How a Maji Order Works Step-by-Step (Desktop Only to Keep Mobile Concise) */}
+              <div className="hidden lg:block lg:col-span-6">
                 <div className="rounded-3xl bg-[#18181b] border border-white/10 p-6 sm:p-8 space-y-6">
                   <div className="flex items-center justify-between border-b border-white/10 pb-5">
                     <div>
