@@ -131,11 +131,106 @@ export default async function HomePage() {
       return 0
     })
 
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng'
+  ).replace(/\/$/, '')
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${baseUrl}/#website`,
+        url: baseUrl,
+        name: 'Maji Marketplace',
+        description:
+          'Launch your Nigerian online storefront in minutes with automated Paystack payouts and live delivery quotes — or buy directly from independent Nigerian stores.',
+        inLanguage: 'en-NG',
+        publisher: {
+          '@id': `${baseUrl}/#organization`,
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${baseUrl}/#organization`,
+        name: 'Maji Marketplace',
+        legalName: 'Hoberg Digital',
+        url: baseUrl,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${baseUrl}/icon-512.png`,
+          width: 512,
+          height: 512,
+        },
+        contactPoint: {
+          '@type': 'ContactPoint',
+          email: 'support.hoberg@gmail.com',
+          contactType: 'customer support',
+          areaServed: 'NG',
+          availableLanguage: ['English'],
+        },
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Active Nigerian Storefronts on Maji',
+        numberOfItems: stores.length,
+        itemListElement: stores.slice(0, 20).map((s, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          name: s.name,
+          url: `${baseUrl}/store/${s.slug}`,
+        })),
+      },
+      {
+        '@type': 'ItemList',
+        name: 'Published Products on Maji Marketplace',
+        numberOfItems: products.length,
+        itemListElement: products.slice(0, 24).map((p, idx) => ({
+          '@type': 'ListItem',
+          position: idx + 1,
+          item: {
+            '@type': 'Product',
+            name: p.name,
+            description: p.description || `${p.name} sold by ${p.store.name} on Maji`,
+            url: `${baseUrl}/store/${p.store.slug}/product/${p.slug}`,
+            ...(p.image_url ? { image: p.image_url } : {}),
+            brand: {
+              '@type': 'Brand',
+              name: p.brand || p.store.name,
+            },
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'NGN',
+              price: p.discount_percent
+                ? Math.round(p.price * (1 - p.discount_percent / 100))
+                : p.price,
+              availability:
+                p.is_digital || (p.stock ?? 1) > 0
+                  ? 'https://schema.org/InStock'
+                  : 'https://schema.org/OutOfStock',
+              url: `${baseUrl}/store/${p.store.slug}/product/${p.slug}`,
+              seller: {
+                '@type': 'Organization',
+                name: p.store.name,
+              },
+            },
+          },
+        })),
+      },
+    ],
+  }
+
   return (
-    <MajiMarketplaceHome
-      stores={stores}
-      products={products}
-      isAuthenticated={isAuthenticated}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MajiMarketplaceHome
+        stores={stores}
+        products={products}
+        isAuthenticated={isAuthenticated}
+      />
+    </>
   )
 }

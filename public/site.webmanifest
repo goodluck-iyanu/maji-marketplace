@@ -1,6 +1,17 @@
 {
-  "name": "Maji",
+  "id": "/",
+  "name": "Maji — Nigerian Storefront & Marketplace",
   "short_name": "Maji",
+  "description": "Launch your Nigerian online storefront in minutes or buy directly from independent Nigerian stores. Automated Paystack T+1 bank payouts and tracked delivery.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "en-NG",
+  "dir": "ltr",
+  "theme_color": "#F05A28",
+  "background_color": "#FAF8F5",
+  "categories": ["shopping", "business", "marketplace"],
   "icons": [
     {
       "src": "/icon-192.png",
@@ -18,9 +29,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "theme_color": "#F05A28",
-  "background_color": "#F05A28",
-  "display": "standalone"
+  ]
 }
-

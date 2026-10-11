@@ -1,0 +1,27 @@
+/* TEAM */
+Platform: Maji Marketplace
+Organization: Hoberg Digital
+Founder & Lead Engineer: Goodluck Ikehungu
+Contact: support.hoberg@gmail.com
+Location: Lagos & Abuja, Nigeria
+
+/* SITE */
+Canonical URL: https://maji.hoberg.com.ng
+Sitemap: https://maji.hoberg.com.ng/sitemap.xml
+AI Discovery: https://maji.hoberg.com.ng/llms.txt
+Language: English (en-NG)
+Standards: HTML5, CSS3, ES2023, Schema.org JSON-LD, OpenGraph, Web App Manifest
+Framework: Next.js App Router (React 19, TypeScript)
+Styling: Tailwind CSS v4
+Database & Auth: Supabase (PostgreSQL, Row-Level Security, Storage)
+Payments: Paystack (Direct Nigerian Bank Subaccount Split Settlement)
+Logistics: Theyutes Courier API & Direct Seller Pickup
+AI Assistant: Google Gemini (Hoberg AI Seller Studio Assistant)
+Brand System: Concept F · S6 Storefront Basket Smile (#F05A28 Maji Ember Orange, #111111 Deep Obsidian, #FAF8F5 Market Alabaster)
+
+/* THANKS */
+Editorial Photography (Unsplash License):
+- Ben Iwara (Lagos, Nigeria)
+- Muhammad-Taha Ibrahim (Abuja, Nigeria)
+- Theresa Ude (Abuja, Nigeria)
+

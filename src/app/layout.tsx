@@ -18,13 +18,60 @@ export const viewport: Viewport = {
   themeColor: "#F05A28",
 };
 
+const APP_BASE_URL = (
+  process.env.NEXT_PUBLIC_APP_URL || "https://maji.hoberg.com.ng"
+).replace(/\/$/, "");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_BASE_URL),
+  applicationName: "Maji Marketplace",
   title: {
-    default: "Maji | Create your online store in minutes",
-    template: "%s | Maji",
+    default: "Maji | Launch Your Nigerian Storefront & Shop Independent Stores",
+    template: "%s | Maji Marketplace",
   },
-  description: "The easiest way to sell physical and digital products online in Nigeria. Instant storefronts, automated Paystack payouts, and seamless delivery.",
+  description:
+    "Launch your Nigerian online storefront in minutes with automated Paystack T+1 bank payouts, live delivery quotes, and Hoberg AI — or buy directly from verified Nigerian stores.",
+  keywords: [
+    "Maji",
+    "Maji Marketplace",
+    "Nigerian online store builder",
+    "create online storefront Nigeria",
+    "Paystack storefront Nigeria",
+    "multi-vendor marketplace Nigeria",
+    "buy from Nigerian stores",
+    "sell physical and digital products Nigeria",
+    "Lagos online shopping",
+    "Abuja online marketplace",
+    "Hoberg Digital",
+  ],
+  authors: [{ name: "Hoberg Digital", url: `${APP_BASE_URL}/humans.txt` }],
+  creator: "Hoberg Digital",
+  publisher: "Hoberg Digital",
+  category: "shopping",
+  alternates: {
+    canonical: "/",
+  },
   manifest: "/site.webmanifest",
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? {
+        verification: {
+          google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+        },
+      }
+    : {}),
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },
@@ -35,24 +82,27 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
-    title: "Maji | Create your online store in minutes",
-    description: "The easiest way to sell physical and digital products online in Nigeria.",
+    title: "Maji | Launch Your Nigerian Storefront & Shop Independent Stores",
+    description:
+      "Open a custom online storefront for your physical or digital products with automated Paystack T+1 payouts and live delivery quotes — or buy directly from Nigerian stores.",
+    url: APP_BASE_URL,
     type: "website",
-    siteName: "Maji",
+    siteName: "Maji Marketplace",
     locale: "en_NG",
     images: [
       {
         url: "/brand/maji-og-banner-1200x630-light.png",
         width: 1200,
         height: 630,
-        alt: "Maji — Storefront Basket Smile Marketplace",
+        alt: "Maji — Nigerian Storefront & Multi-Vendor Marketplace",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maji | Create your online store in minutes",
-    description: "The easiest way to sell physical and digital products online in Nigeria.",
+    title: "Maji | Launch Your Nigerian Storefront & Shop Independent Stores",
+    description:
+      "Open a custom online storefront in Nigeria with automated Paystack payouts and live delivery quotes — or buy directly from independent Nigerian stores.",
     images: ["/brand/maji-og-banner-1200x630-light.png"],
   },
 };

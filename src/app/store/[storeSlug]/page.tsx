@@ -9,35 +9,53 @@ import { MajiLogo, MajiStorefrontBadge } from '@/components/brand/maji-brand'
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string }> }) {
   const { storeSlug } = await params
   const supabase = await createClient()
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng').replace(/\/$/, '')
 
   const { data: store } = await supabase
     .from('stores')
-    .select('name, store_settings(about_text)')
+    .select('name, store_category, store_settings(about_text, banner_url, logo_url)')
     .eq('slug', storeSlug)
     .eq('is_active', true)
     .single()
 
   if (!store) {
-    return { title: 'Store Not Found - Maji' }
+    return { title: 'Store Not Found - Maji', robots: { index: false, follow: false } }
   }
 
+  const settings = (Array.isArray(store.store_settings) ? store.store_settings[0] : store.store_settings) || {}
+  const storeUrl = `${baseUrl}/store/${storeSlug}`
+  const storeDesc =
+    settings?.about_text ||
+    `Shop verified ${store.store_category || 'products'} directly from ${store.name} on Maji Marketplace with instant Paystack checkout and tracked Nigerian delivery.`
+
   return {
-    title: `${store.name} — Shop Online`,
-    description: (Array.isArray(store.store_settings) ? store.store_settings[0] : store.store_settings)?.about_text || `Shop online at ${store.name}`,
+    title: `${store.name} — Official Storefront`,
+    description: storeDesc,
+    alternates: {
+      canonical: storeUrl,
+    },
     openGraph: {
-      title: `${store.name} — Shop Online`,
-      description: (Array.isArray(store.store_settings) ? store.store_settings[0] : store.store_settings)?.about_text || `Shop online at ${store.name}`,
-      url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeSlug}`,
-      siteName: store.name,
+      title: `${store.name} — Official Maji Storefront`,
+      description: storeDesc,
+      url: storeUrl,
+      siteName: `${store.name} on Maji`,
+      locale: 'en_NG',
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeSlug}/opengraph-image`,
+          url: `${baseUrl}/store/${storeSlug}/opengraph-image`,
           width: 1200,
           height: 630,
-        }
+          alt: `${store.name} Official Storefront on Maji`,
+        },
       ],
       type: 'website',
-    }
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${store.name} — Official Maji Storefront`,
+      description: storeDesc,
+      images: [`${baseUrl}/store/${storeSlug}/opengraph-image`],
+    },
   }
 }
 
@@ -68,6 +86,52 @@ export default async function StorePage({
     .order('created_at', { ascending: false })
 
   const settings = (Array.isArray(store.store_settings) ? store.store_settings[0] : store.store_settings) || {}
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng').replace(/\/$/, '')
+  const storeUrl = `${baseUrl}/store/${storeSlug}`
+
+  const storeJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'OnlineStore',
+        '@id': `${storeUrl}#store`,
+        name: store.name,
+        url: storeUrl,
+        description:
+          settings.about_text ||
+          `Official online storefront for ${store.name} on Maji Nigerian Marketplace.`,
+        image: settings.banner_url || settings.logo_url || `${baseUrl}/store/${storeSlug}/opengraph-image`,
+        currenciesAccepted: 'NGN',
+        paymentAccepted: 'Card, Bank Transfer, USSD (Paystack)',
+        areaServed: {
+          '@type': 'Country',
+          name: 'Nigeria',
+        },
+        parentOrganization: {
+          '@type': 'Organization',
+          name: 'Maji Marketplace',
+          url: baseUrl,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Maji Marketplace',
+            item: baseUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: store.name,
+            item: storeUrl,
+          },
+        ],
+      },
+    ],
+  }
 
   // Unified Maji brand CSS variables across all seller storefronts
   const themeStyles = {
@@ -92,6 +156,10 @@ export default async function StorePage({
 
   return (
     <div style={themeStyles} className="min-h-screen bg-[#FAF8F5] text-[#111111] font-sans flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
+      />
       {/* Jumia / Temu / Alibaba Style Top Trust & Promo Bar */}
       <div className="bg-[#111111] text-white text-[11px] sm:text-xs font-semibold py-2 px-4 border-b border-white/10">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">

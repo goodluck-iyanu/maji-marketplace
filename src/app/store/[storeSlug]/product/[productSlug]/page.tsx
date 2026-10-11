@@ -10,6 +10,7 @@ import { MajiLogo, MajiStorefrontBadge } from '@/components/brand/maji-brand'
 export async function generateMetadata({ params }: { params: Promise<{ storeSlug: string, productSlug: string }> }) {
   const { storeSlug, productSlug } = await params
   const supabase = await createClient()
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng').replace(/\/$/, '')
 
   const { data: store } = await supabase
     .from('stores')
@@ -18,21 +19,53 @@ export async function generateMetadata({ params }: { params: Promise<{ storeSlug
     .eq('is_active', true)
     .single()
 
-  if (!store) return { title: 'Not Found' }
+  if (!store) return { title: 'Not Found', robots: { index: false, follow: false } }
 
   const { data: product } = await supabase
     .from('products')
-    .select('name, description, price')
+    .select('name, description, price, product_images(image_url, display_order)')
     .eq('store_id', store.id)
     .eq('slug', productSlug)
     .eq('is_published', true)
     .single()
 
-  if (!product) return { title: 'Not Found' }
+  if (!product) return { title: 'Not Found', robots: { index: false, follow: false } }
+
+  const productUrl = `${baseUrl}/store/${storeSlug}/product/${productSlug}`
+  const images = Array.isArray((product as any).product_images)
+    ? [...(product as any).product_images]
+        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+        .map((img: any) => img.image_url)
+        .filter(Boolean)
+    : []
+  const formattedPrice = `₦${Number(product.price || 0).toLocaleString('en-NG')}`
+  const description =
+    product.description ||
+    `Buy ${product.name} (${formattedPrice}) directly from ${store.name} on Maji Marketplace with instant Paystack checkout.`
 
   return {
-    title: `${product.name} - ${store.name}`,
-    description: product.description || `Buy ${product.name} from ${store.name}`,
+    title: `${product.name} (${formattedPrice}) — ${store.name}`,
+    description,
+    alternates: {
+      canonical: productUrl,
+    },
+    openGraph: {
+      title: `${product.name} — ${store.name} on Maji`,
+      description,
+      url: productUrl,
+      siteName: `${store.name} on Maji`,
+      locale: 'en_NG',
+      type: 'website',
+      images: images.length > 0
+        ? images.map((url: string) => ({ url, alt: `${product.name} — ${store.name}` }))
+        : [{ url: `${baseUrl}/store/${storeSlug}/opengraph-image`, width: 1200, height: 630, alt: product.name }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${product.name} (${formattedPrice}) — ${store.name}`,
+      description,
+      images: images.length > 0 ? [images[0]] : [`${baseUrl}/store/${storeSlug}/opengraph-image`],
+    },
   }
 }
 
@@ -68,6 +101,78 @@ export default async function ProductPage({
 
   if (!product) notFound()
 
+  const baseUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://maji.hoberg.com.ng').replace(/\/$/, '')
+  const storeUrl = `${baseUrl}/store/${storeSlug}`
+  const productUrl = `${storeUrl}/product/${productSlug}`
+  const sortedImages = Array.isArray(product.product_images)
+    ? [...product.product_images]
+        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+        .map((img: any) => img.image_url)
+        .filter(Boolean)
+    : []
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        '@id': `${productUrl}#product`,
+        name: product.name,
+        description:
+          product.description ||
+          `Buy ${product.name} directly from ${store.name} on Maji Marketplace.`,
+        image: sortedImages.length > 0 ? sortedImages : [`${storeUrl}/opengraph-image`],
+        sku: product.id,
+        brand: {
+          '@type': 'Brand',
+          name: store.name,
+        },
+        itemCondition:
+          product.condition && String(product.condition).toLowerCase().includes('used')
+            ? 'https://schema.org/UsedCondition'
+            : 'https://schema.org/NewCondition',
+        offers: {
+          '@type': 'Offer',
+          url: productUrl,
+          priceCurrency: 'NGN',
+          price: Number(product.price || 0),
+          availability:
+            typeof product.stock_quantity === 'number' && product.stock_quantity <= 0 && !product.is_digital
+              ? 'https://schema.org/OutOfStock'
+              : 'https://schema.org/InStock',
+          seller: {
+            '@type': 'Organization',
+            name: store.name,
+            url: storeUrl,
+          },
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Maji Marketplace',
+            item: baseUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: store.name,
+            item: storeUrl,
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: product.name,
+            item: productUrl,
+          },
+        ],
+      },
+    ],
+  }
+
   const themeStyles = {
     '--store-primary': '#F05A28',
     '--store-secondary': '#ffffff',
@@ -75,6 +180,10 @@ export default async function ProductPage({
 
   return (
     <div style={themeStyles} className="min-h-screen bg-[#FAF8F5] text-[#111111] font-sans flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       {/* Top Marketplace Trust Bar */}
       <div className="bg-[#111111] text-white text-[11px] sm:text-xs font-semibold py-2 px-4 border-b border-white/10">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">

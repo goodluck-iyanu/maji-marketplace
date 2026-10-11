@@ -1,0 +1,23 @@
+# Maji Marketplace (by Hoberg Digital)
+
+> Maji (https://maji.hoberg.com.ng) is a Nigerian multi-vendor commerce platform and storefront builder created by Hoberg Digital. It empowers independent Nigerian merchants, small businesses, and creators to launch custom physical or digital online storefronts in minutes with automated Paystack T+1 bank payouts, live courier delivery quotes, and order tracking — while allowing shoppers to buy directly from verified Nigerian stores.
+
+## Core Capabilities
+- **Custom Storefronts (`/store/[storeSlug]`)**: Every seller gets a dedicated storefront URL ready to share on WhatsApp, Instagram, TikTok, and X.
+- **Physical & Digital Commerce**: Supports 18 physical store categories (clothing, shoes, electronics, jewelry, beauty, food, home decor, etc.) and 12 digital store categories (ebooks, courses, templates, software, audio, etc.).
+- **Automated Paystack Split Settlement (`T+1`)**: Sellers connect their Nigerian bank account and receive 100% of their product subtotal via Paystack subaccounts. Buyers pay a transparent `4% + ₦50` platform fee at checkout.
+- **Delivery & Order Tracking (`/track/ORD-...`)**: Physical storefronts support live courier delivery rate calculation (via Theyutes) or direct seller pickup arrangement, with real-time order status tracking.
+- **Hoberg AI Assistant**: Integrated AI assistant inside the Seller Studio (`/dashboard`) to guide merchants through store setup, product creation, and order fulfillment.
+
+## Key Public URLs
+- Homepage & Live Marketplace Catalog: https://maji.hoberg.com.ng/
+- Open a Storefront / Merchant Sign Up: https://maji.hoberg.com.ng/login?mode=signup
+- Seller Studio Sign In: https://maji.hoberg.com.ng/login
+- XML Sitemap (All Active Stores & Published Products): https://maji.hoberg.com.ng/sitemap.xml
+- Humans Attribution: https://maji.hoberg.com.ng/humans.txt
+
+## Contact & Support
+- Organization: Hoberg Digital
+- Support Email: mailto:support.hoberg@gmail.com
+- Region: Nigeria (NGN / ₦)
+
