@@ -19,6 +19,8 @@ export async function createStoreAction(prevState: any, formData: FormData) {
   const storeCategory = formData.get('storeCategory') as string
   const pickupAddress = formData.get('pickupAddress') as string
   const pickupPhone = formData.get('pickupPhone') as string
+  const pickupState = formData.get('pickupState') as string
+  const pickupCity = formData.get('pickupCity') as string
   
   const facebook = formData.get('facebook') as string
   const twitter = formData.get('twitter') as string
@@ -61,6 +63,8 @@ export async function createStoreAction(prevState: any, formData: FormData) {
       store_category: storeCategory,
       pickup_address: productType === 'physical' ? pickupAddress : null,
       pickup_phone: productType === 'physical' ? pickupPhone : null,
+      pickup_state: productType === 'physical' ? pickupState : null,
+      pickup_city: productType === 'physical' ? pickupCity : null,
     })
     .select('id')
     .single()

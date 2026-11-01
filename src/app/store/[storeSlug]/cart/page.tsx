@@ -1,13 +1,14 @@
 'use client'
 
 import { useCart } from '../cart-context'
-import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
+import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck, ChevronDown } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { processCheckout } from '../checkout/actions'
 import { getDeliveryQuotes } from '../checkout/delivery-actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
+import { NG_STATES_CITIES, NG_STATES } from '@/lib/ng-cities'
 
 export default function CartPage() {
   const params = useParams()
@@ -311,31 +312,29 @@ export default function CartPage() {
                             required 
                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
                             value={selectedState}
-                            onChange={(e) => setSelectedState(e.target.value)}
+                            onChange={(e) => { setSelectedState(e.target.value); setSelectedCity('') }}
                           >
                             <option value="">Select state</option>
-                            <option value="Lagos">Lagos</option>
-                            <option value="Abuja">Abuja</option>
-                            <option value="Rivers">Rivers</option>
-                            <option value="Oyo">Oyo</option>
-                            <option value="Kano">Kano</option>
-                            <option value="Ogun">Ogun</option>
-                            <option value="Delta">Delta</option>
-                            {/* In a real app we'd map all 36 states */}
+                            {NG_STATES.map(state => (
+                              <option key={state} value={state}>{state}</option>
+                            ))}
                           </select>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">City / Area</label>
-                          <input 
-                            type="text" 
+                          <select 
                             name="area" 
-                            placeholder="e.g. Lekki" 
-                            required 
-                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+                            required
+                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
                             value={selectedCity}
                             onChange={(e) => setSelectedCity(e.target.value)}
-                            onBlur={(e) => setSelectedCity(e.target.value)}
-                          />
+                            disabled={!selectedState}
+                          >
+                            <option value="">{selectedState ? 'Select city' : 'Select state first'}</option>
+                            {(NG_STATES_CITIES[selectedState] ?? []).map(city => (
+                              <option key={city} value={city}>{city}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       <div className="relative">
@@ -390,7 +389,7 @@ export default function CartPage() {
                           <div className="flex justify-between items-center mb-1">
                             <span className="font-semibold text-blue-900">Delivery Fee</span>
                             <span className="font-bold text-blue-900">
-                              {isCalculatingFee ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Free / Not Available'}
+                              {isCalculatingFee ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Calculating...'}
                             </span>
                           </div>
                           <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
