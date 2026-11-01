@@ -59,10 +59,10 @@ If they ask you something you don't know, just gracefully pivot back to how you 
     const text = response.text()
 
     return NextResponse.json({ text })
-  } catch (error) {
-    console.error('AI Chat Error:', error)
+  } catch (error: any) {
+    console.error('AI Chat Error Detail:', error)
     return NextResponse.json(
-      { error: 'Failed to generate response' },
+      { error: 'Failed to generate response: ' + error.message },
       { status: 500 }
     )
   }

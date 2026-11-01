@@ -102,9 +102,12 @@ export function MajiAIAssistant({
         })
       })
 
-      if (!res.ok) throw new Error('API Error')
-
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Unknown API Error')
+      }
+
       const aiResponseText = data.text
       
       const aiMsg: Message = {
@@ -115,11 +118,11 @@ export function MajiAIAssistant({
       }
       
       setMessages(prev => [...prev, aiMsg])
-    } catch (error) {
+    } catch (error: any) {
       console.error(error)
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having a little trouble connecting right now. Please try again in a moment!",
+        text: `Error: ${error.message || "I'm having trouble connecting."} (If testing locally, please restart npm run dev!)`,
         sender: 'ai',
         time: new Date()
       }
