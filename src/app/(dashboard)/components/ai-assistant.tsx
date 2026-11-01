@@ -11,7 +11,7 @@ type Message = {
   time: Date
 }
 
-// ── Smart AI Responses (Keyword Matching) ──
+// ── Smart AI Responses (Conversational & Lightweight) ──
 const getAIResponse = (message: string, context: {
   storeName: string
   storeSlug: string
@@ -20,53 +20,75 @@ const getAIResponse = (message: string, context: {
   productCount: number
   totalSales: number
 }): string => {
-  const m = message.toLowerCase()
+  const m = message.toLowerCase().trim()
 
-  if (m.includes('hello') || m.includes('hi ') || m.match(/^hi$/) || m.includes('hey')) {
-    return `Hello there! I'm Hoberg AI. How can I help you grow ${context.storeName} today?`
+  // 1. Greetings
+  if (m.match(/^(hi|hello|hey|yo|greetings|sup)\b/)) {
+    const greetings = [
+      `Hello there! I'm Hoberg AI. How can I help you grow **${context.storeName}** today?`,
+      `Hi! Welcome back to the dashboard for **${context.storeName}**. What's on your mind?`,
+      `Hey! Hoberg AI at your service. Need help setting things up or checking sales?`
+    ]
+    return greetings[Math.floor(Math.random() * greetings.length)]
   }
 
-  // Settings / Store Customization
-  if (m.includes('profile') || m.includes('picture') || m.includes('color') || m.includes('logo') || m.includes('banner') || m.includes('appearance') || m.includes('setting')) {
-    return "You can customize your storefront in the **Settings** tab. There you can upload a new logo (profile picture), change your store's primary and secondary colors, upload a banner, and update your social media links!"
+  // 2. Identity / Easter Eggs
+  if (m.includes('who are you') || m.includes('what are you') || m.includes('your name')) {
+    return "I am **Hoberg AI**, your personal assistant here on Maji. I'm built right into your dashboard to help you manage your store, answer questions, and get you more sales!"
+  }
+  if (m.includes('joke')) {
+    return "Why did the e-commerce store break up with the bank? ...Because it lost interest! 😂 How else can I help you today?"
+  }
+  if (m.includes('love you') || m.includes('smart') || m.includes('cool')) {
+    return "Aww, thanks! I'm just doing my best to make your experience on Maji awesome. 💙 What can we work on next?"
   }
 
-  // Onboarding questions
-  if (m.includes('what to do') || m.includes('start') || m.includes('next step') || m.includes('how to')) {
+  // 3. Settings / Customization
+  if (m.match(/\b(profile|picture|color|logo|banner|appearance|theme|setting|custom|edit)\b/)) {
+    return "You can completely customize how your storefront looks in the **Settings** tab (the gear icon). You can upload a new logo, change your store's primary and secondary colors, add a beautiful banner, and update your social media links so customers can find you!"
+  }
+
+  // 4. Onboarding / What's next
+  if (m.match(/\b(what to do|start|next step|how to|help|confused|stuck)\b/)) {
     if (!context.hasBank) {
-      return "Since you just created your store, the very first step is to **add your bank account** so you can receive payments. You can do this in the Payments tab."
+      return "Since you're just getting started, the most important step is to **add your bank account** so you can get paid! 💸 Head over to the **Payments** tab to set that up."
     }
     if (!context.hasProduct) {
-      return "Your bank account is set up! The next step is to **add your first product**. Go to the Products tab and click 'Add Product'."
+      return "Your bank account is all set! The next big step is to **add your first product**. Go to the **Products** tab and click 'Add Product' to start building your catalog."
     }
-    return `Your store is completely set up! You have ${context.productCount} product(s). Your next step is to share your store link (maji.com/store/${context.storeSlug}) with your audience to get sales!`
+    return `Your store is looking great with ${context.productCount} product(s)! To get more sales, you should copy your store link (**maji.com/store/${context.storeSlug}**) and share it on WhatsApp, Twitter, and your Instagram bio.`
   }
 
-  if (m.includes('bank') || m.includes('account number') || m.includes('payout')) {
-    return "You can add or update your bank account details in the **Payments** section of your dashboard. This is where your sales money will be sent."
+  // 5. Bank / Payments
+  if (m.match(/\b(bank|account|payout|withdraw|money|get paid|payment)\b/)) {
+    return "All your payout details are managed in the **Payments** section. You can add or update your bank account there to ensure your sales money goes straight to you."
   }
 
-  if (m.includes('product') || m.includes('upload') || m.includes('sell')) {
-    return "To add a product, go to the **Products** tab on the left sidebar and click 'Add Product'. We'll guide you through adding photos, descriptions, and pricing."
+  // 6. Products / Selling
+  if (m.match(/\b(product|upload|sell|item|create|add)\b/)) {
+    return "Ready to add a product? Head to the **Products** tab on the left menu and click 'Add Product'. We have dedicated builders for digital products, physical items, tickets, and more. It only takes a few minutes!"
   }
 
-  if (m.includes('sales') || m.includes('money') || m.includes('order')) {
+  // 7. Sales / Orders / Analytics
+  if (m.match(/\b(sale|sales|order|analytics|stat|customer|bought)\b/)) {
     if (context.totalSales === 0) {
-      return "You haven't made any sales yet. Try sharing your store link on your social media to get your first customer!"
+      return "You haven't made any sales *just* yet, but don't worry! Keep sharing your link (**maji.com/store/${context.storeSlug}**) on your socials. The first sale is always the hardest!"
     }
-    return `You're doing great! You have ${context.totalSales} total sales. You can view detailed information in the Orders tab.`
+    return `You're crushing it! 🎉 You have **₦${context.totalSales.toLocaleString()}** in total sales so far. You can view all the detailed information and customer details in the **Orders** tab on your dashboard.`
   }
 
-  if (m.includes('share') || m.includes('link') || m.includes('url')) {
-    return `Your live store URL is: **maji.com/store/${context.storeSlug}**\n\nCopy this link and put it in your Instagram bio, Twitter, or send it directly to customers!`
+  // 8. Sharing / Links
+  if (m.match(/\b(share|link|url|website|domain)\b/)) {
+    return `Here is your unique, live store URL:\n\n👉 **maji.com/store/${context.storeSlug}**\n\nCopy this and share it everywhere!`
   }
 
-  if (m.includes('thank') || m.includes('thanks')) {
-    return "You're very welcome! I'm always here floating in the corner if you need anything else. Good luck with your store!"
+  // 9. Gratitude
+  if (m.match(/\b(thank|thanks|appreciate|good job|awesome)\b/)) {
+    return "You're very welcome! I'm always floating right here in the corner if you need anything else. Good luck growing your store! 🚀"
   }
 
-  // Default fallback
-  return "I'm Hoberg AI! I can help you with setting up your store, editing settings (like colors and logos), adding bank accounts, adding products, and understanding your Maji dashboard. What would you like to know?"
+  // 10. Dynamic Fallback
+  return `I'm not exactly sure what you mean by that. I'm still learning! But as your Hoberg AI, I can help you with:\n- Setting up your store\n- Adding products\n- Checking your sales\n- Updating your settings/colors\n\nTry asking me something like "How do I add a product?"`
 }
 
 
@@ -147,20 +169,26 @@ export function MajiAIAssistant({
     setInput('')
     setIsTyping(true)
 
-    // Simulate AI thinking time
+    // Simulate AI thinking and typing time based on response length
     setTimeout(() => {
       const aiResponseText = getAIResponse(userMsg.text, { storeName, storeSlug, hasBank, hasProduct, productCount, totalSales })
       
-      const aiMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: aiResponseText,
-        sender: 'ai',
-        time: new Date()
-      }
+      // Minimum 600ms, plus 15ms per character, capped at 2.5 seconds
+      const typingTime = Math.min(2500, 600 + (aiResponseText.length * 15))
       
-      setMessages(prev => [...prev, aiMsg])
-      setIsTyping(false)
-    }, 1000 + Math.random() * 1000)
+      setTimeout(() => {
+        const aiMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          text: aiResponseText,
+          sender: 'ai',
+          time: new Date()
+        }
+        
+        setMessages(prev => [...prev, aiMsg])
+        setIsTyping(false)
+      }, typingTime)
+      
+    }, 400) // Initial "seen" delay before typing indicator starts processing text
   }
 
   const closeChat = () => {
