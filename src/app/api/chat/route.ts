@@ -35,7 +35,7 @@ If they ask you something you don't know, just gracefully pivot back to how you 
 
     // Initialize the model
     const model = genAI.getGenerativeModel({
-      model: 'gemini-flash-latest',
+      model: 'gemini-2.5-flash',
       systemInstruction: systemPrompt,
     })
 
