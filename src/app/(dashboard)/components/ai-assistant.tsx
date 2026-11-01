@@ -248,7 +248,7 @@ export function MajiAIAssistant({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask me anything..."
-                className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full pl-4 pr-10 py-3 md:py-2 text-sm outline-none transition-all"
+                className="flex-1 bg-gray-100 border-transparent focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-full pl-4 pr-10 py-3 md:py-2 text-base md:text-sm outline-none transition-all"
               />
               <button 
                 type="submit" 
