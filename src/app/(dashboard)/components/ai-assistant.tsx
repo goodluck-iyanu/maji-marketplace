@@ -168,7 +168,7 @@ export function MajiAIAssistant({
     setTimeout(() => {
       setIsOpen(false)
       setIsClosing(false)
-    }, 300) // matches duration-300
+    }, 200) // matches duration-200
   }
 
   return (
@@ -177,7 +177,7 @@ export function MajiAIAssistant({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-14 w-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 z-50 group"
+          className="fixed bottom-4 right-4 md:bottom-6 md:right-6 h-14 w-14 bg-blue-600 text-white rounded-full shadow-xl flex items-center justify-center hover:bg-blue-700 transition-all hover:scale-110 z-50 group animate-in zoom-in-50 fade-in duration-300 ease-out"
         >
           <Bot className="h-7 w-7 group-hover:scale-110 transition-transform" />
           
@@ -193,7 +193,7 @@ export function MajiAIAssistant({
 
       {/* Chat Window */}
       {isOpen && (
-        <div className={`fixed bottom-0 right-0 left-0 md:bottom-6 md:right-6 md:left-auto md:w-[350px] h-[75vh] md:h-[500px] md:max-h-[80vh] bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden md:border md:border-gray-200 animate-in ${isClosing ? 'slide-out-to-bottom-10 fade-out' : 'slide-in-from-bottom-10 fade-in'} duration-300`}>
+        <div className={`fixed bottom-0 right-0 left-0 md:bottom-6 md:right-6 md:left-auto md:w-[350px] h-[75vh] md:h-[500px] md:max-h-[80vh] bg-white md:rounded-2xl shadow-2xl flex flex-col z-50 overflow-hidden md:border md:border-gray-200 transform-gpu origin-bottom md:origin-bottom-right ${isClosing ? 'animate-out zoom-out-95 slide-out-to-bottom-5 fade-out duration-200 ease-in' : 'animate-in zoom-in-95 slide-in-from-bottom-5 fade-in duration-300 ease-out'}`}>
           
           {/* Header */}
           <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
