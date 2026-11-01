@@ -109,7 +109,8 @@ export async function processCheckout(formData: FormData) {
   if (store.product_type === 'physical') {
     if (deliveryMethod === 'delivery') {
       deliveryFee = parseFloat(formData.get('deliveryFee') as string) || 0;
-      finalDeliveryAddress = { state, area, address, landmark, instructions }
+      const carrier = formData.get('carrierName') as string || 'Standard Delivery';
+      finalDeliveryAddress = { state, area, address, landmark, instructions, carrier }
     }
   }
   

@@ -41,3 +41,4 @@ async function buildCorrectCityMap() {
 }
 
 buildCorrectCityMap().catch(console.error);
+

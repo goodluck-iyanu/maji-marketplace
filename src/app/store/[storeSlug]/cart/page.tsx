@@ -26,6 +26,8 @@ export default function CartPage() {
   const [storeId, setStoreId] = useState<string | null>(null)
   const [selectedState, setSelectedState] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
+  const [carrierRates, setCarrierRates] = useState<{fee: number, carrier: string, eta: string}[]>([])
+  const [selectedCarrierIndex, setSelectedCarrierIndex] = useState(0)
   
   // OpenStreetMap Autocomplete State
   const [addressQuery, setAddressQuery] = useState('')
@@ -73,14 +75,20 @@ export default function CartPage() {
     async function calculateFee() {
       if (storeId && selectedState && selectedCity && productType === 'physical' && deliveryMethod === 'delivery') {
         setIsCalculatingFee(true)
+        setCarrierRates([])
+        setDeliveryFee(0)
         const res = await getDeliveryQuotes(storeId, selectedState, selectedCity)
-        if (res.fee) {
-          setDeliveryFee(res.fee)
+        if (res.allRates && res.allRates.length > 0) {
+          setCarrierRates(res.allRates)
+          setSelectedCarrierIndex(0)
+          setDeliveryFee(res.allRates[0].fee)
         } else {
-          setDeliveryFee(0) // Fallback if API fails
+          setCarrierRates([])
+          setDeliveryFee(0)
         }
         setIsCalculatingFee(false)
       } else {
+        setCarrierRates([])
         setDeliveryFee(0)
       }
     }
@@ -98,6 +106,9 @@ export default function CartPage() {
     formData.append('storeSlug', storeSlug)
     formData.append('deliveryMethod', deliveryMethod)
     formData.append('deliveryFee', deliveryFee.toString())
+    if (carrierRates[selectedCarrierIndex]) {
+      formData.append('carrierName', carrierRates[selectedCarrierIndex].carrier)
+    }
     
     try {
       const res = await processCheckout(formData)
@@ -312,7 +323,7 @@ export default function CartPage() {
                             required 
                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
                             value={selectedState}
-                            onChange={(e) => { setSelectedState(e.target.value); setSelectedCity('') }}
+                            onChange={(e) => { setSelectedState(e.target.value); setSelectedCity(''); setCarrierRates([]); setSelectedCarrierIndex(0); setDeliveryFee(0) }}
                           >
                             <option value="">Select state</option>
                             {NG_STATES.map(state => (
@@ -327,7 +338,7 @@ export default function CartPage() {
                             required
                             className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
                             value={selectedCity}
-                            onChange={(e) => setSelectedCity(e.target.value)}
+                            onChange={(e) => { setSelectedCity(e.target.value); setCarrierRates([]); setSelectedCarrierIndex(0); setDeliveryFee(0) }}
                             disabled={!selectedState}
                           >
                             <option value="">{selectedState ? 'Select city' : 'Select state first'}</option>
@@ -384,15 +395,52 @@ export default function CartPage() {
                         <input type="text" name="instructions" placeholder="e.g. Call me when you arrive" className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
                       </div>
                       
+                      {/* CARRIER SELECTION */}
                       {selectedState && selectedCity && (
-                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mt-4 transition-all">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="font-semibold text-blue-900">Delivery Fee</span>
-                            <span className="font-bold text-blue-900">
-                              {isCalculatingFee ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Calculating...'}
-                            </span>
-                          </div>
-                          <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
+                        <div className="mt-4 border-t border-gray-100 pt-4">
+                          <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+                            Choose Delivery Option
+                          </h4>
+                          {isCalculatingFee ? (
+                            <div className="flex items-center gap-2 p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Getting delivery prices...
+                            </div>
+                          ) : carrierRates.length > 0 ? (
+                            <div className="space-y-2">
+                              {carrierRates.map((rate, i) => (
+                                <label
+                                  key={i}
+                                  className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${selectedCarrierIndex === i ? 'border-black bg-gray-50 ring-1 ring-black' : 'border-gray-200 hover:border-gray-300'}`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <input
+                                      type="radio"
+                                      name="selectedCarrier"
+                                      className="hidden"
+                                      checked={selectedCarrierIndex === i}
+                                      onChange={() => {
+                                        setSelectedCarrierIndex(i)
+                                        setDeliveryFee(rate.fee)
+                                      }}
+                                    />
+                                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${selectedCarrierIndex === i ? 'border-black' : 'border-gray-300'}`}>
+                                      {selectedCarrierIndex === i && <div className="w-2 h-2 rounded-full bg-black" />}
+                                    </div>
+                                    <div>
+                                      <p className="text-sm font-semibold text-gray-900">{rate.carrier}</p>
+                                      <p className="text-xs text-gray-500">{rate.eta}</p>
+                                    </div>
+                                  </div>
+                                  <span className="text-sm font-bold text-gray-900">₦{rate.fee.toLocaleString()}</span>
+                                </label>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-xl text-sm text-yellow-800">
+                              No delivery options found for this route. Try selecting a different city or contact the seller directly.
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

@@ -43,3 +43,4 @@ export const NG_STATES_CITIES: Record<string, string[]> = {
 }
 
 export const NG_STATES = Object.keys(NG_STATES_CITIES).sort()
+
