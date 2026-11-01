@@ -108,7 +108,7 @@ export async function processCheckout(formData: FormData) {
 
   if (store.product_type === 'physical') {
     if (deliveryMethod === 'delivery') {
-      deliveryFee = 2000 // Hardcoded for MVP
+      deliveryFee = parseFloat(formData.get('deliveryFee') as string) || 0;
       finalDeliveryAddress = { state, area, address, landmark, instructions }
     }
   }

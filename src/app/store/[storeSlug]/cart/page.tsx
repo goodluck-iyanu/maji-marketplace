@@ -4,6 +4,7 @@ import { useCart } from '../cart-context'
 import { Minus, Plus, ShoppingBag, Loader2, ArrowLeft, AlertCircle, ShieldCheck } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { processCheckout } from '../checkout/actions'
+import { getDeliveryQuotes } from '../checkout/delivery-actions'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
@@ -18,6 +19,12 @@ export default function CartPage() {
   
   const [productType, setProductType] = useState<'physical' | 'digital' | null>(null)
   const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'arrange'>('delivery')
+  
+  const [deliveryFee, setDeliveryFee] = useState(0)
+  const [isCalculatingFee, setIsCalculatingFee] = useState(false)
+  const [storeId, setStoreId] = useState<string | null>(null)
+  const [selectedState, setSelectedState] = useState('')
+  const [selectedCity, setSelectedCity] = useState('')
   
   // OpenStreetMap Autocomplete State
   const [addressQuery, setAddressQuery] = useState('')
@@ -52,15 +59,33 @@ export default function CartPage() {
   useEffect(() => {
     async function fetchStore() {
       const supabase = createClient()
-      const { data } = await supabase.from('stores').select('product_type').eq('slug', storeSlug).single()
+      const { data } = await supabase.from('stores').select('id, product_type').eq('slug', storeSlug).single()
       if (data) {
         setProductType(data.product_type as 'physical' | 'digital')
+        setStoreId(data.id)
       }
     }
     fetchStore()
   }, [storeSlug])
 
-  const deliveryFee = (productType === 'physical' && deliveryMethod === 'delivery') ? 2000 : 0
+  useEffect(() => {
+    async function calculateFee() {
+      if (storeId && selectedState && selectedCity && productType === 'physical' && deliveryMethod === 'delivery') {
+        setIsCalculatingFee(true)
+        const res = await getDeliveryQuotes(storeId, selectedState, selectedCity)
+        if (res.fee) {
+          setDeliveryFee(res.fee)
+        } else {
+          setDeliveryFee(0) // Fallback if API fails
+        }
+        setIsCalculatingFee(false)
+      } else {
+        setDeliveryFee(0)
+      }
+    }
+    calculateFee()
+  }, [storeId, selectedState, selectedCity, productType, deliveryMethod])
+
   const finalTotal = totalAmount + deliveryFee
 
   const handleCheckout = async (formData: FormData) => {
@@ -71,6 +96,7 @@ export default function CartPage() {
     formData.append('cart', JSON.stringify(cartData))
     formData.append('storeSlug', storeSlug)
     formData.append('deliveryMethod', deliveryMethod)
+    formData.append('deliveryFee', deliveryFee.toString())
     
     try {
       const res = await processCheckout(formData)
@@ -280,18 +306,36 @@ export default function CartPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
-                          <select name="state" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors">
+                          <select 
+                            name="state" 
+                            required 
+                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors"
+                            value={selectedState}
+                            onChange={(e) => setSelectedState(e.target.value)}
+                          >
                             <option value="">Select state</option>
                             <option value="Lagos">Lagos</option>
                             <option value="Abuja">Abuja</option>
                             <option value="Rivers">Rivers</option>
                             <option value="Oyo">Oyo</option>
-                            {/* Add more states as needed */}
+                            <option value="Kano">Kano</option>
+                            <option value="Ogun">Ogun</option>
+                            <option value="Delta">Delta</option>
+                            {/* In a real app we'd map all 36 states */}
                           </select>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">City / Area</label>
-                          <input type="text" name="area" placeholder="e.g. Lekki" required className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
+                          <input 
+                            type="text" 
+                            name="area" 
+                            placeholder="e.g. Lekki" 
+                            required 
+                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" 
+                            value={selectedCity}
+                            onChange={(e) => setSelectedCity(e.target.value)}
+                            onBlur={(e) => setSelectedCity(e.target.value)}
+                          />
                         </div>
                       </div>
                       <div className="relative">
@@ -341,13 +385,17 @@ export default function CartPage() {
                         <input type="text" name="instructions" placeholder="e.g. Call me when you arrive" className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-gray-50 focus:bg-white transition-colors" />
                       </div>
                       
-                      <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mt-4">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-semibold text-blue-900">Maji Delivery</span>
-                          <span className="font-bold text-blue-900">₦2,000</span>
+                      {selectedState && selectedCity && (
+                        <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl mt-4 transition-all">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-semibold text-blue-900">Delivery Fee</span>
+                            <span className="font-bold text-blue-900">
+                              {isCalculatingFee ? <Loader2 className="w-4 h-4 animate-spin text-blue-500" /> : deliveryFee > 0 ? `₦${deliveryFee.toLocaleString()}` : 'Free / Not Available'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
                         </div>
-                        <p className="text-sm text-blue-700">Estimated delivery: 2-3 business days</p>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
