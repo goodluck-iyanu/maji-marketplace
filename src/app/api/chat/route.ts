@@ -41,10 +41,19 @@ If they ask you something you don't know, just gracefully pivot back to how you 
 
     // Format the conversation history for Gemini
     // Gemini expects { role: 'user' | 'model', parts: [{ text: '...' }] }
-    const history = messages.slice(0, -1).map((msg: any) => ({
+    let history = messages.slice(0, -1).map((msg: any) => ({
       role: msg.sender === 'user' ? 'user' : 'model',
       parts: [{ text: msg.text }]
     }))
+
+    // Gemini strictly requires the first message in history to be from the 'user'.
+    // If our history starts with the AI's welcome message, we prepend a dummy user greeting.
+    if (history.length > 0 && history[0].role === 'model') {
+      history.unshift({
+        role: 'user',
+        parts: [{ text: 'Hello!' }]
+      })
+    }
 
     const currentMessage = messages[messages.length - 1].text
 
